@@ -19,31 +19,14 @@ gtatradecoverage <- function(evaluation = NULL,
                            output.path = NULL,
                            testmode = FALSE) {
 
-                          evaluation = "harmful"
-                          flow = "imports"
-                          importers = NULL
-                          exporters = c("china","Australia")
-                          implementers = NULL
-                          implementer.role = NULL
-                          products = NULL
-                          sectors = NULL
-                          instruments = NULL
-                          inception.range = c("2009-01-01", NA)
-                          in.force = NULL
-                          implementation.level = NULL
-                          eligible.firms = NULL
-                          rdata = FALSE
-                          output.path = NULL
-                          testmode = TRUE
-
 
   # Initialising Function ---------------------------------------------------
 
   # load libraries
-  require("splitstackshape")
-  require("foreign")
-  require("openxlsx")
-  require("scales")
+  library("splitstackshape")
+  library("foreign")
+  library("openxlsx")
+  library("scales")
 
   # Store today's date
   today = Sys.Date()
