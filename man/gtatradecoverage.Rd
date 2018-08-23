@@ -16,6 +16,7 @@
 \item{implementation.level}{Takes a list of implementation level in numeric form (1 = supra, 2 = nation, 3 = subnat, 4 = SEZ, 5 = IFI, 6 = NFI) to filter the sample. Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None}
 \item{eligible.firms}{Takes a list of eligible firms in numeric form (1 = all, 2 = SME, 3 = firm-specific, 4 =  state-controlled, 5 = state-trading). Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None.}
 \item{in.force}{Takes values TRUE (currenctly in force) or FALSE (not in force anymore), if empty no filtering takes place (in force and not in force anymore).}
+\item{intervention.id}{Takes in a list of intervention ids in numeric form. Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None.}
 \item{rdata}{Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE}
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
 \item{testmode}{Can be set to TRUE or FALSE. If TRUE, sample will be minimized by 99 percent in order to speed up processing. Keep in mind that this will distort results significantly. Default: FALSE.}

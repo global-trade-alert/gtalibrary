@@ -11,6 +11,7 @@ gtatradecoverage <- function(evaluation = NULL,
                            instruments = NULL,
                            inception.range = c("2009-01-01", NA),
                            in.force = NULL,
+                           intervention.id = NULL,
                            implementation.level = NULL,
                            eligible.firms = NULL,
                            rdata = FALSE,
@@ -216,6 +217,29 @@ gtatradecoverage <- function(evaluation = NULL,
   }
 
 
+  # Filtering Intervention IDs -------------------------------------------------
+
+  master.backup = master
+  master = master.backup
+
+  if (is.null(intervention.id)==F) {
+    if (tolower(intervention.id[1])=="remove"){
+      print(paste0("Removing intervention IDs: ", paste0(intervention.id, collapse = ", ")))
+      master <- subset(master, ! tolower(intervention_id) %in% tolower(intervention.id))
+
+    } else if (tolower(intervention.id[1])=="keep"){
+      print(paste0("Keeping intervention IDs: ", paste0(intervention.id, collapse = ", ")))
+      master <- subset(master, tolower(intervention_id) %in% tolower(intervention.id))
+
+    } else {
+      print(paste0("Keeping intervention IDs: ", paste0(intervention.id, collapse = ", ")))
+      master <- subset(master, tolower(intervention_id) %in% tolower(intervention.id))
+    }
+  }
+
+  # Check if master is empty, stop function
+  if(nrow(master)==0){stop("No values left after filtering for intervention IDs")}
+
   # Currently in force and inside duration specified--------------------------------------------
   ## Filtering for currently in force
   if (is.null(in.force)==F) {
@@ -253,7 +277,7 @@ gtatradecoverage <- function(evaluation = NULL,
   }
 
   # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values existing for chosen parameters (last filtered for inception date)")}
+  if(nrow(master)==0){stop("No values left after filtering for inception range")}
 
 
   # Filtering MAST Chapters -------------------------------------------------
@@ -262,13 +286,12 @@ gtatradecoverage <- function(evaluation = NULL,
     if (tolower(instruments[1])=="remove"){
       print(paste0("Removing interventions with MAST Chapter ", instruments))
       master <- subset(master, ! tolower(mast.chapter) %in% tolower(instruments))
-    }
-    if (tolower(instruments[1])=="keep"){
+
+    } else if (tolower(instruments[1])=="keep"){
       print(paste0("Keeping instruments with MAST Chapter ", instruments))
       master <- subset(master, tolower(mast.chapter) %in% tolower(instruments))
 
-    }
-    if (tolower(instruments)=="include"){
+    } else if (tolower(instruments)=="include"){
       master <- master
 
     } else {
@@ -302,9 +325,8 @@ gtatradecoverage <- function(evaluation = NULL,
     if (tolower(implementation.level[1])=="remove") {
       print(paste0("Removing these following implementation levels: ", implementation.level))
       master=subset(master, intervention_id %in% subset(gta_intervention, ! implementation_level_id %in% implementation.level)$id)
-    }
 
-    if (tolower(implementation.level[1])=="keep") {
+    } else if (tolower(implementation.level[1])=="keep") {
       print(paste0("Keeping these implementation levels:", implementation.level))
       master=subset(master, intervention_id %in% subset(gta_intervention, implementation_level_id %in% implementation.level)$id)
 
@@ -338,9 +360,8 @@ gtatradecoverage <- function(evaluation = NULL,
     if (tolower(eligible.firms[1])=="remove") {
       print(paste0("Removing these eligible firms categorie: ", eligible.firms))
       master=subset(master, intervention_id %in% subset(gta_intervention, ! eligible_firms_id %in% eligible.firms)$id)
-    }
 
-    if (tolower(eligible.firms[1])=="keep") {
+    } else if (tolower(eligible.firms[1])=="keep") {
       print(paste0("Keeping these eligible firms categories:", eligible.firms))
       master=subset(master, intervention_id %in% subset(gta_intervention, eligible_firms_id %in% eligible.firms)$id)
 
@@ -551,11 +572,13 @@ gtatradecoverage <- function(evaluation = NULL,
     print(importers)
     master <- subset(master, i.un %in% importers | tolower(importer) %in% tolower(importers) | importer == "World")
   }
+
   if(is.null(exporters)==F) {
     print("Filtering for chosen exporters: ")
     print(exporters)
     master <- subset(master, a.un %in% exporters | tolower(exporter) %in% tolower(exporters) | exporter == "World")
   }
+
   if(is.null(implementers)==F){
     print("Filtering for chosen implementers: ")
     print(implementers)
@@ -716,17 +739,18 @@ gtatradecoverage <- function(evaluation = NULL,
 
     if (tolower(implementer.role[1]) == "all combinations") {
       master <- master
-    }
-    if (tolower(implementer.role[1])=="keep"){
+
+    } else if (tolower(implementer.role[1])=="keep"){
       master <- subset(master, implementer.type %in% implementer.role)
-    }
-    if (tolower(implementer.role[1])=="remove"){
+
+    } else if (tolower(implementer.role[1])=="remove"){
       master <- subset(master, ! implementer.type %in% implementer.role)
 
-      } else {
+    } else {
       master <- subset(master, implementer.type %in% implementer.role)
     }
   }
+
   if (is.null(implementer.role)==T) {
     if (tolower(flow) == "imports") {
       master <- subset(master, implementer.type == "importer")
