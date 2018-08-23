@@ -1,5 +1,3 @@
-
-
 # Function infos and parameters -------------------------------------------
 
 gtatradecoverage <- function(evaluation = NULL,
@@ -23,10 +21,7 @@ gtatradecoverage <- function(evaluation = NULL,
   # Initialising Function ---------------------------------------------------
 
   # load libraries
-  library("splitstackshape")
-  library("foreign")
-  library("openxlsx")
-  library("scales")
+  library("xlsx")
 
   # Store today's date
   today = Sys.Date()
@@ -101,6 +96,7 @@ gtatradecoverage <- function(evaluation = NULL,
 
 
   # Defining Country groups -------------------------------------------------
+  # load country groups from database replica
 
   # defining country groups
   world=unique(c(imports.bilateral$a.un,imports.bilateral$i.un, master.red$a.un, master.red$i.un, 0))
@@ -267,7 +263,15 @@ gtatradecoverage <- function(evaluation = NULL,
       print(paste0("Removing interventions with MAST Chapter ", instruments))
       master <- subset(master, ! tolower(mast.chapter) %in% tolower(instruments))
     }
-    if (tolower(instruments[1])=="keep" | tolower(instruments[1])!="remove"){
+    if (tolower(instruments[1])=="keep"){
+      print(paste0("Keeping instruments with MAST Chapter ", instruments))
+      master <- subset(master, tolower(mast.chapter) %in% tolower(instruments))
+
+    }
+    if (tolower(instruments)=="include"){
+      master <- master
+
+    } else {
       print(paste0("Keeping instruments with MAST Chapter ", instruments))
       master <- subset(master, tolower(mast.chapter) %in% tolower(instruments))
     }
@@ -300,10 +304,14 @@ gtatradecoverage <- function(evaluation = NULL,
       master=subset(master, intervention_id %in% subset(gta_intervention, ! implementation_level_id %in% implementation.level)$id)
     }
 
-    if (tolower(implementation.level[1])=="keep" | tolower(implementation.level[1]!="remove")) {
+    if (tolower(implementation.level[1])=="keep") {
       print(paste0("Keeping these implementation levels:", implementation.level))
       master=subset(master, intervention_id %in% subset(gta_intervention, implementation_level_id %in% implementation.level)$id)
-    }
+
+    } else {
+      print(paste0("Keeping these implementation levels:", implementation.level))
+      master=subset(master, intervention_id %in% subset(gta_intervention, implementation_level_id %in% implementation.level)$id)
+      }
   }
 
   # Check if master is empty, stop function
@@ -332,10 +340,14 @@ gtatradecoverage <- function(evaluation = NULL,
       master=subset(master, intervention_id %in% subset(gta_intervention, ! eligible_firms_id %in% eligible.firms)$id)
     }
 
-    if (tolower(eligible.firms[1])=="keep" | tolower(eligible.firms[1]!="remove")) {
+    if (tolower(eligible.firms[1])=="keep") {
       print(paste0("Keeping these eligible firms categories:", eligible.firms))
       master=subset(master, intervention_id %in% subset(gta_intervention, eligible_firms_id %in% eligible.firms)$id)
-    }
+
+    } else {
+      print(paste0("Keeping these eligible firms categories:", eligible.firms))
+      master=subset(master, intervention_id %in% subset(gta_intervention, eligible_firms_id %in% eligible.firms)$id)
+      }
   }
 
   # Check if master is empty, stop function
@@ -343,8 +355,7 @@ gtatradecoverage <- function(evaluation = NULL,
 
 
   # Calculations and creating master.max ------------------------------------------------------------
-  master.backup.max <- master
-  master <- master.backup.max
+
   #P: Computing values for each year depending on share of coverage --> calculated in 0 data prep.
   for(yr in eval(parse(text=paste0(from,":",to)))){
     eval(parse(text=paste("master$value.",yr,"=master$value.",yr,"*master$Value", sep="")))
@@ -514,8 +525,6 @@ gtatradecoverage <- function(evaluation = NULL,
     }
   }
 
-  master.temp <- master.groups
-  master.groups <- master.temp
 
   # Creating world and country groups values and add them to the base master
   # Save dataframe for later generation of world and group data
@@ -639,9 +648,6 @@ gtatradecoverage <- function(evaluation = NULL,
     rm(imp.any)
     }
 
-  master.backup.mast <- master
-  master <- master.backup.mast
-
 
   ## adding MAST chapter total
   print(paste0(from," | adding MAST chapter total"))
@@ -661,7 +667,7 @@ gtatradecoverage <- function(evaluation = NULL,
 
   # if instruments are chosen, calculate the total of the chosen instruments
   if(is.null(instruments)==F){
-    if(tolower(instruments[1])!= "include") {
+    if(tolower(instruments[length(instruments)])!= "include") {
 
     ## adding MAST chapter total of chosen instruments
     print(paste0(from," | adding MAST chapter total of chosen instruments"))
@@ -708,16 +714,16 @@ gtatradecoverage <- function(evaluation = NULL,
   if (is.null(implementer.role)==F) {
     print("Filter for implementer role")
 
-    if (tolower(implementer.role) == "all combinations") {
+    if (tolower(implementer.role[1]) == "all combinations") {
       master <- master
     }
-    if (tolower(implementer.role[1])=="keep" | tolower(implementer.role[1]!="remove")){
+    if (tolower(implementer.role[1])=="keep"){
       master <- subset(master, implementer.type %in% implementer.role)
     }
     if (tolower(implementer.role[1])=="remove"){
       master <- subset(master, ! implementer.type %in% implementer.role)
-    }
-    else {
+
+      } else {
       master <- subset(master, implementer.type %in% implementer.role)
     }
   }
@@ -809,10 +815,12 @@ gtatradecoverage <- function(evaluation = NULL,
     }
   }
 
-
   print("Save excel file")
-  write.xlsx(x=list("Results"=coverage.total.xlsx,"Parameters"=parameters), file=paste0(output.path,"Trade coverage estimate - ",evaluation," - ", today,".xlsx"))
 
+  write.xlsx(coverage.total.xlsx, file=paste0(getwd(),output.path,"Trade coverage estimate - ",evaluation," - ", today,".xlsx"),
+             sheetName="Results", append=FALSE, row.names=FALSE)
+  write.xlsx(parameters, file=paste0(getwd(),output.path,"Trade coverage estimate - ",evaluation," - ", today,".xlsx"),
+             sheetName="Parameters", append=TRUE, row.names=FALSE)
 
   # End of package
   return(master)
