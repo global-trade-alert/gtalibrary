@@ -1,4 +1,4 @@
-# Function infos and parameters -------------------------------------------
+# Function infos and parameters  TEST --------------------------------------------
 
 gtatradecoverage <- function(evaluation = NULL,
                            flow = NULL,
