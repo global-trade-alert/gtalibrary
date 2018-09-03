@@ -20,6 +20,7 @@ gta_un_code_vector=function(countries, role=NULL){
 
       if(sum(as.numeric((countries %in% country.correspondence$un_code)==F))>0){
         cty.error=paste("'",paste(countries[(countries %in% country.correspondence$un_code)==F], collapse="; "),"'", sep="")
+
       } else{
         country.un.codes=countries
       }
@@ -29,8 +30,13 @@ gta_un_code_vector=function(countries, role=NULL){
 
 
   if(exists("cty.error")){
+
     print(paste("Unkown ",role," country value(s): ", cty.error, ".", sep=""))
+    rm(cty.error)
+
   } else {
     return(country.un.codes)
+    rm(country.un.codes)
   }
+  rm(countries, role)
 }
