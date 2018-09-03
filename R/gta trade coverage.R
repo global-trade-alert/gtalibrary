@@ -1,13 +1,13 @@
 # Function infos and parameters  --------------------------------------------
 
 gta_trade_coverage <- function(evaluation = NULL,
-                           # flow = NULL, see comment below. JF thinks this is redundant (my bad)
+                           # flow = NULL, see comment below. JF thinks this is redundant (including it is his fault)
                            importers = NULL,
                            exporters = NULL,
                            implementers = NULL,
                            implementer.role = NULL,
-                           products = NULL,
-                           sectors = NULL,
+                           sectors = "all",
+                           products = "all",
                            instruments = NULL,
                            inception.range = c("2009-01-01", NA),
                            in.force = NULL,
@@ -38,7 +38,7 @@ gta_trade_coverage <- function(evaluation = NULL,
     end.year = year(inception.range[2])
   }
 
-  ## JF: I think we should remove this from the function. It serves no role when importers/exports plus implementer.type can be specified.
+  ## JF: I think we should remove FLOW from the function. It serves no role when importers/exports plus implementer.type can be specified.
   # ###### FLOW
   # if (is.null(implementer.role)==T) {
   #   if (tolower(flow) == "imports") {
@@ -70,10 +70,57 @@ gta_trade_coverage <- function(evaluation = NULL,
   importing.countries=gta_un_code_vector(importers, "importing")
   exporting.countries=gta_un_code_vector(exporters, "exporting")
 
-  ###### IMPLEMENTERS
+  ### IMPLEMENTERS
   implementing.countries=gta_un_code_vector(implementers, "implementing")
 
-#### This belongs to setting imports/exporters.
+
+  ###### IMPLEMENTER ROLES
+  if (is.null(implementer.role)==T) {
+    implementer.role=c("importer", "3rd country")
+  } else {
+      implementer.role= tolower(implementer.role)
+
+      if("any" %in% implementer.role){
+        implementer.role=c("importer","exporter", "3rd country")
+      }
+
+      if(sum(as.numeric((implementer.role %in% c("any","importer","exporter", "3rd country"))==F))>0){
+        role.error=paste("'",paste(implementer.role[(implementer.role %in% c("any","importer","exporter", "3rd country"))==F], collapse="; "),"'", sep="")
+        print(paste("Unkown implementer role(s): ", role.error, ".", sep=""))
+      }
+    }
+
+  ###### SECTORS & PRODUCTS
+  if(sectors=="all"){
+
+    if(products=="all"){
+      hs.codes=gta_hs_code_check(products)
+
+    } else{
+      hc.codes=gta_hs_code_check(products)
+
+      # updating the sector vector to include the CPC codes for those HS codes
+      sectors=gta_hs_to_cpc(hs.codes)
+    }
+
+  } else {
+    cpc.codes=gta_cpc_code_check(sectors)
+
+    if(products=="all"){
+      hs.codes=gta_cpc_to_hs(cpc.codes)
+    } else {
+      hs.codes=c(gta_cpc_to_hs(cpc.codes),gta_hs_code_check(products))
+
+      # updating the sector vector to include the CPC codes for those HS codes
+      sectors=gta_hs_to_cpc(hs.codes)
+    }
+
+  }
+
+###################################### JF HAS TO CHECK MORE FROM HERE
+
+
+#### This belongs to setting imports/exporters. MAybe this is completly useless....
   # Prepare necessary lists for country blocks
   block.names <- c("G7","G20","EU", "LDC countries", "African Union members")
   block.numbers <- c(10007,10020,10028,10053,10055)
@@ -98,11 +145,7 @@ gta_trade_coverage <- function(evaluation = NULL,
    # We have to recalculate the trade data tables if either of those choices is made:
    if(is.null(products)==F|is.null(importers)==F|is.null(exporters)==F){
 
-     if (is.numeric(products)==F & is.null(products)==F) {
-       stop("The products list does contain values other than numerics.")
-     }
-
-     if (is.numeric(products)==T) {
+     if (is.null(products)==T) {
        print("Loading final.shares from data folder")
        load("data/support tables/final goods trade shares.Rdata")
        setnames(final.shares, old="Reporter.un", "i.un")
