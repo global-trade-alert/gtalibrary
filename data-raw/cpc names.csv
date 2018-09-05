@@ -1,0 +1,401 @@
+cpc;cpc.digit.level;cpc.name
+01;2;Agriculture & horticulture products
+011;3;Cereals
+012;3;Vegetables
+013;3;Fruits & nuts
+014;3;Oilseeds & oleaginous fruits
+015;3;Edible roots & tubers with high starch or inulin content
+016;3;Stimulant, spice & aromatic crops
+017;3;Pulses (dried leguminous vegetables)
+018;3;Sugar crops
+019;3;"Forage; natural rubber; living plants; raw vegetable materials"
+02;2;Live animals & animal products (excl. meat)
+021;3;Live animals
+022;3;Raw milk
+023;3;Eggs of hens or other birds in shell, fresh
+024;3;Reproductive materials of animals
+029;3;Other animal products
+03;2;Forestry & logging products
+031;3;Wood in the rough
+032;3;Non-wood forest products
+04;2;Fish & fish products
+041;3;Fish, live, not for human consumption
+042;3;Fish live, fresh or chilled for human consumption
+043;3;Crustaceans, live, fresh or chilled
+044;3;Molluscs live, fresh or chilled
+045;3;Other aquatic invertebrates, live, fresh or chilled
+049;3;Other aquatic plants & animals
+11;2;Coal & peat
+110;3;Coal & peat
+12;2;Crude petroleum & natural gas
+120;3;Crude petroleum & natural gas
+13;2;Uranium & thorium ores incl. concentrates
+130;3;Uranium & thorium ores & concentrates
+14;2;Metal ores
+141;3;Iron ores & concentrates, other than roasted iron pyrites
+142;3;Non-ferrous metal ores & concentrates
+15;2;Stone, sand & clay
+151;3;Monumental or building stone
+152;3;"Gypsum; anhydrite; limestone (flux) & other calcareous stone"
+153;3;Sands, pebbles, gravel, natural bitumen & asphalt
+154;3;Clays
+16;2;Salt, precious stones & fertilizers
+161;3;Chemical & fertilizer minerals
+162;3;"Salt & pure sodium chloride; sea water"
+163;3;"Precious & semi-precious stones; natural abrasives; other minerals"
+17;2;Electricity, steam & gas
+171;3;Electrical energy
+172;3;Coal gas, water gas, producer gas & similar gases (excl. fuels)
+173;3;Steam & hot water
+174;3;Ice & snow
+18;2;Natural water
+180;3;Natural water
+21;2;Meat, fish, fruits, vegetables, oils & fats
+211;3;Meat & meat products
+212;3;Prepared & preserved fish, crustaceans, molluscs
+213;3;Prepared & preserved vegetables, pulses & potatoes
+214;3;Prepared & preserved fruits & nuts
+215;3;Animal fats
+216;3;Vegetable oils
+217;3;Margarine & similar preparations
+218;3;Cotton linters
+219;3;"Oil-cake; flours & meals of oil seeds; vegetable waxes; etc."
+22;2;Dairy & egg products
+221;3;Processed liquid milk, cream & whey
+222;3;Other dairy products
+223;3;Eggs, in shell, preserved or cooked
+23;2;Bakery, grain mill & starch products
+231;3;Grain mill products
+232;3;"Starches & starch products; sugars & sugar syrups n.e.c."
+233;3;"Preparations used in animal feeding; lucerne meal & pellets"
+234;3;Bakery products
+235;3;Sugar & molasses
+236;3;Cocoa, chocolate & sugar confectionery
+237;3;Macaroni, noodles, couscous & similar farinaceous products
+239;3;Food products n.e.c.
+24;2;Beverages
+241;3;"Ethyl alcohol; spirits, liqueurs & spirits"
+242;3;Wines
+243;3;Malt liquors & malt
+244;3;"Soft drinks; bottled mineral waters"
+25;2;Tobacco products
+250;3;Tobacco products
+26;2;Yarn & woven textile fabrics
+261;3;Natural textile fibres prepared for spinning
+262;3;Man-made textile staple fibres processed for spinning
+263;3;Textile yarn & thread of natural fibres
+264;3;Textile yarn & thread of man-made filaments or staple fibres
+265;3;Woven fabrics of natural non-cotton fibres
+266;3;Woven fabrics (except special fabrics) of cotton
+267;3;Woven fabrics of man-made filaments & staple fibres
+268;3;Special fabrics
+27;2;Textile articles other than apparel
+271;3;Made-up textile articles
+272;3;Carpets & other textile floor coverings
+273;3;"Twine, cordage, ropes & cables; articles thereof"
+279;3;Textiles n.e.c.
+28;2;Wearing apparel & knitted fabrics
+281;3;Knitted or crocheted fabrics
+282;3;Wearing apparel, except fur apparel
+283;3;"Furskins & artificial fur; articles thereof"
+29;2;Leather and footwear
+291;3;"Tanned or dressed leather; composition leather"
+292;3;"Luggage & handbags; saddlery & harness; other leather articles"
+293;3;Footwear other than sports footwear
+294;3;Sports footwear, except skating boots
+295;3;Other footwear
+296;3;Parts of footwear
+31;2;Wood, cork & straw products
+311;3;"Wood, sawn or chipped lengthwise, sliced or peeled, of a thickness exceeding 6 mm; railway or tramway sleepers (cross-ties) of wood, not impregnated"
+312;3;"Wood continuously shaped; wood wool, flour and chips"
+313;3;"Wood, rough or treated; railway sleepers; poles"
+314;3;Boards & panels
+315;3;"Veneer sheets; sheets for plywood; densified wood"
+316;3;Builders' joinery & carpentry of wood
+317;3;"Wooden packing cases; pallets & other load boards; barrels"
+319;3;Other products of wood, cork or straw
+32;2;Pulp, paper & printing products
+321;3;Pulp, paper & paperboard
+322;3;Books, in print
+323;3;Newspapers & periodicals, daily, in print
+324;3;Newspapers & periodicals, other than daily, in print
+325;3;Printed maps, music, cards, & pictures
+326;3;Stamps, banknotes, stock certificates, brochures & leaflets
+327;3;Registers, notebooks, diaries & similar articles
+328;3;Plates, cylinders or lithographic stones for use in printing
+33;2;Processed coke & refined fuels
+331;3;"Coke & semi-coke of coal, of lignite or of peat; retort carbon"
+332;3;"Tar distilled from coal, lignite or peat; other mineral tars"
+333;3;Petroleum oils & oils of bituminous materials, other than crude
+334;3;Petroleum gases & other gaseous hydrocarbons, except natural gas
+335;3;"Petroleum jelly, coke or bitumen; paraffin wax & similar products"
+336;3;Radioactive elements or residues & prodcuts containing them
+337;3;Fuel elements (cartridges), for or of nuclear reactors
+34;2;Basic chemicals
+341;3;Basic organic chemicals
+342;3;Basic inorganic chemicals n.e.c.
+343;3;"Tanning or dyeing extracts; tannins; colouring matter n.e.c."
+344;3;Activated natural mineral products incl. acids, oils and tar
+345;3;Miscellaneous basic chemical products
+346;3;Fertilizers & pesticides
+347;3;Plastics in primary forms
+348;3;Synthetic rubber & mixtures thereof in primary forms
+35;2;Pharmaceuticals & toiletries, man-made fibres & paint
+351;3;"Paints & varnishes & related products; artists' colours; ink"
+352;3;Pharmaceutical products
+353;3;Soap, cleaning preparations, perfumes & toilet preparations
+354;3;Chemical products n.e.c.
+355;3;Man-made fibres
+36;2;Rubber & plastics products
+361;3;Rubber tyres & tubes
+362;3;Other rubber products
+363;3;Semi-manufactures of plastics
+364;3;Packaging products of plastics
+369;3;Other plastics products
+37;2;Glass products, ceramics, cement & stones
+371;3;Glass & glass products
+372;3;Non-structural ceramic ware
+373;3;Refractory products & structural non-refractory clay products
+374;3;Plaster, lime & cement
+375;3;Articles of concrete, cement & plaster
+376;3;Monumental or building stone & articles
+379;3;Other non-metallic mineral products n.e.c.
+38;2;Furniture, musical & sports instruments, toys, jewellery
+381;3;Furniture
+382;3;Jewellery & related articles
+383;3;Musical instruments
+384;3;Sports goods
+385;3;Games & toys
+386;3;Roundabouts, swings, shooting galleries, fairground amusements
+387;3;Prefabricated buildings
+389;3;Other manufactured articles n.e.c.
+39;2;Wastes or scraps
+391;3;Wastes from food & tobacco industry
+392;3;Non-metal wastes or scraps
+393;3;Metal wastes or scraps
+399;3;Other wastes & scraps
+41;2;Basic metals
+411;3;Basic iron & steel
+412;3;Products of iron or steel
+413;3;Basic precious metals & metals clad with precious metals
+414;3;Copper, nickel, aluminium, alumina, lead, zinc & tin, unwrought
+415;3;Unfinished products of copper, nickel, aluminium, lead, zinc or tin
+416;3;Other non-ferrous metals, cerments & articles thereos
+42;2;Fabricated metal products, except machinery & equipment
+421;3;Structural metal products & parts
+422;3;Tanks, reservoirs & containers of iron, steel or aluminium
+423;3;Steam generators, (except central heating boilers) & parts
+429;3;Other fabricated metal products
+43;2;General-purpose machinery
+431;3;Engines & turbines & parts
+432;3;"Pumps, compressors, hydraulic & pneumatic power engines; parts"
+433;3;"Bearings, gears, gearing & driving elements; parts"
+434;3;Ovens & furnace burners & parts
+435;3;Lifting & handling equipment & parts
+439;3;Other general-purpose machinery & parts
+44;2;Special-purpose machinery
+441;3;Agricultural or forestry machinery & parts
+442;3;Machine-tools & parts
+443;3;Machinery for metallurgy & parts
+444;3;"Machinery for mining, quarrying & construction; parts"
+445;3;"Machinery for food, beverage & tobacco processing; parts"
+446;3;"Machinery for textile, apparel & leather production; parts"
+447;3;Weapons & ammunition & parts
+448;3;Domestic appliances & parts
+449;3;Other special-purpose machinery & parts
+45;2;Office, accounting & computing machinery
+451;3;Office & accounting machinery and its accessories
+452;3;Computing machinery & parts
+46;2;Electrical machinery & apparatus
+461;3;"Electric motors, generators & transformers; parts"
+462;3;"Electricity distribution & control apparatus; parts"
+463;3;"Insulated wire & cable; optical fibre cables"
+464;3;"Accumulators, primary cells & primary batteries; parts"
+465;3;"Electric filament or discharge lamps; lighting equipment; parts"
+469;3;Other electrical equipment & parts
+47;2;Radio, television & communication equipment & apparatus
+471;3;"Electronic valves & tubes; electronic components; parts"
+472;3;"Television & radio transmitters; cameras; telephone sets"
+473;3;"Broadcast recording apparatus; microphones, loudspeakers, etc."
+474;3;Parts for the goods of classes 4721 to 4733 & 4822
+475;3;Disks, tapes, storage devices & other media, not recorded
+476;3;Disks, tapes & other physical media, recorded
+478;3;Packaged software
+479;3;Cards with magnetic strips or chip
+48;2;Medical appliances, precision & optical instruments, watches & clocks
+481;3;Medical & surgical equipment & orthopaedic appliances
+482;3;Instruments & control equipment, except optical instruments
+483;3;"Optical instruments & photographic equipment; parts thereof"
+484;3;"Watches & clocks; parts"
+49;2;Transport equipment
+491;3;"Motor vehicles, trailers & semi-trailers; parts"
+492;3;"Motor vehicle bodies; trailers & parts thereof"
+493;3;Ships
+494;3;Pleasure & sporting boats
+495;3;"Railway & tramway locomotives & rolling stock; parts"
+496;3;"Aircraft & spacecraft; parts"
+499;3;Other transport equipment & parts
+53;2;Constructions
+531;3;Buildings
+532;3;Civil engineering works
+54;2;Construction services
+541;3;General construction services of buildings
+542;3;General construction services of civil engineering works
+543;3;Site preparation services
+544;3;Assembly & erection of prefabricated constructions
+545;3;Special trade construction services
+546;3;Installation services
+547;3;Building completion & finishing services
+61;2;Wholesale trade services
+611;3;Wholesale trade services, except on a fee or contract basis
+612;3;Wholesale trade services on a fee or contract basis
+62;2;Retail trade services
+621;3;Non-specialized store retail trade services
+622;3;Specialized store retail trade services
+623;3;Mail order or Internet retail trade services
+624;3;Other non-store retail trade services
+625;3;Retail trade services on a fee or contract basis
+63;2;Accommodation, food & beverage services
+631;3;Accommodation services for visitors
+632;3;Other accommodation services for visitors & others
+633;3;Food serving services
+634;3;Beverage serving services
+64;2;Passenger transport services
+641;3;Local transport & sightseeing services for passengers
+642;3;Long-distance transport services of passengers
+65;2;Freight transport services
+651;3;Land transport services of freight
+652;3;Water transport services of freight
+653;3;Air & space transport services of freight
+66;2;Transport vehicle rental services
+660;3;Rental services of transport vehicles with operators
+67;2;Supporting transport services
+671;3;Cargo handling services
+672;3;Storage & warehousing services
+673;3;Supporting services for railway transport
+674;3;Supporting services for road transport
+675;3;Supporting services for water transport
+676;3;Supporting services for air or space transport
+679;3;Other supporting transport services
+68;2;Postal & courier services
+680;3;Postal & courier services
+69;2;Utilities services
+691;3;Electricity & gas distribution (on own account)
+692;3;Water distribution (on own account)
+71;2;Financial & related services
+711;3;Financial, insurance & pension services, excl. investment banking
+712;3;Investment banking services
+713;3;Insurance & pension services, excl. social security
+714;3;Reinsurance services
+715;3;Services auxiliary to financial services
+716;3;Services auxiliary to insurance & pensions
+717;3;Services of holding financial assets
+72;2;Real estate services
+721;3;Real estate services involving own or leased property
+722;3;Real estate services on a fee or contract basis
+73;2;Machinery & goods rental services
+731;3;Leasing or rental services concerning machinery & equipment
+732;3;Leasing or rental services concerning other goods
+733;3;Licensing services for the right to use intellectual property
+81;2;Research & development services
+811;3;Research & development in natural sciences & engineering
+812;3;Research & development in social sciences & humanities
+813;3;Interdisciplinary research & development
+814;3;Research & development originals
+82;2;Legal & accounting services
+821;3;Legal services
+822;3;Accounting, auditing & bookkeeping services
+823;3;Tax consultancy & preparation services
+824;3;Insolvency & receivership services
+83;2;Professional services
+831;3;"Management consulting & management services; ITC services"
+832;3;Architectural services, planning & landscape architectural services
+833;3;Engineering services
+834;3;Scientific & other technical services
+835;3;Veterinary services
+836;3;Advertising services & provision of advertising space or time
+837;3;Market research & public opinion polling services
+838;3;Photography services & photographic processing services
+839;3;Other professional, technical & business services
+84;2;ITC services
+841;3;Telephony & other telecommunications services
+842;3;Internet telecommunications services
+843;3;On-line content
+844;3;News agency services
+845;3;Library & archive services
+846;3;Broadcasting, programming & programme distribution services
+85;2;Personal support services
+851;3;Employment services
+852;3;Investigation & security services
+853;3;Cleaning services
+854;3;Packaging services
+855;3;Travel arrangement, tour operator & related services
+859;3;Other support services
+86;2;Agriculture support services
+861;3;Support services to agriculture, hunting, forestry & fishing
+862;3;Support services to mining
+863;3;Support services to electricity, gas & water distribution
+87;2;Maintenance & repair & services
+871;3;Maintenance services of fabricated metal products & machinery
+872;3;Repair services of other goods
+873;3;Installation services (other than construction)
+88;2;Manufacturing services
+881;3;Food, beverage & tobacco manufacturing services
+882;3;Textile, wearing apparel & leather manufacturing services
+883;3;Wood & paper manufacturing services
+884;3;Petroleum, chemical & pharmaceutical manufacturing services
+885;3;Rubber, plastic & non-metallic mineral manufacturing services
+886;3;Basic metal manufacturing services
+887;3;Fabricated metal product & machinery manufacturing services
+888;3;Transport equipment manufacturing services
+889;3;Other manufacturing services
+89;2;Printing & publishing services, material processing
+891;3;Publishing, printing & reproduction services
+892;3;Moulding, pressing & similar plastic manufacturing services
+893;3;Forging, stamping & similar metal manufacturing services
+894;3;Recylcling services, on a fee or contract basis
+91;2;Public administration & social security
+911;3;Administrative services of the government
+912;3;Public administrative services
+913;3;Administrative social security services
+92;2;Education services
+921;3;Pre-primary education services
+922;3;Primary education services
+923;3;Secondary education services
+924;3;Post-secondary non-tertiary education services
+925;3;Tertiary education services
+929;3;Other education & training services
+93;2;Human health & social care services
+931;3;Human health services
+932;3;Residential care services for the elderly & disabled
+933;3;Other social services with accommodation
+934;3;Social services without accommodation
+935;3;Other social services without accommodation
+94;2;Sewage, waste collectionl & environmental protection services
+941;3;Sewerage, sewage treatment & septic tank cleaning services
+942;3;Waste collection services
+943;3;Waste treatment & disposal services
+944;3;Remediation services
+945;3;Sanitation & similar services
+949;3;Other environmental protection services n.e.c.
+95;2;Services of membership organizations
+951;3;Services furnished by employers & professional organizations
+952;3;Services furnished by trade unions
+959;3;Services furnished by other membership organizations
+96;2;Recreational, cultural & sporting services
+961;3;Audiovisual & related services
+962;3;Performing arts & other live entertainment event presentation
+963;3;Services of performing & other artists
+964;3;Museum & preservation services
+965;3;Sports & recreational sports services
+966;3;Services of athletes & related support services
+969;3;Other amusement & recreational services
+97;2;Housekeeping, beauty and funeral services
+971;3;Washing, cleaning & dyeing services
+972;3;Beauty & physical well-being services
+973;3;Funeral, cremation & undertaking services
+979;3;Other miscellaneous services
+98;2;Domestic services
+980;3;Domestic services
+99;2;Services provided by extraterritorial organizations & bodies
+990;3;Services provided by extraterritorial organizations & bodies
