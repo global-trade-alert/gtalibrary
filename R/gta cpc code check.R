@@ -12,7 +12,7 @@
 gta_cpc_code_check=function(codes){
 
   # Load cpc names
-  cpc.names <- gtalibrary:::cpc.names
+  load("data/cpc.names.rda")
 
   # Check length of longest number in codes, make sure it is not higher than 3
   if (max(nchar(codes)) >= 4) {
@@ -35,7 +35,7 @@ gta_cpc_code_check=function(codes){
         if (max(nchar(codes)) <= 2) {
 
           # Check if all cpc codes occur on 2nd level cpc
-          if (any(unique(codes) %in% subset(cpc.names, cpc.digit.level == 2)$cpc) == T){
+          if (all(unique(codes) %in% subset(cpc.names, cpc.digit.level == 2)$cpc) == T){
             print("Only 2nd level codes provided: All existing!")
 
           } else {
@@ -45,7 +45,7 @@ gta_cpc_code_check=function(codes){
         } else if (max(nchar(codes)) == 3) {
 
             # Check if all cpc codes occur on 3rd and 2nd level cpc
-            if (any(unique(codes) %in% cpc.names$cpc) == T){
+            if (all(unique(codes) %in% cpc.names$cpc) == T){
               print("3rd and 2nd level codes provided: All existing!")
 
             } else {
@@ -84,7 +84,7 @@ gta_cpc_code_check=function(codes){
       rm(codes.2, codes.3)
 
       # Check whether all values exist in cpc.names$cpc
-      if (any(unique(codes) %in% cpc.names$cpc) == T){
+      if (all(unique(codes) %in% cpc.names$cpc) == T){
         print("2nd and 3rd level codes provided: All existing")
 
       } else {
