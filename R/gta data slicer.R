@@ -400,7 +400,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       stop("Please specify whether you want to focus on the specified intervention types or exclude them (keep.type=T/F).")
     } else{
 
-      load("data/int.mast.types.rda")
+      int.mast.types <- gtalibrary::int.mast.types
       check=gta_parameter_check(tolower(intervention.type), tolower(int.mast.types$intervention.type))
 
       if(check!="OK"){
@@ -446,7 +446,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       mast.letter <- gsub("[0-9]+","", mast.chapter)
       mast.letter <- mast.letter[mast.letter != ""]
 
-      load("data/int.mast.types.rda")
+      int.mast.types <- gtalibrary::int.mast.types
       check=gta_parameter_check(tolower(mast.letter), tolower(int.mast.types$mast.chapter.id))
 
       if(check!="OK"){
