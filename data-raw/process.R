@@ -1,11 +1,11 @@
 ## Create necessary dataframes for function
 
 # load csv
-cpc.names <- read.csv("../R help files/cpc names.csv", sep=";")
+cpc.names <- read.csv("data-raw/cpc names.csv", sep=";")
 
-hs.names <- read.csv("../R help files/hs2012 names.csv", sep=";")
+hs.names <- read.csv("data-raw/hs2012 names.csv", sep=";")
 
-cpc.to.hs <- read.csv("../R help files/cpc 2.1 to HS 2012.csv", sep=";")
+cpc.to.hs <- read.csv("data-raw/cpc 2.1 to HS 2012.csv", sep=";")
 colnames(cpc.to.hs) <- c("cpc","hs")
 
 # Saving datasets in the a sysdata.R file in the R folder. This way it will be only available inside the package.
