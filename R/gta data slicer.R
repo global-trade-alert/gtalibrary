@@ -389,10 +389,91 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # intervention.type
   # keep.type
+  if(is.null(intervention.type)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Intervention types included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.type)){
+      stop("Please specify whether you want to focus on the specified intervention types or exclude them (keep.type=T/F).")
+    } else{
+
+      load("data/int.mast.types.rda")
+      check=gta_parameter_check(tolower(intervention.type), tolower(int.mast.types$intervention.type))
+
+      if(check!="OK"){
+        print(paste("Unkown intervention type(s): ", check, ".", sep=""))
+
+        } else {
+          if(keep.type==T){
+            master=subset(master, tolower(intervention.type) %in% tolower(intervention.type))
+
+            parameter.choices=rbind(parameter.choices,
+                                    data.frame(parameter="Intervention types included:", choice=paste(intervention.type, collapse = ", ")))
+
+          } else {
+            master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.type))
+
+            parameter.choices=rbind(parameter.choices,
+                                    data.frame(parameter="Intervention types included:", choice=paste("All except ", paste(intervention.types, collapse = ", "), sep="")))
+
+          }
+
+      }
+
+      rm(check, int.mast.types)
+    }
+  }
 
 
   # mast.chapter
   # keep.mast
+  if(is.null(mast.chapter)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Mast chapters included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.mast)){
+      stop("Please specify whether you want to focus on the specified mast chapters or exclude them (keep.mast=T/F).")
+
+    } else{
+
+      #Remove integers from string
+      mast.letter <- gsub("[0-9]+","", mast.chapter)
+      mast.letter <- mast.letter[mast.letter != ""]
+
+      load("data/int.mast.types.rda")
+      check=gta_parameter_check(tolower(mast.letter), tolower(int.mast.types$mast.chapter.id))
+
+      if(check!="OK"){
+        print(paste("Unkown mast chapter(s): ", check, ".", sep=""))
+
+      } else {
+
+      if(keep.mast==T){
+        master=subset(master, tolower(mast.chapter) %in% tolower(mast.letter))
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
+
+      } else {
+        master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Mast chapters included:", choice=paste("All except ", paste(mast.letter, collapse = ", "), sep="")))
+
+      }
+
+      }
+
+      rm(check, int.mast.types, mast.letter)
+    }
+  }
+
 
 
   # implementation.level
@@ -406,10 +487,19 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   # cpc.sectors
   # keep.cpc
 
+   # check if >=500
 
   # hs.codes
   # keep.hs
 
+  # temp.products=unique(master[,c("new.id", "affected.product")])
+  # master$affected.product=NULL
+  #
+  # temp.products=cSplit(affected.products)
+  # temp.products=subset(affected.products NOT/IN choice)
+  # temp.products=aggregate(prodcuts ~new.id, CSV)
+  # master=merge(master, temp.products, by="new.id") \\ ohne all.x=T
+  # master$new.id=NULL
 
   # intervention.id
   # keep.intervention
