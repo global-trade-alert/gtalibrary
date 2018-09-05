@@ -10,4 +10,4 @@ colnames(cpc.to.hs) <- c("cpc","hs")
 
 # Saving datasets in the a sysdata.R file in the R folder. This way it will be only available inside the package.
 # Call the internally saved packages from inside the function like this: gtalibrary:::name_of_dataframe
-devtools::use_data(cpc.names, hs.names, cpc.to.hs, internal = T, overwrite = T)
+devtools::use_data(cpc.names, hs.names, cpc.to.hs, internal = F, overwrite = T)
