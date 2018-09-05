@@ -19,6 +19,27 @@ gta_un_code_vector=function(countries, role=NULL){
 
   if(is.null(countries)==F){ ## I know this could have been the "else" of the preceding "if", but find this easier readable
 
+
+    ## preparation: a correspondence between country/group names and UN codes
+
+    gta.jur=read.csv("data/database replica/gta_jurisdiction.csv")
+    gta.jur.group=read.csv("data/database replica/gta_jurisdiction_group.csv")
+    gta.jur.group=subset(gta.jur.group, is_public==1)
+    gta.jur.group.mem=read.csv("data/database replica/gta_jurisdiction_group_member.csv")
+    setnames(gta.jur.group.mem, "jurisdiction_group_id", "id")
+    gta.jur.group=merge(gta.jur.group, gta.jur.group.mem, by="id", all.x=T)
+    gta.jur.group$id=NULL
+    setnames(gta.jur.group, "jurisdiction_id", "id")
+    gta.jur.group=merge(gta.jur.group, gta.jur[,c("id", "un_code")], all.x=T)
+
+    country.correspondence=rbind(gta.jur[,c("name", "un_code")], gta.jur.group[,c("name", "un_code")])
+    country.names=gta.jur[,c("name", "un_code")]
+    rm(gta.jur, gta.jur.group, gta.jur.group.mem)
+
+
+
+    ## Checking & converting codes
+
     if(grepl("[A-Za-z]+",paste(countries, collapse=";"))){
 
       if(sum(as.numeric((tolower(countries) %in% tolower(country.correspondence$name))==F))>0){
@@ -44,7 +65,7 @@ gta_un_code_vector=function(countries, role=NULL){
 
   if(exists("cty.error")){
 
-    print(paste("Unkown ",role," country value(s): ", cty.error, ".", sep=""))
+    stop(paste("Unkown ",role," country value(s): ", cty.error, ".", sep=""))
     rm(cty.error)
 
   } else {

@@ -79,24 +79,11 @@ gta_trade_coverage <- function(evaluation = NULL,
   # }
 
   ###### IMPORTERS / EXPORTERS / IMPLEMENTERS
-  ## preparation: a correspondence between country/group names and UN codes
 
-  gta.jur=read.csv("data/database replica/gta_jurisdiction.csv")
-  gta.jur.group=read.csv("data/database replica/gta_jurisdiction_group.csv")
-  gta.jur.group=subset(gta.jur.group, is_public==1)
-  gta.jur.group.mem=read.csv("data/database replica/gta_jurisdiction_group_member.csv")
-  setnames(gta.jur.group.mem, "jurisdiction_group_id", "id")
-  gta.jur.group=merge(gta.jur.group, gta.jur.group.mem, by="id", all.x=T)
-  gta.jur.group$id=NULL
-  setnames(gta.jur.group, "jurisdiction_id", "id")
-  gta.jur.group=merge(gta.jur.group, gta.jur[,c("id", "un_code")], all.x=T)
-
-  country.correspondence=rbind(gta.jur[,c("name", "un_code")], gta.jur.group[,c("name", "un_code")])
-  country.names=gta.jur[,c("name", "un_code")]
-  rm(gta.jur, gta.jur.group, gta.jur.group.mem)
-
-  ### IMPORTERS/EXPORTERS
+  ### IMPORTERS
   importing.countries=gta_un_code_vector(importers, "importing")
+
+  ### EXPORTERS
   exporting.countries=gta_un_code_vector(exporters, "exporting")
 
   ### IMPLEMENTERS
