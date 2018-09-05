@@ -17,9 +17,6 @@ gta_cpc_code_check=function(codes){
   # Check length of longest number in codes, make sure it is not higher than 3
   if (max(nchar(codes)) >= 4) {
     stop("Please provide codes only up to 3 figures")
-
-  } else {
-      longest <- max(nchar(codes))
   }
 
   # Check whether some values occure twice, indicating that there's a problem with leading zeros
@@ -38,8 +35,14 @@ gta_cpc_code_check=function(codes){
           if (all(unique(codes) %in% subset(cpc.names, cpc.digit.level == 2)$cpc) == T){
             print("Only 2nd level codes provided: All existing!")
 
+            return(codes)
+
           } else {
-            stop("Non existing values provided")
+            non.existing <- codes[! codes %in% subset(cpc.names, cpc.digit.level ==2)$cpc]
+            print(paste0("Non existing values provided: ", paste0(non.existing, collapse = ", ")))
+
+            return(non.existing)
+
             }
 
         } else if (max(nchar(codes)) == 3) {
@@ -48,8 +51,14 @@ gta_cpc_code_check=function(codes){
             if (all(unique(codes) %in% cpc.names$cpc) == T){
               print("3rd and 2nd level codes provided: All existing!")
 
+              return(codes)
+
             } else {
-                stop("Non existing values provided")
+              non.existing <- codes[! codes %in% cpc.names$cpc]
+              print(paste0("Non existing values provided: ", paste0(non.existing, collapse = ", ")))
+
+              return(non.existing)
+
               }
         }
 
@@ -87,8 +96,15 @@ gta_cpc_code_check=function(codes){
       if (all(unique(codes) %in% cpc.names$cpc) == T){
         print("2nd and 3rd level codes provided: All existing")
 
+        return(codes)
+
       } else {
         stop("Non existing values provided")
+        non.existing <- codes[! codes %in% cpc.names$cpc]
+        print(paste0("Non existing values provided: ", paste0(non.existing, collapse = ", ")))
+
+        return(non.existing)
+
         }
     }
   }
