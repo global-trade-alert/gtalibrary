@@ -12,7 +12,7 @@
 gta_cpc_code_check=function(codes){
 
   # Load cpc names
-  load("sysdata.rda")
+  cpc.names <- gtalibrary:::cpc.names
 
   # Check length of longest number in codes, make sure it is not higher than 3
   if (max(nchar(codes)) >= 4) {
