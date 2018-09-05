@@ -7,5 +7,5 @@ Maintainer: Global Trade Alert <patrick.buess@student.unisg.ch>
 Description: To be written.
 License: To be defined.
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 6.1.0
