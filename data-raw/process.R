@@ -1,4 +1,4 @@
-## Create necessary dataframes for function
+## Create necessary dataframes for functions
 
 # load csv
 cpc.names <- read.csv("data-raw/cpc names.csv", sep=";")
