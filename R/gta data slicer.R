@@ -478,16 +478,96 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # implementation.level
   # keep.level
+  if(is.null(implementation.level)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Implementation levels included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.level)){
+      stop("Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F).")
+
+    } else{
+
+      imp.levels <- gtalibrary::imp.levels
+
+      check=gta_parameter_check(tolower(implementation.level), tolower(imp.levels$implementation.levels))
+
+      if(check!="OK"){
+        print(paste("Unkown implementation level(s): ", check, ".", sep=""))
+
+      } else {
+
+        if(keep.level==T){
+          master=subset(master, tolower(implementation.level) %in% tolower(implementation.level))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Implementation levels included:", choice=paste(implementation.level, collapse = ", ")))
+
+        } else {
+          master=subset(master, ! tolower(implementation.level) %in% tolower(implementation.level))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Implementation levels included:", choice=paste("All except ", paste(implementation.level, collapse = ", "), sep="")))
+
+        }
+
+      }
+
+      rm(check, imp.levels)
+    }
+  }
 
 
   # eligible.firms
   # keep.firms
+  if(is.null(eligible.firms)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Eligible firms categories included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.firms)){
+      stop("Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F).")
+
+    } else{
+
+      elig.firms <- gtalibrary::elig.firms
+
+      check=gta_parameter_check(tolower(eligible.firms), tolower(elig.firms$eligible.firms))
+
+      if(check!="OK"){
+        print(paste("Unkown eligible firms categorie(s): ", check, ".", sep=""))
+
+      } else {
+
+        if(keep.firms==T){
+          master=subset(master, tolower(eligible.firms) %in% tolower(eligible.firms))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Eligible firms categories included:", choice=paste(eligible.firms, collapse = ", ")))
+
+        } else {
+          master=subset(master, ! tolower(eligible.firms) %in% tolower(eligible.firms))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Eligible firms categories included:", choice=paste("All except ", paste(eligible.firms, collapse = ", "), sep="")))
+
+        }
+
+      }
+
+      rm(check, elig.firms)
+    }
+  }
 
 
   # cpc.sectors
   # keep.cpc
 
-   # check if >=500
+  # check if >=500
 
   # hs.codes
   # keep.hs

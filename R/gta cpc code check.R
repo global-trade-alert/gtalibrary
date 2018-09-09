@@ -9,6 +9,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
+
 gta_cpc_code_check=function(codes){
 
   # Load cpc names
@@ -33,7 +34,7 @@ gta_cpc_code_check=function(codes){
 
           # Check if all cpc codes occur on 2nd level cpc
           if (all(unique(codes) %in% subset(cpc.names, cpc.digit.level == 2)$cpc) == T){
-            print("Only 2nd level codes provided: All existing!")
+            print(paste0("Only 2nd level codes provided, all existing: ", paste0(codes, collapse=", ")))
 
             return(codes)
 
@@ -49,7 +50,7 @@ gta_cpc_code_check=function(codes){
 
             # Check if all cpc codes occur on 3rd and 2nd level cpc
             if (all(unique(codes) %in% cpc.names$cpc) == T){
-              print("3rd and 2nd level codes provided: All existing!")
+              print(paste0("2nd and 3rd level codes provided, all existing: ", paste0(codes, collapse=", ")))
 
               return(codes)
 
@@ -94,12 +95,12 @@ gta_cpc_code_check=function(codes){
 
       # Check whether all values exist in cpc.names$cpc
       if (all(unique(codes) %in% cpc.names$cpc) == T){
-        print("2nd and 3rd level codes provided: All existing")
+        print(paste0("2nd and 3rd level codes provided, all existing: ", paste0(codes, collapse=", ")))
 
         return(codes)
 
       } else {
-        stop("Non existing values provided")
+        print("Non existing values provided")
         non.existing <- codes[! codes %in% cpc.names$cpc]
         print(paste0("Non existing values provided: ", paste0(non.existing, collapse = ", ")))
 

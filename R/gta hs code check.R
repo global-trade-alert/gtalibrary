@@ -18,8 +18,8 @@ gta_hs_code_check=function(codes){
   hs.names$HS12code.4 <- substr(hs.names$HS12code, 1,4)
   hs.names$HS12code.2 <- substr(hs.names$HS12code, 1,2)
 
-  if (max(nchar(codes)) >= 6) {
-    print("Codes with more than 6 figures provided. These will be reduced.")
+  if (max(nchar(codes)) >= 7) {
+    print(paste0("Codes with more than 6 figures provided. These will be reduced: ", paste0(codes[nchar(codes)>=7], collapse=", ")))
     codes <- as.numeric(substr(codes, 1,6))
   }
 
@@ -50,7 +50,7 @@ gta_hs_code_check=function(codes){
       return(non.existing)
 
     } else {
-      print("All HS codes existing!")
+      print(paste0("All HS codes existing: ", paste0(codes, collapse=", ")))
       return(codes)
 
     }
@@ -60,3 +60,4 @@ gta_hs_code_check=function(codes){
 
   rm(codes)
 }
+

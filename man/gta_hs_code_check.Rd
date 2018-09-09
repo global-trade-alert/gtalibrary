@@ -7,7 +7,7 @@
 gta_hs_code_check(codes)
 }
 \arguments{
-\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed.}
+\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.}
 }
 \description{
 This function checks whether a vector of HS codes is consistent with HS 2012 and returns it as a vector of 6-digit level HS codes.
