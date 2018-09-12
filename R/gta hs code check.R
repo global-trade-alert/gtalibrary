@@ -14,40 +14,27 @@ gta_hs_code_check=function(codes){
 
   # Load HS names, create 4 and 2 digits columns
   hs.names <- gtalibrary::hs.names
-  hs.names$HS12code <- as.factor(sprintf("%06i", hs.names$HS12code))
-  hs.names$HS12code.4 <- substr(hs.names$HS12code, 1,4)
-  hs.names$HS12code.2 <- substr(hs.names$HS12code, 1,2)
 
-  if (max(nchar(codes)) >= 7) {
-    print(paste0("Codes with more than 6 figures provided. These will be reduced: ", paste0(codes[nchar(codes)>=7], collapse=", ")))
-    codes <- as.numeric(substr(codes, 1,6))
-  }
+  hs.codes=c(unique(hs.names$HS12code),
+             unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)==0],1,2)),
+             unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)!=0],1,1)),
+             unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)==0],1,4)),
+             unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)!=0],1,3)))
+
 
   if (is.numeric(codes)==T) {
 
-    # Convert hs codes in dataframe to numeric
-    hs.names$HS12code <- as.numeric(as.character(hs.names$HS12code))
-    hs.names$HS12code.2 <- as.numeric(as.character(hs.names$HS12code.2))
-    hs.names$HS12code.4 <- as.numeric(as.character(hs.names$HS12code.4))
+    if (max(nchar(codes)) >= 7) {
+      print(paste0("Codes with more than 6 figures provided. These will be reduced: ", paste0(codes[nchar(codes)>=7], collapse=", ")))
 
-    #Split to different length sets
-    codes.6 <- codes[nchar(codes) >= 5]
-    codes.4 <- codes[nchar(codes) == 3 | nchar(codes) == 4]
-    codes.2 <- codes[nchar(codes) == 1 | nchar(codes) == 2]
+      # taking the first 6 digits from numbers with even digit count, and only the first 5 digits of the others.
+      codes <- unique(c(as.numeric(substr(codes[(nchar(codes)%%2)==0], 1,6)),as.numeric(substr(codes[(nchar(codes)%%2)!=0], 1,5))))
+    }
 
-    non.existing <- c()
-    if (all(unique(codes.6) %in% hs.names$HS12code) == F){
-       non.existing <- append(non.existing, codes.6[! codes.6 %in% hs.names$HS12code])
-    }
-    if (all(unique(codes.4) %in% hs.names$HS12code.4) == F){
-      non.existing <- append(non.existing, codes.4[! codes.4 %in% hs.names$HS12code])
-    }
-    if (all(unique(codes.2) %in% hs.names$HS12code.2) == F){
-      non.existing <- append(non.existing, codes.2[! codes.2 %in% hs.names$HS12code])
-    }
-    if (length(non.existing) != 0) {
-      print(paste0("Non existing values provided: ", paste0(non.existing, collapse = ", ")))
-      return(non.existing)
+
+    if (sum(as.numeric((codes %in% hs.codes)==F))>0){
+      print(paste0("Non existing values provided: ", paste0(codes[(codes %in% hs.codes)==F], collapse = ", ")))
+
 
     } else {
       print(paste0("All HS codes existing: ", paste0(codes, collapse=", ")))
