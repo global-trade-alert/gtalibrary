@@ -60,6 +60,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         keep.intervention = NULL
                         ){
   library("httr")
+  library("splitstackshape")
 
   ## Collecting
   parameter.choices=data.frame(parameter=character(), choice=character())
@@ -563,14 +564,119 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+keep.cpc = F
+cpc.sectors <- c(652, gta_cpc_code_expand(c(23,24,71,72)))
+
 
   # cpc.sectors
   # keep.cpc
+  if(is.null(cpc.sectors)){
 
-  # check if >=500
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="CPC sectors included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.cpc)){
+      stop("Please specify whether you want to focus on the specified CPC sectors or exclude them (keep.cpc=T/F).")
+    } else{
+
+      # CPC code check
+      cpc.sectors <- gta_cpc_code_check(codes = cpc.sectors)
+
+      # Check if there are codes above 500
+      if (max(cpc.sectors) >= 500) {
+
+        # Filter master for HS codes
+        ## CONVERT CPC TO HS HERE AND ADD FILTER
+      }
+
+      # Create new specific id and master.temp
+      master$new.id <- seq(1,nrow(master))
+      master.temp <- unique(master[,c("new.id", "affected.sector")])
+      master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.sector"), direction="long", sep=",")
+
+      # Filter products
+      if(keep.cpc==T){
+        master.temp=subset(master.temp, as.numeric(affected.sector) %in% cpc.sectors)
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="CPC codes included:", choice=paste(cpc.sectors, collapse = ", ")))
+
+      } else {
+        master.temp=subset(master.temp, ! as.numeric(affected.product) %in% cpc.sectors)
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="CPC codes included:", choice=paste("All except ", paste(cpc.sectors, collapse = ", "), sep="")))
+
+      }
+      # clear affected.product column
+      master$affected.sector <- NULL
+
+      # Collapse hs codes by id
+      master.temp <- aggregate( .~ new.id, master.temp, function(x) toString(x))
+
+      # Merge and remove new.id
+      master <- merge(master, master.temp, by="new.id")
+      master$new.id <- NULL
+
+    }
+
+    rm(check, cpc.names, master.temp)
+  }
+
 
   # hs.codes
   # keep.hs
+  if(is.null(hs.codes)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="HS codes included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.hs)){
+      stop("Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F).")
+    } else{
+
+      # HS code check
+      hs.codes <- gta_hs_code_check(codes = hs.codes)
+
+      # Create new specific id and master.temp
+      master$new.id <- seq(1,nrow(master))
+      master.temp <- unique(master[,c("new.id", "affected.product")])
+      master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.product"), direction="long", sep=",")
+
+      # Filter products
+      if(keep.hs==T){
+          master.temp=subset(master.temp, affected.product %in% hs.codes)
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="HS codes included:", choice=paste(hs.codes, collapse = ", ")))
+
+        } else {
+          master.temp=subset(master.temp, ! affected.product %in% hs.codes)
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="HS codes included:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
+
+        }
+      # clear affected.product column
+      master$affected.product <- NULL
+
+      # Collapse hs codes by id
+      master.temp <- aggregate( .~ new.id, master.temp, function(x) toString(x))
+
+      # Merge and remove new.id
+      master <- merge(master, master.temp, by="new.id")
+      master$new.id <- NULL
+
+    }
+
+      rm(check, hs.names, master.temp)
+    }
+
+
 
   # temp.products=unique(master[,c("new.id", "affected.product")])
   # master$affected.product=NULL
