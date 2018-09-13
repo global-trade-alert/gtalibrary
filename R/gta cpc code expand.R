@@ -1,10 +1,10 @@
 # Roxygen documentation
 
-#' Expands 2nd level CPC codes to the 3rd level.
+#' Expands 2-digit level CPC codes into 3-digit level CPC codes.
 #'
-#' This function takes in CPC 2nd level codes and outputs all corresponding 3rd level codes in a vector.
+#' This function takes in 2-digit level CPC codes and returns all corresponding 3-digit level CPC codes in a vector.
 #'
-#' @param codes Supply the 2nd level CPC codes you want to expand.
+#' @param codes Supply the 2-digit level CPC codes you want to expand.
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -17,7 +17,7 @@ gta_cpc_code_expand=function(codes){
 
   # Check length of longest number in codes, make sure it is not higher than 3
   if (max(nchar(codes)) >= 3) {
-    stop("Please provide codes only up to 2 figures")
+    stop("Please provide codes with 2 characters or less.")
   }
 
   # check vector type to decide further processing
@@ -29,13 +29,13 @@ gta_cpc_code_expand=function(codes){
     #check if all codes exist
     if (all(unique(codes) %in% sprintf("%02i",subset(cpc.names, cpc.digit.level == 2)$cpc) == T)){
       codes <- sprintf("%03i",subset(cpc.names, cpc.digit.level == 3)$cpc)[substr(sprintf("%03i",subset(cpc.names, cpc.digit.level == 3)$cpc),1,2) %in% codes]
-      print("Expansion successful. Returning vector of 3rd level CPC codes.")
+      print("Expansion successful. Returning vector of 3-digit level CPC codes.")
 
           return(as.numeric(codes))
 
         } else {
           non.existing <- codes[! codes %in% sprintf("%02i",subset(cpc.names, cpc.digit.level ==2)$cpc)]
-          print(paste0("Non existing values provided: ", paste0(non.existing, collapse = ", ")))
+          print(paste0("Unknown values provided: ", paste0(non.existing, collapse = ", ")))
 
           return(non.existing)
 
