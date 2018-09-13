@@ -14,8 +14,10 @@
 gta_hs_code_finder=function(products){
 
   library(webdriver)
+  library(XML)
 
   find.hs=data.frame(product.name=products, hs.code=NA, source=NA)
+  find.hs$products=as.character(find.hs$products)
 
   pjs <- run_phantomjs()
   remDr=Session$new(port=pjs$port)
