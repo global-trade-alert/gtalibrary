@@ -15,9 +15,10 @@ gta_hs_code_finder=function(products){
 
   library(webdriver)
   library(XML)
+  library(stringr)
 
   find.hs=data.frame(product.name=unique(as.character(products)), hs.code=NA, source=NA)
-  find.hs$products=as.character(find.hs$products)
+  find.hs$product.name=as.character(find.hs$product.name)
 
   pjs <- run_phantomjs()
   remDr=Session$new(port=pjs$port)
@@ -34,7 +35,7 @@ gta_hs_code_finder=function(products){
       e$sendKeys(key$enter)
       Sys.sleep(2.5)
 
-
+      html <- htmlParse(remDr$getSource()[[1]], asText=T)
       if(length(xpathSApply(html, "//div[@id='hscode']",xmlValue))>0){
         find.hs$hs.code[i]=as.character(paste(unlist(str_extract_all(xpathSApply(html, "//div[@id='hscode']",xmlValue), "\\d+")),collapse=""))
         find.hs$source[i]="matched via Eurostat HS code finder ('https://eurostat.prod.3ceonline.com')"
