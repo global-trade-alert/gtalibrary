@@ -29,6 +29,7 @@
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
 #' @param intervention.id Provide a vector of intervention IDs.
 #' @param keep.intervention Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
+#' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -57,7 +58,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         hs.codes = NULL,
                         keep.hs = NULL,
                         intervention.id = NULL,
-                        keep.intervention = NULL
+                        keep.intervention = NULL,
+                        lag.adjustment=NULL
                         ){
   library("httr")
   library("splitstackshape")
@@ -564,9 +566,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
-keep.cpc = F
-cpc.sectors <- c(652, gta_cpc_code_expand(c(23,24,71,72)))
-
 
   # cpc.sectors
   # keep.cpc
@@ -584,19 +583,13 @@ cpc.sectors <- c(652, gta_cpc_code_expand(c(23,24,71,72)))
       # CPC code check
       cpc.sectors <- gta_cpc_code_check(codes = cpc.sectors)
 
-      # Check if there are codes above 500
-      if (max(cpc.sectors) >= 500) {
-
-        # Filter master for HS codes
-        ## CONVERT CPC TO HS HERE AND ADD FILTER
-      }
 
       # Create new specific id and master.temp
       master$new.id <- seq(1,nrow(master))
       master.temp <- unique(master[,c("new.id", "affected.sector")])
       master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.sector"), direction="long", sep=",")
 
-      # Filter products
+      # Filter sectors
       if(keep.cpc==T){
         master.temp=subset(master.temp, as.numeric(affected.sector) %in% cpc.sectors)
 
@@ -610,15 +603,49 @@ cpc.sectors <- c(652, gta_cpc_code_expand(c(23,24,71,72)))
                                 data.frame(parameter="CPC codes included:", choice=paste("All except ", paste(cpc.sectors, collapse = ", "), sep="")))
 
       }
-      # clear affected.product column
+      # clear affected.sector column
       master$affected.sector <- NULL
 
-      # Collapse hs codes by id
+      # Collapse cpc codes by id
       master.temp <- aggregate( .~ new.id, master.temp, function(x) toString(x))
 
       # Merge and remove new.id
       master <- merge(master, master.temp, by="new.id")
       master$new.id <- NULL
+
+      ## Correcting the affected product column to only include HS codes belong to the cpc.sectors, if any.
+      if(min(cpc.sectors)<500){
+
+        products=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
+
+        # Create new specific id and master.temp
+        master$new.id <- seq(1,nrow(master))
+        master.temp <- unique(master[,c("new.id", "affected.product")])
+        master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.product"), direction="long", sep=",")
+
+        master.temp=subset(master.temp, affected.product %in% products)
+
+
+        # clear affected.product/affected.sector column
+        master$affected.product <- NULL
+
+
+        # Collapse hs codes by id
+        master.hs <- aggregate( .~ new.id, master.temp, function(x) toString(x))
+
+
+        # Merge and remove new.id
+        master <- merge(master, master.hs, by="new.id", all.x=T) # all.x=T is vital here since there may also be service sectors in cpc.sectors
+        master$new.id <- NULL
+
+        rm(products, master.hs, master.temp)
+
+
+
+      } else {
+      ## If the stated sectors only include services, then remove all HS codes that may also have been affected by the same intervention
+        master$affected.product=NA
+      }
 
     }
 
@@ -661,34 +688,39 @@ cpc.sectors <- c(652, gta_cpc_code_expand(c(23,24,71,72)))
                                   data.frame(parameter="HS codes included:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
 
         }
-      # clear affected.product column
+
+      # clear affected.product/affected.sector column
       master$affected.product <- NULL
+      master$affected.sector <- NULL
 
       # Collapse hs codes by id
-      master.temp <- aggregate( .~ new.id, master.temp, function(x) toString(x))
+      master.hs <- aggregate( .~ new.id, master.temp, function(x) toString(x))
+
+      # Add and collapse corresponding CPC codes
+      cpc=gtalibrary::cpc.to.hs
+      setnames(cpc, "hs", "affected.product")
+      setnames(cpc, "cpc", "affected.sector")
+      master.temp=merge(master.temp, cpc, by="affected.product", all.x=T)
+      master.cpc <- aggregate(affected.sector ~ new.id, master.temp, function(x) toString(unique(x)))
 
       # Merge and remove new.id
-      master <- merge(master, master.temp, by="new.id")
+      master <- merge(master, master.hs, by="new.id")
+      master <- merge(master, master.cpc, by="new.id")
       master$new.id <- NULL
 
     }
 
-      rm(check, hs.names, master.temp)
-    }
+      rm(check, hs.names, master.temp, master.cpc, master.hs)
+  }
 
 
-
-  # temp.products=unique(master[,c("new.id", "affected.product")])
-  # master$affected.product=NULL
-  #
-  # temp.products=cSplit(affected.products)
-  # temp.products=subset(affected.products NOT/IN choice)
-  # temp.products=aggregate(prodcuts ~new.id, CSV)
-  # master=merge(master, temp.products, by="new.id") \\ ohne all.x=T
-  # master$new.id=NULL
 
   # intervention.id
   # keep.intervention
+
+
+  # reporting lag adjustment
+
 
 
 
