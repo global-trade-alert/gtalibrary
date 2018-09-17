@@ -7,7 +7,7 @@
 gta_cpc_code_check(codes)
 }
 \arguments{
-\item{codes}{Supply the CPC codes you want to check. Values with 3 digits are allowed. If mixing 2nd and 3rd level CPC sector codes, place 2nd level codes inside the gta_cpc_code_expand function.}
+\item{codes}{Supply the CPC codes you want to check. Only 3-digit level CPC codes are allowed. If mixing 2-digit and 3-digit CPC sector codes, place 2-digit codes inside the gta_cpc_code_expand function.}
 }
 \description{
 This function checks whether a vector of CPC codes is consistent with CPC 2.1 and returns it as a vector of 3-digit level codes.

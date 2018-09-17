@@ -2,15 +2,15 @@
 % Please edit documentation in R/gta cpc code expand.R
 \name{gta_cpc_code_expand}
 \alias{gta_cpc_code_expand}
-\title{Expands 2nd level CPC codes to the 3rd level.}
+\title{Expands 2-digit level CPC codes into 3-digit level CPC codes.}
 \usage{
 gta_cpc_code_expand(codes)
 }
 \arguments{
-\item{codes}{Supply the 2nd level CPC codes you want to expand.}
+\item{codes}{Supply the 2-digit level CPC codes you want to expand.}
 }
 \description{
-This function takes in CPC 2nd level codes and outputs all corresponding 3rd level codes in a vector.
+This function takes in 2-digit level CPC codes and returns all corresponding 3-digit level CPC codes in a vector.
 }
 \references{
 www.globaltradealert.org

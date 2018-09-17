@@ -63,6 +63,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         ){
   library("httr")
   library("splitstackshape")
+  library("lubridate")
 
   ## Collecting
   parameter.choices=data.frame(parameter=character(), choice=character())
@@ -533,7 +534,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.firms)){
-      stop("Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F).")
+      stop("Please specify whether you want to focus on the specified eligibe firms categories or exclude them (keep.level=T/F).")
 
     } else{
 
@@ -603,6 +604,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                                 data.frame(parameter="CPC codes included:", choice=paste("All except ", paste(cpc.sectors, collapse = ", "), sep="")))
 
       }
+
       # clear affected.sector column
       master$affected.sector <- NULL
 
@@ -717,12 +719,80 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # intervention.id
   # keep.intervention
+  if(is.null(intervention.id)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Intervention IDs included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.intervention)){
+      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.intervention=T/F).")
+
+    } else{
+
+      gta.interventions <- gtalibrary::gta.interventions
+
+      check=gta_parameter_check(intervention.id, unique(gta.interventions$id))
+
+      if(check!="OK"){
+        print(paste("Unkown interventions IDs: ", check, ".", sep=""))
+
+      } else {
+
+        if(keep.intervention==T){
+          master=subset(master, intervention.id %in% unique(gta.interventions$id))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Intervention IDs included:", choice=paste(intervention.id, collapse = ", ")))
+
+        } else {
+          master=subset(master, ! intervention.id %in% unique(gta.interventions$id))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.id, collapse = ", "), sep="")))
+
+        }
+
+      }
+
+      rm(check, gta.interventions)
+    }
+  }
 
 
+  lag.adjustment = "02-28"
   # reporting lag adjustment
+  if(is.null(lag.adjustment)){
 
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Lag adjustment:", choice="Disabled"))
 
+  } else {
 
+      # lag.adjustments <- format(as.Date(lag.adjustment, "%m-%d"), "%m-%d")
+
+      if (is.na(as.Date(lag.adjustment, "%m-%d"))==T) {
+        stop("Please specifiy a valid lag date!")
+
+      } else {
+
+        # Remove interventions without implementation date
+        master<-subset(master, is.na(date.implemented)==F)
+
+        # Remove interventions later than lag date
+        master$month.day <- format(as.Date(master$date.implemented), "%m-%d")
+        master <- subset(master, month.day <= lag.adjustment)
+
+        # Clear temp row
+        master$month.day <- NULL
+
+        parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Lag adjustment date:", choice=paste(lag.adjustment)))
+
+        }
+
+      }
 
 
   ## Returning the result
