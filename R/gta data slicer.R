@@ -27,7 +27,7 @@
 #' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
-#' @param intervention.id Provide a vector of intervention IDs.
+#' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.intervention Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
 #'
@@ -57,7 +57,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         keep.cpc = NULL,
                         hs.codes = NULL,
                         keep.hs = NULL,
-                        intervention.id = NULL,
+                        intervention.ids = NULL,
                         keep.intervention = NULL,
                         lag.adjustment=NULL
                         ){
@@ -719,7 +719,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # intervention.id
   # keep.intervention
-  if(is.null(intervention.id)){
+  if(is.null(intervention.ids)){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Intervention IDs included:", choice="All"))
@@ -731,9 +731,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     } else{
 
-      gta.interventions <- gtalibrary::gta.interventions
+      gta.interventions = unique(master$intervention.id)
 
-      check=gta_parameter_check(intervention.id, unique(gta.interventions$id))
+      check=gta_parameter_check(intervention.ids, gta.interventions)
 
       if(check!="OK"){
         print(paste("Unkown interventions IDs: ", check, ".", sep=""))
@@ -741,16 +741,16 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       } else {
 
         if(keep.intervention==T){
-          master=subset(master, intervention.id %in% unique(gta.interventions$id))
+          master=subset(master, intervention.id %in% intervention.ids)
 
           parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Intervention IDs included:", choice=paste(intervention.id, collapse = ", ")))
+                                  data.frame(parameter="Intervention IDs included:", choice=paste(intervention.ids, collapse = ", ")))
 
         } else {
-          master=subset(master, ! intervention.id %in% unique(gta.interventions$id))
+          master=subset(master, ! intervention.id %in% intervention.ids)
 
           parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.id, collapse = ", "), sep="")))
+                                  data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.ids, collapse = ", "), sep="")))
 
         }
 
@@ -761,34 +761,30 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   }
 
 
-  lag.adjustment = "02-28"
+
   # reporting lag adjustment
   if(is.null(lag.adjustment)){
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Lag adjustment:", choice="Disabled"))
+                            data.frame(parameter="Lag adjustment:", choice="Unadjusted"))
 
   } else {
 
-      # lag.adjustments <- format(as.Date(lag.adjustment, "%m-%d"), "%m-%d")
-
       if (is.na(as.Date(lag.adjustment, "%m-%d"))==T) {
-        stop("Please specifiy a valid lag date!")
+        stop("Please specifiy a valid lag date ('mm-dd').")
 
       } else {
 
         # Remove interventions without implementation date
         master<-subset(master, is.na(date.implemented)==F)
 
-        # Remove interventions later than lag date
-        master$month.day <- format(as.Date(master$date.implemented), "%m-%d")
-        master <- subset(master, month.day <= lag.adjustment)
-
-        # Clear temp row
-        master$month.day <- NULL
+        # set lag date
+        master$date.lag=as.Date(paste(data.table::year(master$date.implemented),lag.adjustment, sep="-"),"%Y-%m-%d")
+        master=subset(master, date.published<=date.lag)
+        master$date.lag=NULL
 
         parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Lag adjustment date:", choice=paste(lag.adjustment)))
+                                  data.frame(parameter="Lag-adjustment date:", choice=paste(lag.adjustment)))
 
         }
 
