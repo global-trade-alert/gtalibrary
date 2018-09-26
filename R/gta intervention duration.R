@@ -20,12 +20,7 @@ gta_intervention_duration <- function(
   data.path="data/master_plus.Rdata",
   intervention.ids=NULL,
   keep.interventions=NULL,
-<<<<<<< HEAD
-  years=NULL
-=======
-  years=NULL,
->>>>>>> 42964a2dc3a4bda8a45aa2de8aa474ca3a1a35be
-) {
+  years=NULL) {
 
   ## initialising
   library(data.table)
