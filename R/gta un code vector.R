@@ -11,6 +11,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
+
 gta_un_code_vector=function(countries, role=NULL){
 
   if(is.null(countries)){
@@ -24,42 +25,30 @@ gta_un_code_vector=function(countries, role=NULL){
     country.correspondence=gtalibrary::country.correspondence
     country.names=gtalibrary::country.names
 
+    ## Checking parameters
 
-
+    if (all(tolower(countries) %in% c(tolower(unique(country.correspondence$name)), unique(country.correspondence$un_code)))==F) {
+      cty.error = countries[(tolower(countries) %in% c(tolower(unique(country.correspondence$name)), unique(country.correspondence$un_code)))==F]
+      stop(paste("Unkown ",role," country value(s): ", paste(cty.error, collapse =", ")))
+    }
 
     ## Checking & converting codes
 
     if(grepl("[A-Za-z]+",paste(countries, collapse=";"))){
 
-      if(sum(as.numeric((tolower(countries) %in% tolower(country.correspondence$name))==F))>0){
-
-        cty.error=paste("'",paste(countries[(tolower(countries) %in% tolower(country.correspondence$name))==F], collapse="; "),"'", sep="")
-
-      } else{
         country.un.codes=unique(country.correspondence$un_code[tolower(country.correspondence$name) %in% tolower(countries)])
-      }
-
-    } else{
-
-      if(sum(as.numeric((countries %in% country.correspondence$un_code)==F))>0){
-        cty.error=paste("'",paste(countries[(countries %in% country.correspondence$un_code)==F], collapse="; "),"'", sep="")
-
-      } else{
-        country.un.codes=countries
-      }
 
     }
-  }
 
+    if(sum(as.numeric((tolower(countries) %in% tolower(country.correspondence$name))==F))>0){
 
-  if(exists("cty.error")){
+      country.un.codes = unique(append(country.un.codes, countries[(countries %in% country.correspondence$un_code)==T]))
 
-    stop(paste("Unkown ",role," country value(s): ", cty.error, ".", sep=""))
-    rm(cty.error)
+    }
 
-  } else {
     return(country.un.codes)
-    rm(country.un.codes)
+
+    rm(countries, role, country.un.codes, cty.error)
+
   }
-  rm(countries, role)
 }
