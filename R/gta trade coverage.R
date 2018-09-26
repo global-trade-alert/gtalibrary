@@ -32,7 +32,7 @@
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
 #' @param intervention.ids Provide a vector of intervention IDs.
-#' @param keep.intervention Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
+#' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
 #'
 #' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
@@ -68,7 +68,7 @@ gta_trade_coverage <- function(
   hs.codes = NULL,
   keep.hs = NULL,
   intervention.ids = NULL,
-  keep.intervention = NULL,
+  keep.interventions = NULL,
   lag.adjustment=NULL,
   rdata = FALSE,
   output.path = NULL,
@@ -101,7 +101,7 @@ gta_trade_coverage <- function(
   # hs.codes = NULL
   # keep.hs = NULL
   # intervention.ids = NULL
-  # keep.intervention = NULL
+  # keep.interventions = NULL
   # lag.adjustment=NULL
   # rdata = FALSE
   # output.path = NULL
@@ -143,7 +143,7 @@ gta_trade_coverage <- function(
                                  hs.codes = hs.codes,
                                  keep.hs = keep.hs,
                                  intervention.ids = intervention.ids,
-                                 keep.intervention = keep.intervention,
+                                 keep.interventions = keep.interventions,
                                  lag.adjustment=lag.adjustment)
 
   master.slicer <- data_slicer[[2]]
