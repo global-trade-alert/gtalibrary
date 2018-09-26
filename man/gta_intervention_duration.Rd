@@ -26,7 +26,7 @@ gta_intervention_duration(data.path = "data/master_plus.Rdata",
 Output is two data frames. First data frame includes the share of each year that in intervention was in force. Second data frame states parameter choices.
 }
 \description{
-Coputes the share of each calendar year that each intervention was in force.
+Computes the share of each calendar year that each intervention was in force.
 }
 \references{
 www.globaltradealert.org

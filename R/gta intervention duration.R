@@ -2,7 +2,7 @@
 
 #' GTA intra-year duration calculator
 #'
-#' Coputes the share of each calendar year that each intervention was in force.
+#' Computes the share of each calendar year that each intervention was in force.
 #'
 #' @param data.path Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.
 #' @param intervention.ids Provide a vector of intervention IDs.

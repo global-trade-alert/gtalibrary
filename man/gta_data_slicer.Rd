@@ -16,7 +16,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.intervention = NULL,
   lag.adjustment = NULL, df.name = "master.sliced",
-  pc.name = "parameter.choice.slicer.")
+  pc.name = "parameter.choice.slicer")
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
