@@ -30,6 +30,9 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.intervention Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
+#' @param df.name Set the name of the generated result data frame. Default is master.sliced.
+#' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.
+
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -59,7 +62,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         keep.hs = NULL,
                         intervention.ids = NULL,
                         keep.intervention = NULL,
-                        lag.adjustment=NULL
+                        lag.adjustment=NULL,
+                        df.name="master.sliced",
+                        pc.name="parameter.choice.slicer"
                         ){
   library("httr")
   library("splitstackshape")
@@ -792,9 +797,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
   ## Returning the result
-
-  output=list(parameter.choices, master)
-  return(output)
-
-  rm(parameter.choices, master)
+  eval(parse(text=paste(df.name, "<<-master", sep="")))
+  eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
 }

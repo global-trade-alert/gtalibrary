@@ -15,7 +15,8 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.intervention = NULL,
-  lag.adjustment = NULL)
+  lag.adjustment = NULL, df.name = "master.sliced",
+  pc.name = "parameter.choice.slicer.")
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -69,6 +70,10 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 \item{keep.intervention}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
+
+\item{df.name}{Set the name of the generated result data frame. Default is master.sliced.}
+
+\item{pc.name}{Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.}
 }
 \description{
 Make use of the many variables captured in the taxonomy of the Global Trade Alert and tailor the data to your needs. This function returns a list of 2 data frames. The first, master, contains the subset of GTA data you requested. The second, parameter.choices, lists all implicit or exlicited choices that led to the subset.
