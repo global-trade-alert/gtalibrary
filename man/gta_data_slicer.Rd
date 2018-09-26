@@ -14,7 +14,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-  intervention.id = NULL, keep.intervention = NULL,
+  intervention.ids = NULL, keep.intervention = NULL,
   lag.adjustment = NULL)
 }
 \arguments{
@@ -64,7 +64,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{keep.hs}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.}
 
-\item{intervention.id}{Provide a vector of intervention IDs.}
+\item{intervention.ids}{Provide a vector of intervention IDs.}
 
 \item{keep.intervention}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
