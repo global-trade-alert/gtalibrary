@@ -4,23 +4,36 @@
 #'
 #' Computes the trade coverages of GTA measures.
 #'
-#' @param evaluation Takes in the values "harmful" or "liberalising". Default: None, it must be defined.
-#' @param flow This parameter can either be 'export' or 'import'. Default: None, it must be defined.
+#' @param data.path.coverage Specifies where the GTA data file is located (Default: 'data/database replica'). Set to 'online' to download the latest copy.
+#' @param data.path Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.
+#' @param gta.evaluation Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.
+#' @param affected.flow Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. World will be added independent of the choice made. Default: All combinations.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. World will be added independent of the choice made. Default: All combinations.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
-#' @param products Takes in a list of products as numbers (HS2, HS4 or HS6 codes) to filter the sample for products. Codes of different levels can be mixed freely. Default: None.
-#' @param sectors Takes in a list of sectors as numbers (CPC level 2 or 3) to filter the sample for sectors. Default: None.
-#' @param instruments Takes in a list of Mast chapters (A, B, CAP, D, E, F, FDI, G, I, L, M, MIG, N, P, TARIFF, X) to filter the sample. "include" can be added at the end of the list to include single chapters along with the aggregated value. Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None.
-#' @param inception.range Takes a list of two dates, start and end of inception range. Default: c("2009-01-01", infinite).
-#' @param implementation.level Takes a list of implementation level in numeric form (1 = supra, 2 = nation, 3 = subnat, 4 = SEZ, 5 = IFI, 6 = NFI) to filter the sample. Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None
-#' @param eligible.firms Takes a list of eligible firms in numeric form (1 = all, 2 = SME, 3 = firm-specific, 4 =  state-controlled, 5 = state-trading). Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None.
-#' @param in.force Takes values TRUE (currenctly in force) or FALSE (not in force anymore), if empty no filtering takes place (in force and not in force anymore).
-#' @param intervention.id Takes in a list of intervention ids in numeric form. Set the first value of the list to "keep" or "remove" in order to include or exclude the chosen values (if not specified, the chosen values will be included). Default: None.
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
 #' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 #' @param testmode Can be set to TRUE or FALSE. If TRUE, sample will be minimized by 99 percent in order to speed up processing. Keep in mind that this will distort results significantly. Default: FALSE.
+#' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
+#' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
+#' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
+#' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
+#' @param intervention.type Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
+#' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
+#' @param mast.chapter Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.
+#' @param keep.mast Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated MAST chapter ID.
+#' @param implementation.level Specify the government level responsible for the intervention.  Default is 'any'. Permissible values are 'supranational', 'national', 'subnational', 'IFI', 'NFI' or combinations thereof. IFI and NFI refer to government-owned financial institutions that are owned by one ('NFI') or more ('IFI') governments.
+#' @param keep.level Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementation levels.
+#' @param eligible.firms Concentrate the analysis on interventions that are targeted at certain subsets. Default is 'any'. Permissible values are 'all', 'firm-specific', 'SMEs', 'state-controlled','state trading enterprise' or combinations thereof.
+#' @param keep.firms Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated firm subsets.
+#' @param cpc.sectors Provide a vector of CPC codes that you are interested in (version 2.1, any digit level).
+#' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
+#' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
+#' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
+#' @param intervention.ids Provide a vector of intervention IDs.
+#' @param keep.intervention Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
+#' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
 #'
 #' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
 #' @references www.globaltradealert.org
@@ -29,119 +42,195 @@
 
 # Function infos and parameters  --------------------------------------------
 
-gta_trade_coverage <- function(evaluation = NULL,
-                           # flow = NULL, see comment below. JF thinks this is redundant (including it is his fault)
-                           importers = NULL,
-                           exporters = NULL,
-                           implementers = NULL,
-                           implementer.role = NULL,
-                           sectors = "all",
-                           products = "all",
-                           instruments = NULL,
-                           inception.range = c("2009-01-01", NA),
-                           in.force = NULL,
-                           intervention.id = NULL,
-                           implementation.level = NULL,
-                           eligible.firms = NULL,
-                           rdata = FALSE,
-                           output.path = NULL,
-                           testmode = FALSE) {
+gta_trade_coverage_temp <- function(
+  data.path="data/master_plus.Rdata",
+  data.path.coverage="data/trade coverage/trade coverage base file.Rdata",
+  gta.evaluation= NULL,
+  affected.flow = NULL,
+  importers = NULL,
+  exporters = NULL,
+  implementers = NULL,
+  implementer.role = NULL,
+  announcement.period = NULL,
+  implementation.period = NULL,
+  revocation.period = NULL,
+  in.force.today = NULL,
+  intervention.type = NULL,
+  keep.type = NULL,
+  mast.chapter = NULL,
+  keep.mast = NULL,
+  implementation.level = NULL,
+  keep.level = NULL,
+  eligible.firms = NULL,
+  keep.firms = NULL,
+  cpc.sectors = NULL,
+  keep.cpc = NULL,
+  hs.codes = NULL,
+  keep.hs = NULL,
+  intervention.ids = NULL,
+  keep.intervention = NULL,
+  lag.adjustment=NULL,
+  rdata = FALSE,
+  output.path = NULL,
+  testmode = FALSE) {
 
+  # For testing
+
+  # data.path="data/master_plus.Rdata"
+  # data.path.coverage="data/trade coverage/trade coverage base file.Rdata"
+  # gta.evaluation= NULL
+  # affected.flow = NULL
+  # importers = NULL
+  # exporters = NULL
+  # implementers = NULL
+  # implementer.role = NULL
+  # announcement.period = NULL
+  # implementation.period = NULL
+  # revocation.period = NULL
+  # in.force.today = NULL
+  # intervention.type = NULL
+  # keep.type = NULL
+  # mast.chapter = NULL
+  # keep.mast = NULL
+  # implementation.level = NULL
+  # keep.level = NULL
+  # eligible.firms = NULL
+  # keep.firms = NULL
+  # cpc.sectors = NULL
+  # keep.cpc = NULL
+  # hs.codes = NULL
+  # keep.hs = NULL
+  # intervention.ids = NULL
+  # keep.intervention = NULL
+  # lag.adjustment=NULL
+  # rdata = FALSE
+  # output.path = NULL
+  # testmode = FALSE
+
+  # importers = c("United States of America", "Germany","g20","EU-28")
+  # exporters = NULL
+  # affected.flow ="inward"
+  # implementers = NULL
+  # implementer.role = NULL
+  # rdata = FALSE
 
   # Initialising Function ---------------------------------------------------
 
   # load libraries
   library("xlsx")
   library("splitstackshape")
+  library("data.table")
 
+  ######## Feed data slicer
 
+  data_slicer <- gta_data_slicer(data.path=data.path,
+                                 gta.evaluation= gta.evaluation,
+                                 affected.flow = affected.flow,
+                                 announcement.period = announcement.period,
+                                 implementation.period = implementation.period,
+                                 revocation.period = revocation.period,
+                                 in.force.today = in.force.today,
+                                 intervention.type = intervention.type,
+                                 keep.type = keep.type,
+                                 mast.chapter = mast.chapter,
+                                 keep.mast = keep.mast,
+                                 implementation.level = implementation.level,
+                                 keep.level = keep.level,
+                                 eligible.firms = eligible.firms,
+                                 keep.firms = keep.firms,
+                                 cpc.sectors = cpc.sectors,
+                                 keep.cpc = keep.cpc,
+                                 hs.codes = hs.codes,
+                                 keep.hs = keep.hs,
+                                 intervention.ids = intervention.ids,
+                                 keep.intervention = keep.intervention,
+                                 lag.adjustment=lag.adjustment)
 
-######## Define function parameters
-  ###### DATES
-  today = Sys.Date()
-  start.year = year(inception.range[1])
+  master.slicer <- data_slicer[[2]]
 
-  if(is.na(inception.range[2])){
-    end.year = year(today)
-  } else {
-    end.year = year(inception.range[2])
-  }
+  ##### Extracting Parameter Choices from data slicer
+  parameter.choices <- data_slicer[[1]]
+  rm(data_slicer)
 
-  ## JF: I think we should remove FLOW from the function. It serves no role when importers/exports plus implementer.type can be specified.
-  # ###### FLOW
-  # if (is.null(implementer.role)==T) {
-  #   if (tolower(flow) == "imports") {
-  #     master <- subset(master, implementer.type == "importer")
-  #   }
-  #   if (tolower(flow) == "exports") {
-  #     master <- subset(master, implementer.type == "importer or 3rd country")
-  #   }
-  # }
+  ######## Define function parameters
 
   ###### IMPORTERS / EXPORTERS / IMPLEMENTERS
 
   ### IMPORTERS
-  importing.countries=gta_un_code_vector(importers, "importing")
+  importing.country=gta_un_code_vector(importers, "importing")
 
   ### EXPORTERS
-  exporting.countries=gta_un_code_vector(exporters, "exporting")
+  exporting.country=gta_un_code_vector(exporters, "exporting")
 
   ### IMPLEMENTERS
-  implementing.countries=gta_un_code_vector(implementers, "implementing")
-
+  implementing.country=gta_un_code_vector(implementers, "implementing")
 
   ###### IMPLEMENTER ROLES
   if (is.null(implementer.role)==T) {
     implementer.role=c("importer", "3rd country")
   } else {
-      implementer.role= tolower(implementer.role)
+    implementer.role= tolower(implementer.role)
 
-      if("any" %in% implementer.role){
-        implementer.role=c("importer","exporter", "3rd country")
-      }
-
-      if(sum(as.numeric((implementer.role %in% c("any","importer","exporter", "3rd country"))==F))>0){
-        role.error=paste("'",paste(implementer.role[(implementer.role %in% c("any","importer","exporter", "3rd country"))==F], collapse="; "),"'", sep="")
-        print(paste("Unkown implementer role(s): ", role.error, ".", sep=""))
-      }
+    if("any" %in% implementer.role){
+      implementer.role=c("importer","exporter", "3rd country")
     }
 
-  ###### SECTORS & PRODUCTS
-  if(sectors=="all"){
-
-    if(products=="all"){
-      hs.codes=gta_hs_code_check(products)
-
-    } else{
-      hc.codes=gta_hs_code_check(products)
-
-      # updating the sector vector to include the CPC codes for those HS codes
-      sectors=gta_hs_to_cpc(hs.codes)
+    if(sum(as.numeric((implementer.role %in% c("any","importer","exporter", "3rd country"))==F))>0){
+      role.error=paste("'",paste(implementer.role[(implementer.role %in% c("any","importer","exporter", "3rd country"))==F], collapse="; "),"'", sep="")
+      print(paste("Unkown implementer role(s): ", role.error, ".", sep=""))
     }
-
-  } else {
-    cpc.codes=gta_cpc_code_check(sectors)
-
-    if(products=="all"){
-      hs.codes=gta_cpc_to_hs(cpc.codes)
-    } else {
-      hs.codes=c(gta_cpc_to_hs(cpc.codes),gta_hs_code_check(products))
-
-      # updating the sector vector to include the CPC codes for those HS codes
-      sectors=gta_hs_to_cpc(hs.codes)
-    }
-
   }
 
-###################################### JF HAS TO CHECK MORE FROM HERE
+  ## data path for coverage file
+  if(data.path.coverage=="online"){
+    print("Downloading the latest copy of the GTA trade coverage dataset.The file is deleted after loading the data into your environment.")
+    download.file("https://www.dropbox.com/s/s99dho5vhhmjizr/trade%20coverage%20base%20file.Rdata?dl=0","GTA trade coverage data.Rdata")
+    load("GTA trade coverage data.Rdata")
+    unlink("GTA trade coverage data.Rdata")
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice="Downloaded latest copy"))
+  } else{
+    load(data.path.coverage)
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Local copy from '",data.path,"'.", sep="")))
+  }
+
+  # COMMENT: Will we use master.green at any point? then gta.evaluation should be reincluded as parameter to define master set to use.
+  master <- master.red
+  rm(master.green, master.red)
 
 
-#### This belongs to setting imports/exporters. MAybe this is completly useless....
+  ###### Take in data from data slicer and define interventions to keep
+
+  # Column split affected product column
+  master.slicer <- cSplit(master.slicer, which(colnames(master.slicer)=="affected.product"), direction="long", sep=",")
+  # Take unique column combination of intervention.id, implementer, affected.product
+  master.slicer <- unique(master.slicer[,c("intervention.id","implementing.jurisdiction","affected.product")])
+
+  # Merge with master by intervention.id, implementer, affected_product
+  setnames(master.slicer, "affected.product", "affected_products")
+  setnames(master.slicer, "intervention.id", "intervention_id")
+  setnames(master.slicer, "implementing.jurisdiction","implementer")
+
+  master <- merge(master, master.slicer, by=c("intervention_id","implementer","affected_products"))
+
+  # TEST
+  length(unique(master.slicer$intervention_id))-length(unique(master$intervention_id))
+
+  rm(master.slicer)
+
+  ###### HS CODES in sample
+
+  products <- unique(master$affected_product)
+
+
+  ###################################### JF HAS TO CHECK MORE FROM HERE
+
+
+  #### This belongs to setting imports/exporters. MAybe this is completly useless....
   # Prepare necessary lists for country blocks
-  block.names <- c("G7","G20","EU", "LDC countries", "African Union members")
-  block.numbers <- c(10007,10020,10028,10053,10055)
-  block.abbr <- c("g7", "g20", "eu28", "ldc", "au")
-  block.list <- data.frame(block.abbr, block.names, block.numbers)
+  # block.names <- c("G7","G20","EU", "LDC countries", "African Union members")
+  # block.numbers <- c(10007,10020,10028,10053,10055)
+  # block.abbr <- c("g7", "g20", "eu28", "ldc", "au")
+  # block.list <- data.frame(block.abbr, block.names, block.numbers)
 
 
   # Check whether sets available and filter for products --------------------
@@ -152,63 +241,54 @@ gta_trade_coverage <- function(evaluation = NULL,
   # - if no: display error message, saying dataframes cannot be found
 
   ## JF: I would also require reloading the data frames; if someone adjusts the product choices between queries, things blow up otherwise.
+  ## PB: data frames are loaded at the beginning to subset master
 
-  if (endsWith(getwd(), "/GTA cloud")==T) {
-    print("Loading GTA & trade data files")
-    load("data/trade coverage/trade coverage base file.Rdata")
-
-######## TRADE DATA
-   # We have to recalculate the trade data tables if either of those choices is made:
-   if(is.null(products)==F|is.null(importers)==F|is.null(exporters)==F){
-
-     if (is.null(products)==T) {
-       print("Loading final.shares from data folder")
-       load("data/support tables/final goods trade shares.Rdata")
-       setnames(final.shares, old="Reporter.un", "i.un")
-       setnames(final.shares, old="Partner.un", "a.un")
-       setnames(final.shares, old="Tariff.line", "affected_products")
-
-       # Add tariff_line_code_4, because otherwise trade values and interventions will be filtered differently
-       print("Filtering for products")
-       final.shares$affected_products.4 <-  substr(final.shares$affected_products, 1,4)
-       final.shares$affected_products.4[nchar(final.shares$affected_products)==5] <-  substr(final.shares$affected_products[nchar(final.shares$affected_products)==5], 1,3)
-
-       final.shares$affected_products.2 <- substr(final.shares$affected_products, 1,2)
-       final.shares$affected_products.2[nchar(final.shares$affected_products)==5] <- substr(final.shares$affected_products[nchar(final.shares$affected_products)==5], 1,1)
-
-       final.shares=subset(final.shares, affected_products %in% products | affected_products.4 %in% products | affected_products.2 %in% products)
-     }
+  # if (endsWith(getwd(), "/GTA cloud")==T) {
+  #   print("Loading GTA & trade data files")
+  #   load("data/trade coverage/trade coverage base file.Rdata")
 
 
-     ## correcting for exporters, if stated
-     if(is.null(exporters)==F){
-       if(is.numeric(exporters)==T){
-         final.shares=subset(final.shares, a.un %in% exporters)
-       } else {
-         print("Exporters need to be specified as UN codes.")
-       }
+  ######## TRADE DATA
+
+  # We have to recalculate the trade data tables if either of those choices is made:
+  if(is.null(products)==F|is.null(importers)==F|is.null(exporters)==F){
+    print("Loading final.shares from data folder")
+    load("data/support tables/final goods trade shares.Rdata")
+    setnames(final.shares, old="Reporter.un", "i.un")
+    setnames(final.shares, old="Partner.un", "a.un")
+    setnames(final.shares, old="Tariff.line", "affected_products")
+
+    if (is.null(products)==F) {
+      # COMMENT: With data slicer only 6 digit codes will be delivered
+      print("Filtering for products")
+      final.shares=subset(final.shares, affected_products %in% products)
     }
 
 
-
-     ## correcting for importers, if stated
-     if(is.null(importers)==F){
-       if(is.numeric(importers)==T){
-         final.shares=subset(final.shares, i.un %in% importers)
-       } else {
-         print("Importers need to be specified as UN codes.")
-       }
+    ## correcting for exporters, if stated
+    if(is.null(exporters)==F){
+      if(is.numeric(exporters)==T){
+        final.shares=subset(final.shares, a.un %in% exporters)
+      } else {
+        print("Exporters need to be specified as UN codes.")
+      }
     }
 
+    ## correcting for importers, if stated
+    if(is.null(importers)==F){
+      if(is.numeric(importers)==T){
+        final.shares=subset(final.shares, i.un %in% importers)
+      } else {
+        print("Importers need to be specified as UN codes.")
+      }
+    }
 
+    ### replacing import data frames
+    print("Create imports and imports.bilateral dataframes")
 
-     ### replacing import data frames
-     print("Create imports and imports.bilateral dataframes")
+    imports=aggregate(Value ~ i.un, final.shares, sum)
+    imports.bilateral=aggregate(Value ~ i.un + a.un, final.shares, sum)
 
-     imports=aggregate(Value ~ i.un, final.shares, sum)
-     imports.bilateral=aggregate(Value ~ i.un + a.un, final.shares, sum)
-
-   }
   } else {
     stop("Necessary dataframes cannot be found. Is 'GTA cloud' your working directory?")
   }
@@ -220,7 +300,17 @@ gta_trade_coverage <- function(evaluation = NULL,
   ### add a function that calculates group trade and have it run for all chosen groups, if any.
 
   # Defining Country groups -------------------------------------------------
-  # load country groups from database replica
+
+  ## preparation: a correspondence between country/group names and UN codes
+  country.correspondence=gtalibrary::country.correspondence
+  country.names=gtalibrary::country.names
+
+  # Define country groups:
+  country.groups <- subset(country.correspondence, (name %in% country.names$name)==F)
+  country.groups <- aggregate(un_code ~ name, country.groups, toString)
+
+  # Check if country groups defined in parameter
+  cty.groups.defined <- country.groups[tolower(country.groups$name) %in% tolower(c(importers, exporters, implementers)),]
 
   # defining country groups
   world=unique(c(imports.bilateral$a.un,imports.bilateral$i.un, master.red$a.un, master.red$i.un, 0))
@@ -270,31 +360,6 @@ gta_trade_coverage <- function(evaluation = NULL,
   imports.bilateral=unique(rbind(group.combos,imports.bilateral, imports, exports))
 
 
-
-
-  ##### GTA DATA
-  # Check whether master-set is availabe -------------------------------------
-
-  if (exists("master.green") & exists("master.red") == F) {
-    stop("Master sets cannot be found")
-  }
-
-  # Removing unused master set ------------------------------------------------
-
-  # delete unused master depending on
-
-  if (is.null(evaluation)==T) {
-    stop("No evaluation type defined")
-  }
-  if (evaluation == "harmful") {
-    print("Only harmful interventions chosen")
-    master <- master.red
-  }
-  if (evaluation == "liberalising") {
-    print("Only liberalising interventions chosen")
-    master <- master.green
-  }
-
   # REMOVE AFTER TESTING: Remove 99/100 of all rows to increase computing speed for writing function
   if (testmode==T){
     keep.rows = seq(1,length(master$i.un),100)
@@ -340,164 +405,6 @@ gta_trade_coverage <- function(evaluation = NULL,
   } else {
     stop("gta_intervention.csv cannot be found")
   }
-
-
-  # Filtering Intervention IDs -------------------------------------------------
-
-  master.backup = master
-  master = master.backup
-
-  if (is.null(intervention.id)==F) {
-    if (tolower(intervention.id[1])=="remove"){
-      print(paste0("Removing intervention IDs: ", paste0(intervention.id, collapse = ", ")))
-      master <- subset(master, ! tolower(intervention_id) %in% tolower(intervention.id))
-
-    } else if (tolower(intervention.id[1])=="keep"){
-      print(paste0("Keeping intervention IDs: ", paste0(intervention.id, collapse = ", ")))
-      master <- subset(master, tolower(intervention_id) %in% tolower(intervention.id))
-
-    } else {
-      print(paste0("Keeping intervention IDs: ", paste0(intervention.id, collapse = ", ")))
-      master <- subset(master, tolower(intervention_id) %in% tolower(intervention.id))
-    }
-  }
-
-  # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values left after filtering for intervention IDs")}
-
-  # Currently in force and inside duration specified--------------------------------------------
-  ## Filtering for currently in force
-  if (is.null(in.force)==F) {
-
-    if (in.force == TRUE) {
-      print("Filtering out interventions not in force anymore")
-      master=subset(master, is.na(master$removal_date)==T | removal_date >= today)
-    }
-
-    if (in.force == FALSE) {
-      print("Filtering out interventions which are still in force")
-      master=subset(master, is.na(master$removal_date)==F & removal_date <= today)
-    }
-
-  } else {
-    print("Interventions in force as well as not in force included")
-  }
-
-
-  # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values existing for chosen parameters (last filtered for in.force)")}
-
-  ## Filtering for start and end date
-  if (inception.range[1] != "2009-01-01") {
-    print(paste0("Filtering interventions before ",inception.range[1]))
-    master <- subset(master, inception_date >= inception.range[1])
-  } else {
-    print(paste0("Filtering interventions before ",inception.range[1]))
-    master <- subset(master, inception_date >= inception.range[1])
-  }
-
-  if (is.na(inception.range[2])==F) {
-    print(paste0("Filtering interventions after ",inception.range[2]))
-    master <- subset(master, inception_date <= inception.range[2])
-  }
-
-  # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values left after filtering for inception range")}
-
-
-  # Filtering MAST Chapters -------------------------------------------------
-
-  if (is.null(instruments)==F) {
-    if (tolower(instruments[1])=="remove"){
-      print(paste0("Removing interventions with MAST Chapter ", instruments))
-      master <- subset(master, ! tolower(mast.chapter) %in% tolower(instruments))
-
-    } else if (tolower(instruments[1])=="keep"){
-      print(paste0("Keeping instruments with MAST Chapter ", instruments))
-      master <- subset(master, tolower(mast.chapter) %in% tolower(instruments))
-
-    } else if (tolower(instruments)=="include"){
-      master <- master
-
-    } else {
-      print(paste0("Keeping instruments with MAST Chapter ", instruments))
-      master <- subset(master, tolower(mast.chapter) %in% tolower(instruments))
-    }
-  }
-
-  # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values existing for chosen parameters (last filtered for MAST Chapters)")}
-
-
-  # Setting implementation level --------------------------------------------
-
-  ## Setting the implementation level, if of interest (1=supra, 2=nation, 3=subnat, 4=SEZ, 5=IFI, 6=NFI)
-
-  if (is.null(implementation.level)==F) {
-
-    if (exists("gta_intervention") == F) {
-
-      if (endsWith(getwd(), "/GTA cloud")==T) {
-        print("Load gta_intervention dataframe")
-        print("Filtering for chosen intervention levels")
-        gta_intervention=read.csv("data/database replica/gta_intervention.csv", sep=",")
-
-      } else {
-        stop("gta_interventions dataframe cannot be found and working directory does not point to GTA cloud folder for retrieving")
-      }
-    }
-
-    if (tolower(implementation.level[1])=="remove") {
-      print(paste0("Removing these following implementation levels: ", implementation.level))
-      master=subset(master, intervention_id %in% subset(gta_intervention, ! implementation_level_id %in% implementation.level)$id)
-
-    } else if (tolower(implementation.level[1])=="keep") {
-      print(paste0("Keeping these implementation levels:", implementation.level))
-      master=subset(master, intervention_id %in% subset(gta_intervention, implementation_level_id %in% implementation.level)$id)
-
-    } else {
-      print(paste0("Keeping these implementation levels:", implementation.level))
-      master=subset(master, intervention_id %in% subset(gta_intervention, implementation_level_id %in% implementation.level)$id)
-      }
-  }
-
-  # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values left after filtering for implementation levels")}
-
-  # Setting eligible firms --------------------------------------------------
-
-  ## Setting the eligible firms box, if of interest (1= all, 2=SME, 3=firm-specific, 4= state-controlled, 5=state-trading)
-
-  if (is.null(eligible.firms)==F) {
-
-    if (exists("gta_intervention") == F) {
-
-      if (endsWith(getwd(), "/GTA cloud")==T) {
-        print("Load gta_intervention dataframe")
-        print("Filtering for chosen eligible firms categories")
-        gta_intervention=read.csv("data/database replica/gta_intervention.csv", sep=",")
-
-      } else {
-        stop("gta_interventions dataframe cannot be found and working directory does not point to GTA cloud folder for retrieving")
-      }
-    }
-
-    if (tolower(eligible.firms[1])=="remove") {
-      print(paste0("Removing these eligible firms categorie: ", eligible.firms))
-      master=subset(master, intervention_id %in% subset(gta_intervention, ! eligible_firms_id %in% eligible.firms)$id)
-
-    } else if (tolower(eligible.firms[1])=="keep") {
-      print(paste0("Keeping these eligible firms categories:", eligible.firms))
-      master=subset(master, intervention_id %in% subset(gta_intervention, eligible_firms_id %in% eligible.firms)$id)
-
-    } else {
-      print(paste0("Keeping these eligible firms categories:", eligible.firms))
-      master=subset(master, intervention_id %in% subset(gta_intervention, eligible_firms_id %in% eligible.firms)$id)
-      }
-  }
-
-  # Check if master is empty, stop function
-  if(nrow(master)==0){stop("No values left after filtering for eligible firms categories")}
 
 
   # Calculations and creating master.max ------------------------------------------------------------
