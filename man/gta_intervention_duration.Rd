@@ -5,7 +5,9 @@
 \title{GTA intra-year duration calculator}
 \usage{
 gta_intervention_duration(data.path = "data/master_plus.Rdata",
-  intervention.ids = NULL, keep.interventions = NULL, years = NULL)
+  intervention.ids = NULL, keep.interventions = NULL, years = NULL,
+  df.name = "intervention.duration",
+  pc.name = "parameter.choice.duration")
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -15,9 +17,13 @@ gta_intervention_duration(data.path = "data/master_plus.Rdata",
 \item{keep.interventions}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{years}{The calendar years for which to calculate the shares. Calculation includes interventions based on enforcement status, not implementation date i.e. if you start in 2010, this function will also work with interventions implemneted in 2009 but still in force in 2010. Specify as c(start.year, end.year). Default is c(2008,CURRENT.YEAR).}
+
+\item{df.name}{Set the name of the generated result data frame. Default is intervention.duration.}
+
+\item{pc.name}{Set the name of the generated parameter choice data frame. Default is parameter.choice.duration.}
 }
 \value{
-Output is a list with two data frames. First data frame includes the share of each year that in intervention was in force. Second data frame states parameter choices.
+Output is two data frames. First data frame includes the share of each year that in intervention was in force. Second data frame states parameter choices.
 }
 \description{
 Coputes the share of each calendar year that each intervention was in force.
