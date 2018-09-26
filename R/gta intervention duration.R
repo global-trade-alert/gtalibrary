@@ -8,8 +8,10 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param years The calendar years for which to calculate the shares. Calculation includes interventions based on enforcement status, not implementation date i.e. if you start in 2010, this function will also work with interventions implemneted in 2009 but still in force in 2010. Specify as c(start.year, end.year). Default is c(2008,CURRENT.YEAR).
+#' @param df.name Set the name of the generated result data frame. Default is intervention.duration.
+#' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.duration.
 #'
-#' @return Output is a list with two data frames. First data frame includes the share of each year that in intervention was in force. Second data frame states parameter choices.
+#' @return Output is two data frames. First data frame includes the share of each year that in intervention was in force. Second data frame states parameter choices.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
@@ -20,7 +22,10 @@ gta_intervention_duration <- function(
   data.path="data/master_plus.Rdata",
   intervention.ids=NULL,
   keep.interventions=NULL,
-  years=NULL) {
+  years=NULL,
+  df.name="intervention.duration",
+  pc.name="parameter.choice.duration"
+  ) {
 
   ## initialising
   library(data.table)
@@ -124,7 +129,7 @@ gta_intervention_duration <- function(
 
   duration=rbind(subset(duration, is.na(share)==F), intra.year)
   duration=duration[,c("intervention.id","year","share")]
-  output=list(duration, parameter.choices)
-  return(output)
-  rm(master, yr.length, intra.year)
+
+  eval(parse(text=paste(df.name"<<-duration", sep="")))
+  eval(parse(text=paste(pc.name"<<-parameter.choices", sep="")))
 }
