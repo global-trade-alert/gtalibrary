@@ -42,7 +42,7 @@
 
 # Function infos and parameters  --------------------------------------------
 
-gta_trade_coverage_temp <- function(
+gta_trade_coverage <- function(
   data.path="data/master_plus.Rdata",
   data.path.coverage="data/trade coverage/trade coverage base file.Rdata",
   gta.evaluation= NULL,
