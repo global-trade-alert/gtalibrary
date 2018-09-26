@@ -20,7 +20,7 @@ gta_intervention_duration <- function(
   data.path="data/master_plus.Rdata",
   intervention.ids=NULL,
   keep.interventions=NULL,
-  years=NULL,
+  years=NULL
 ) {
 
   ## initialising
