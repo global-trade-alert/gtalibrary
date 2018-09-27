@@ -6,7 +6,7 @@
 #'
 #' @param data.path Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.
 #' @param gta.evaluation Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.
-#' @param affected.flow Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
+#' @param affected.flows Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
 #' @param implementing.country Specify the implementing countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
 #' @param affected.country Specify the affected countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
@@ -39,7 +39,7 @@
 
 gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         gta.evaluation= NULL,
-                        affected.flow = NULL,
+                        affected.flows = NULL,
                         implementing.country = NULL,
                         keep.implementer = NULL,
                         affected.country = NULL,
@@ -108,19 +108,19 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   }
 
 
-  # affected.flow
+  # affected.flows
 
-  if(is.null(affected.flow)){
+  if(is.null(affected.flows)){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Affected flows included:", choice="inward, outward, outward subsidy"))
 
   } else {
-    check=gta_parameter_check(tolower(affected.flow), c("inward", "outward", "outward subsidy"))
+    check=gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"))
     if(check!="OK"){
       print(paste("Unkown GTA evaluation(s): ", check, ".", sep=""))
     } else {
-      flow=tolower(affected.flow)
+      flow=tolower(affected.flows)
       master=subset(master, tolower(affected.flow) %in% flow)
 
       parameter.choices=rbind(parameter.choices,
