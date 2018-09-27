@@ -58,7 +58,7 @@ gta_trade_coverage <- function(
   importers = NULL,
   group.importers = TRUE,
   exporters = NULL,
-  group.exporter = TRUE,
+  group.exporters = TRUE,
   implementers = NULL,
   implementer.role = NULL,
   announcement.period = NULL,
@@ -101,27 +101,27 @@ gta_trade_coverage <- function(
 
   print("Slicing GTA master data set ...")
   gta_data_slicer(data.path=data.path,
-                                 gta.evaluation= gta.evaluation,
-                                 affected.flow = affected.flow,
-                                 announcement.period = announcement.period,
-                                 implementation.period = implementation.period,
-                                 revocation.period = revocation.period,
-                                 in.force.today = in.force.today,
-                                 intervention.types = intervention.types,
-                                 keep.type = keep.type,
-                                 mast.chapters = mast.chapters,
-                                 keep.mast = keep.mast,
-                                 implementation.level = implementation.level,
-                                 keep.level = keep.level,
-                                 eligible.firms = eligible.firms,
-                                 keep.firms = keep.firms,
-                                 cpc.sectors = cpc.sectors,
-                                 keep.cpc = keep.cpc,
-                                 hs.codes = hs.codes,
-                                 keep.hs = keep.hs,
-                                 intervention.ids = intervention.ids,
-                                 keep.interventions = keep.interventions,
-                                 lag.adjustment=lag.adjustment)
+                  gta.evaluation= gta.evaluation,
+                  affected.flow = affected.flow,
+                  announcement.period = announcement.period,
+                  implementation.period = implementation.period,
+                  revocation.period = revocation.period,
+                  in.force.today = in.force.today,
+                  intervention.types = intervention.types,
+                  keep.type = keep.type,
+                  mast.chapters = mast.chapters,
+                  keep.mast = keep.mast,
+                  implementation.level = implementation.level,
+                  keep.level = keep.level,
+                  eligible.firms = eligible.firms,
+                  keep.firms = keep.firms,
+                  cpc.sectors = cpc.sectors,
+                  keep.cpc = keep.cpc,
+                  hs.codes = hs.codes,
+                  keep.hs = keep.hs,
+                  intervention.ids = intervention.ids,
+                  keep.interventions = keep.interventions,
+                  lag.adjustment=lag.adjustment)
 
 
   ##### Extracting Parameter Choices from data slicer
@@ -129,6 +129,30 @@ gta_trade_coverage <- function(
   rm(parameter.choice.slicer)
   print("Slicing GTA master data set ... complete.")
 
+
+  ### restricted the data set to the specified exporters.
+  ## Can be done here since they are always either a.un or i.un.
+  ## Cannot be done for the importers!
+
+  if(is.null(exporters)){
+    exporting.country=gtalibrary::country.names$un_code
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice="All"))
+  }else {
+    exporting.country=gta_un_code_vector(exporters, "exporting")
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, sep=", ")))
+  }
+
+  ms=master.sliced[0,]
+
+  if(nrow(subset(master.sliced, affected.flow %in% c("inward","outward subsidy")))>0){
+    ms=rbind(ms, subset(master.sliced, affected.flow %in% c("inward","outward subsidy") & a.un %in% exporting.country))
+  }
+
+  if(nrow(subset(master.sliced, affected.flow=="outward"))>0){
+    ms=rbind(ms, subset(master.sliced, affected.flow=="outward" & i.un %in% exporting.country))
+  }
+  master.sliced=ms
+  rm(ms)
 
   ##### Intervention durations
   ## relevant parameter: coverage.period
@@ -148,18 +172,17 @@ gta_trade_coverage <- function(
 
   ## calculate intervention durations
   print("Calculating intervention durations ...")
-  gta_intervention_duration(data.path=master.sliced,
+  gta_intervention_duration(data.path='master.sliced[,c("intervention.id", "date.implemented", "date.removed")]',
                             is.data.frame=TRUE,
-                            years=c(year.start:year.end),
+                            years=c(year.start,year.end),
                             current.year.todate=current.year.todate)
-
   rm(parameter.choice.duration)
   print("Calculating intervention durations ... complete.")
 
   ######## calculate implementer-importer-exporter-product tuples
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path,"'.", sep="")))
 
-  gta_imp_exp_hs_tuples(master.path=master.sliced,
+  gta_imp_exp_hs_tuples(master.path='master.sliced',
                         master.data.frame=TRUE)
   rm(parameter.tuple)
 
@@ -173,16 +196,6 @@ gta_trade_coverage <- function(
   }else {
     importing.country=gta_un_code_vector(importers, "importing")
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, sep=", ")))
-  }
-
-
-  ### EXPORTERS
-  if(is.null(exporters)){
-    exporting.country=gtalibrary::country.names$un_code
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice="All"))
-  }else {
-    exporting.country=gta_un_code_vector(exporters, "exporting")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, sep=", ")))
   }
 
 
@@ -217,7 +230,6 @@ gta_trade_coverage <- function(
   # filter master.tuple
   print("Restricting set to stated importers/exporters ...")
   master.tuple=subset(master.tuple, i.un %in% importing.country)
-  master.tuple=subset(master.tuple, a.un %in% exporting.country)
   print("Restricting set to stated importers/exporters ... complete.")
 
   print("Restricting set to stated implementers and their roles ...")
@@ -244,10 +256,11 @@ gta_trade_coverage <- function(
   duration.max=data.frame(iahs=character(), year=numeric(), share=numeric())
 
   for(yr in c(year.start:year.end)){
-    duration.temp=data.frame(iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id)$iahs),
-                             year=numeric(), share=numeric())
+    v.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id)$iahs)
+    if(length(v.iahs)>0){
+      duration.temp=data.frame(iahs=v.iahs,
+                               year=yr, share=NA)
 
-    if(nrow(duration.temp)>0){
       duration.temp$year=yr
       duration.temp$share=NA
       duration.temp$share=apply(duration.temp,1, function(x) max(subset(intervention.duration, year==yr & intervention.id %in% subset(master.tuple, iahs==x[1])$intervention.id)$share))
@@ -269,12 +282,11 @@ gta_trade_coverage <- function(
 
     for(inst in unique(master.sliced$intervention.type)){
       for(yr in c(year.start:year.end)){
-        duration.temp=data.frame(iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.id %in% subset(master.sliced, intervention.type==inst)$intervention.id)$intervention.id)$iahs),
-                                 year=numeric(), share=numeric())
+        v.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.id %in% subset(master.sliced, intervention.type==inst)$intervention.id)$intervention.id)$iahs)
+        if(length(v.iahs)>0){
+          duration.temp=data.frame(iahs=v.iahs,
+                                   year=yr, share=NA)
 
-        if(nrow(duration.temp)>0){
-          duration.temp$year=yr
-          duration.temp$share=NA
           duration.temp$intervention.type=inst
           duration.temp$share=apply(duration.temp,1, function(x) max(subset(intervention.duration, year==yr & intervention.id %in% subset(master.tuple, iahs==x[1])$intervention.id)$share))
           duration.max=rbind(duration.max,duration.temp)
@@ -296,12 +308,11 @@ gta_trade_coverage <- function(
 
     for(inst in unique(master.sliced$mast.chapter)){
       for(yr in c(year.start:year.end)){
-        duration.temp=data.frame(iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.id %in% subset(master.sliced, mast.chapter==inst)$intervention.id)$intervention.id)$iahs),
-                                 year=numeric(), share=numeric())
+        v.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.id %in% subset(master.sliced, mast.chapter==inst)$intervention.id)$intervention.id)$iahs)
+        if(length(v.iahs)>0){
+          duration.temp=data.frame(iahs=v.iahs,
+                                   year=yr, share=NA)
 
-        if(nrow(duration.temp)>0){
-          duration.temp$year=yr
-          duration.temp$share=NA
           duration.temp$mast.chapter=inst
           duration.temp$share=apply(duration.temp,1, function(x) max(subset(intervention.duration, year==yr & intervention.id %in% subset(master.tuple, iahs==x[1])$intervention.id)$share))
           duration.max=rbind(duration.max,duration.temp)
@@ -347,7 +358,7 @@ gta_trade_coverage <- function(
 
   final.coverage=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric())
 
-  if(group.importers==F & group.exporters==F){
+  if(group.importers==T & group.exporters==T){
     fc.temp=aggregate(trade.value.affected ~ year, master.coverage, sum)
     fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
     fc.temp$i.un=999
@@ -355,7 +366,7 @@ gta_trade_coverage <- function(
     final.coverage=rbind(final.coverage, fc.temp)
   }
 
-  if(group.importers==T & group.exporters==F){
+  if(group.importers==F & group.exporters==T){
     fc.temp=aggregate(trade.value.affected ~ i.un + year, master.coverage, sum)
     fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -364,7 +375,7 @@ gta_trade_coverage <- function(
     final.coverage=rbind(final.coverage, fc.temp)
   }
 
-  if(group.importers==F & group.exporters==T){
+  if(group.importers==T & group.exporters==F){
     fc.temp=aggregate(trade.value.affected ~ a.un + year, master.coverage, sum)
     fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -373,7 +384,7 @@ gta_trade_coverage <- function(
     final.coverage=rbind(final.coverage, fc.temp)
   }
 
-  if(group.importers==T & group.exporters==T){
+  if(group.importers==F & group.exporters==F){
     fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, master.coverage, sum)
     fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -396,7 +407,7 @@ gta_trade_coverage <- function(
         print(paste("Calculated aggregate annual trade coverage for ", inst, sep=""))
 
       } else {
-        if(group.importers==F & group.exporters==F){
+        if(group.importers==T & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
           fc.temp$intervention.type=inst
@@ -405,7 +416,7 @@ gta_trade_coverage <- function(
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
-        if(group.importers==T & group.exporters==F){
+        if(group.importers==F & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
           fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -415,7 +426,7 @@ gta_trade_coverage <- function(
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
-        if(group.importers==F & group.exporters==T){
+        if(group.importers==T & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
           fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -425,7 +436,7 @@ gta_trade_coverage <- function(
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
-        if(group.importers==T & group.exporters==T){
+        if(group.importers==F & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
           fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -454,7 +465,7 @@ gta_trade_coverage <- function(
         print(paste("Calculated aggregate annual trade coverage for ", inst, sep=""))
 
       } else {
-        if(group.importers==F & group.exporters==F){
+        if(group.importers==T & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
           fc.temp$mast.chapter=inst
@@ -463,7 +474,7 @@ gta_trade_coverage <- function(
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
-        if(group.importers==T & group.exporters==F){
+        if(group.importers==F & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
           fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -473,7 +484,7 @@ gta_trade_coverage <- function(
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
-        if(group.importers==F & group.exporters==T){
+        if(group.importers==T & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
           fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -483,7 +494,7 @@ gta_trade_coverage <- function(
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
-        if(group.importers==T & group.exporters==T){
+        if(group.importers==F & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
           fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
           fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
@@ -579,7 +590,7 @@ gta_trade_coverage <- function(
     write.xlsx(trade.coverage.estimates, file=paste("GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Estimates")
     write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Parameter choices", append=T)
     print("Saving XLSX ... completed in working directory")
-    } else {
+  } else {
     write.xlsx(trade.coverage.estimates, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Estimates")
     write.xlsx(parameter.choices, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Parameter choices", append=T)
     print("Saving XLSX ... completed in output path")
@@ -594,4 +605,4 @@ gta_trade_coverage <- function(
 
 
 
-  }
+}

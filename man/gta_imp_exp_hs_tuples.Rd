@@ -12,7 +12,7 @@ gta_imp_exp_hs_tuples(master.path = "data/master_plus.Rdata",
 \arguments{
 \item{master.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
 
-\item{master.data.frame}{Specify if the master.path is a data frame in the current environment. Default is FALSE. If you supply a data frame, the first three columns need to be (1) intervention ID, (2) implementation date, (3) removal date. In that order.}
+\item{master.data.frame}{Specify if the master.path is a data frame in the current environment. Default is FALSE.}
 
 \item{replica.path}{Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.}
 

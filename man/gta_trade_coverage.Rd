@@ -8,7 +8,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   replica.path = "data/database replica/database replica - parts - base.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
   gta.evaluation = NULL, affected.flow = NULL, importers = NULL,
-  group.importers = TRUE, exporters = NULL, group.exporter = TRUE,
+  group.importers = TRUE, exporters = NULL, group.exporters = TRUE,
   implementers = NULL, implementer.role = NULL,
   announcement.period = NULL, implementation.period = NULL,
   revocation.period = NULL, in.force.today = NULL,
@@ -39,6 +39,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{group.importers}{Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
 \item{exporters}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.}
+
+\item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
 
@@ -91,8 +93,6 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
 
 \item{testmode}{Can be set to TRUE or FALSE. If TRUE, sample will be minimized by 99 percent in order to speed up processing. Keep in mind that this will distort results significantly. Default: FALSE.}
-
-\item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 }
 \value{
 Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.

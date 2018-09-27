@@ -33,16 +33,16 @@ gta_un_code_vector=function(countries, role=NULL){
     }
 
     ## Checking & converting codes
-
+    country.un.codes=NULL
     if(grepl("[A-Za-z]+",paste(countries, collapse=";"))){
 
-        country.un.codes=unique(country.correspondence$un_code[tolower(country.correspondence$name) %in% tolower(countries)])
+        country.un.codes=c(country.un.codes, unique(country.correspondence$un_code[tolower(country.correspondence$name) %in% tolower(countries)]))
 
     }
 
     if(sum(as.numeric((tolower(countries) %in% tolower(country.correspondence$name))==F))>0){
 
-      country.un.codes = unique(append(country.un.codes, countries[(countries %in% country.correspondence$un_code)==T]))
+      country.un.codes = unique(c(country.un.codes, countries[(countries %in% country.correspondence$un_code)==T]))
 
     }
 

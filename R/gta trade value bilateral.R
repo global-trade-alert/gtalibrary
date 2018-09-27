@@ -64,7 +64,7 @@ gta_trade_value_bilateral <- function(
 
       }
 
-      rm(check, importers)
+
     }
   }
 
@@ -96,7 +96,7 @@ gta_trade_value_bilateral <- function(
 
       }
 
-      rm(check, exporters)
+
     }
   }
 

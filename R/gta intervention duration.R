@@ -74,7 +74,7 @@ gta_intervention_duration <- function(
 
 
   # calculating intra-year duration
-  master=unique(master[,c("intervention.id", "date.implemented", "date.removed")])
+  master=master[,c("intervention.id", "date.implemented", "date.removed")]
   master=subset(master, year(date.implemented)<=year.end )
   master$date.removed[is.na(master$date.removed)]=as.Date(paste(year(Sys.Date())+1,"-01-01",sep=""), "%Y-%m-%d")
 

@@ -5,7 +5,7 @@
 #' Generates the importer-exporter-product tuples for GTA interventions.
 #'
 #' @param master.path Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.
-#' @param master.data.frame Specify if the master.path is a data frame in the current environment. Default is FALSE. If you supply a data frame, the first three columns need to be (1) intervention ID, (2) implementation date, (3) removal date. In that order.
+#' @param master.data.frame Specify if the master.path is a data frame in the current environment. Default is FALSE.
 #' @param replica.path Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.
 #' @param df.name Set the name of the generated result data frame. Default is 'master.tuple'.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is 'parameter.tuple'.
@@ -33,13 +33,6 @@ gta_imp_exp_hs_tuples <- function(
   if(master.data.frame){
     eval(parse(text=paste("master=", master.path, sep="")))
 
-    if(ncol(master)<3){stop("Please supply a data frame with at least three columns (intervention ID, implementation and removal date).")}
-
-    if(ncol(master)==3){
-      names(master)=c("intervention.id", "date.implemented", "date.removed")
-    }else{
-      names(master)=c("intervention.id", "date.implemented", "date.removed", names(master[,4:ncol(master)]))
-    }
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Data frame '",master.path,"' from the global environment.", sep="")))
 
   }else{
