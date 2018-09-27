@@ -5,9 +5,9 @@
 #' Computes the share of each calendar year that each intervention was in force.
 #'
 #' @param data.path Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.
-#' @param intervention.ids Provide a vector of intervention IDs.
-#' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
+#' @param is.data.frame Specify if the data path is a data frame in the current environment. Default is FALSE. If you supply a data frame, the first three columns need to be (1) intervention ID, (2) implementation date, (3) removal date. In that order.
 #' @param years The calendar years for which to calculate the shares. Calculation includes interventions based on enforcement status, not implementation date i.e. if you start in 2010, this function will also work with interventions implemneted in 2009 but still in force in 2010. Specify as c(start.year, end.year). Default is c(2008,CURRENT.YEAR).
+#' @param current.year.todate Should the duration for the current year, if included, be calculated as 'share of year to date' (TRUE) or 'share of entire current year' (FALSE). Default is TRUE.
 #' @param df.name Set the name of the generated result data frame. Default is intervention.duration.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.duration.
 #'
@@ -20,9 +20,9 @@
 
 gta_intervention_duration <- function(
   data.path="data/master_plus.Rdata",
-  intervention.ids=NULL,
-  keep.interventions=NULL,
+  is.data.frame=FALSE,
   years=NULL,
+  current.year.todate=TRUE,
   df.name="intervention.duration",
   pc.name="parameter.choice.duration"
   ) {
@@ -32,15 +32,29 @@ gta_intervention_duration <- function(
   parameter.choices=data.frame(parameter=character(), choice=character())
 
   ## data file
-  if(data.path=="online"){
-    print("Downloading the latest copy of the GTA dataset.The file is deleted after loading the data into your environment.")
-    download.file("https://www.dropbox.com/s/78kpe232p2b36ze/GTA%20full%20data%20export.Rdata?dl=1","GTA data.Rdata")
-    load("GTA data.Rdata")
-    unlink("GTA data.Rdata")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice="Downloaded latest copy"))
-  } else{
-    load(data.path)
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Local copy from '",data.path,"'.", sep="")))
+  if(is.data.frame){
+    eval(parse(text=paste("master=", data.path, sep="")))
+
+    if(ncol(master)<3){stop("Please supply a data frame with at least three columns (intervention ID, implementation and removal date).")}
+
+    if(ncol(master)==3){
+      names(master)=c("intervention.id", "date.implemented", "date.removed")
+     }else{
+      names(master)=c("intervention.id", "date.implemented", "date.removed", names(master[,4:ncol(master)]))
+    }
+
+
+  }else{
+    if(data.path=="online"){
+      print("Downloading the latest copy of the GTA dataset.The file is deleted after loading the data into your environment.")
+      download.file("https://www.dropbox.com/s/78kpe232p2b36ze/GTA%20full%20data%20export.Rdata?dl=1","GTA data.Rdata")
+      load("GTA data.Rdata")
+      unlink("GTA data.Rdata")
+      parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice="Downloaded latest copy"))
+    } else{
+      load(data.path)
+      parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Local copy from '",data.path,"'.", sep="")))
+    }
   }
 
   ## check years
@@ -57,48 +71,6 @@ gta_intervention_duration <- function(
   }
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Enforcement years:", choice=paste(year.start, " to ",year.end, sep="")))
 
-  ## subsetting for intervention ids.
-  # keep.intervention
-  if(is.null(intervention.ids)){
-
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Intervention IDs included:", choice="All"))
-
-  } else {
-
-    if(is.null(keep.intervention)){
-      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.intervention=T/F).")
-
-    } else{
-
-      gta.interventions = unique(master$intervention.id)
-
-      check=gta_parameter_check(intervention.ids, gta.interventions)
-
-      if(check!="OK"){
-        print(paste("Unkown interventions IDs: ", check, ".", sep=""))
-
-      } else {
-
-        if(keep.intervention==T){
-          master=subset(master, intervention.id %in% intervention.ids)
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Intervention IDs included:", choice=paste(intervention.ids, collapse = ", ")))
-
-        } else {
-          master=subset(master, ! intervention.id %in% intervention.ids)
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.ids, collapse = ", "), sep="")))
-
-        }
-
-      }
-
-      rm(check, gta.interventions)
-    }
-  }
 
 
   # calculating intra-year duration
@@ -120,10 +92,22 @@ gta_intervention_duration <- function(
   # duration is one
   duration$share[year(duration$date.implemented)<duration$year & year(duration$date.removed)>duration$year]=1
 
+  #○ durations for cases that start/end within the given year
   intra.year=subset(duration, is.na(share))
-
   for(i in 1:nrow(intra.year)){
-    intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
+
+    if(intra.year$year[i]<year(Sys.Date())){
+      intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
+    }else{
+
+      ## correcting current year duration (if required)
+      if(current.year.todate){
+        intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):Sys.Date())))/(as.numeric(Sys.Date()-as.Date(paste(year(Sys.Date()),"-01-01",sep="")))+1)
+      } else{
+        intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
+      }
+
+    }
 
   }
 

@@ -15,9 +15,9 @@
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
-#' @param intervention.type Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
+#' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
 #' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
-#' @param mast.chapter Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.
+#' @param mast.chapters Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.
 #' @param keep.mast Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated MAST chapter ID.
 #' @param implementation.level Specify the government level responsible for the intervention.  Default is 'any'. Permissible values are 'supranational', 'national', 'subnational', 'IFI', 'NFI' or combinations thereof. IFI and NFI refer to government-owned financial institutions that are owned by one ('NFI') or more ('IFI') governments.
 #' @param keep.level Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementation levels.
@@ -48,9 +48,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         implementation.period = NULL,
                         revocation.period = NULL,
                         in.force.today = NULL,
-                        intervention.type = NULL,
+                        intervention.types = NULL,
                         keep.type = NULL,
-                        mast.chapter = NULL,
+                        mast.chapters = NULL,
                         keep.mast = NULL,
                         implementation.level = NULL,
                         keep.level = NULL,
@@ -69,8 +69,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   library("httr")
   library("splitstackshape")
   library("lubridate")
+  library("data.table")
 
-  ## Collecting
+  ## Collecting parameter values
   parameter.choices=data.frame(parameter=character(), choice=character())
 
   ## data path
@@ -398,7 +399,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # intervention.type
   # keep.type
-  if(is.null(intervention.type)){
+  if(is.null(intervention.types)){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Intervention types included:", choice="All"))
@@ -410,20 +411,20 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     } else{
 
       int.mast.types <- gtalibrary::int.mast.types
-      check=gta_parameter_check(tolower(intervention.type), tolower(int.mast.types$intervention.type))
+      check=gta_parameter_check(tolower(intervention.types), tolower(int.mast.types$intervention.type))
 
       if(check!="OK"){
         print(paste("Unkown intervention type(s): ", check, ".", sep=""))
 
         } else {
           if(keep.type==T){
-            master=subset(master, tolower(intervention.type) %in% tolower(intervention.type))
+            master=subset(master, tolower(intervention.type) %in% tolower(intervention.types))
 
             parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Intervention types included:", choice=paste(intervention.type, collapse = ", ")))
+                                    data.frame(parameter="Intervention types included:", choice=paste(intervention.types, collapse = ", ")))
 
           } else {
-            master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.type))
+            master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.types))
 
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="Intervention types included:", choice=paste("All except ", paste(intervention.types, collapse = ", "), sep="")))
@@ -439,7 +440,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # mast.chapter
   # keep.mast
-  if(is.null(mast.chapter)){
+  if(is.null(mast.chapters)){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Mast chapters included:", choice="All"))
@@ -452,7 +453,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     } else{
 
       #Remove integers from string
-      mast.letter <- gsub("[0-9]+","", mast.chapter)
+      mast.letter <- gsub("[0-9]+","", mast.chapters)
       mast.letter <- mast.letter[mast.letter != ""]
 
       int.mast.types <- gtalibrary::int.mast.types

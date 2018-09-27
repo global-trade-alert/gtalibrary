@@ -10,7 +10,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   affected.country = NULL, keep.affected = NULL,
   announcement.period = NULL, implementation.period = NULL,
   revocation.period = NULL, in.force.today = NULL,
-  intervention.type = NULL, keep.type = NULL, mast.chapter = NULL,
+  intervention.types = NULL, keep.type = NULL, mast.chapters = NULL,
   keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
@@ -41,11 +41,11 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
 
-\item{intervention.type}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
+\item{intervention.types}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
 
 \item{keep.type}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.}
 
-\item{mast.chapter}{Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.}
+\item{mast.chapters}{Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.}
 
 \item{keep.mast}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated MAST chapter ID.}
 
