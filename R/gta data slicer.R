@@ -61,7 +61,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         hs.codes = NULL,
                         keep.hs = NULL,
                         intervention.ids = NULL,
-                        keep.intervention = NULL,
+                        keep.interventions = NULL,
                         lag.adjustment=NULL,
                         df.name="master.sliced",
                         pc.name="parameter.choice.slicer"

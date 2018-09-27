@@ -100,7 +100,7 @@ gta_trade_coverage <- function(
   parameter.choices=data.frame(parameter=character(), choice=character())
 
   print("Slicing GTA master data set ...")
-  data_slicer <- gta_data_slicer(data.path=data.path,
+  gta_data_slicer(data.path=data.path,
                                  gta.evaluation= gta.evaluation,
                                  affected.flow = affected.flow,
                                  announcement.period = announcement.period,
