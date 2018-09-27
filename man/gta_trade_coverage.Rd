@@ -7,7 +7,7 @@
 gta_trade_coverage(data.path = "data/master_plus.Rdata",
   replica.path = "data/database replica/database replica - parts - base.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
-  gta.evaluation = NULL, affected.flow = NULL, importers = NULL,
+  gta.evaluation = NULL, affected.flows = NULL, importers = NULL,
   group.importers = TRUE, exporters = NULL, group.exporters = TRUE,
   implementers = NULL, implementer.role = NULL,
   announcement.period = NULL, implementation.period = NULL,
@@ -32,7 +32,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{gta.evaluation}{Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.}
 
-\item{affected.flow}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
+\item{affected.flows}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
 
 \item{importers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.}
 

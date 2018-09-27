@@ -5,7 +5,7 @@
 \title{This function allows you to extract a tailored subset of the GTA database.}
 \usage{
 gta_data_slicer(data.path = "data/master_plus.Rdata",
-  gta.evaluation = NULL, affected.flow = NULL,
+  gta.evaluation = NULL, affected.flows = NULL,
   implementing.country = NULL, keep.implementer = NULL,
   affected.country = NULL, keep.affected = NULL,
   announcement.period = NULL, implementation.period = NULL,
@@ -23,7 +23,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{gta.evaluation}{Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.}
 
-\item{affected.flow}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
+\item{affected.flows}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
 
 \item{implementing.country}{Specify the implementing countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.}
 
