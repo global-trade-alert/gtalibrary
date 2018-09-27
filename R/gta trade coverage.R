@@ -9,7 +9,7 @@
 #' @param coverage.period The calendar years for which to calculate the trade coverage shares. Default is c(2009,CURRENT.YEAR). Calculation includes interventions based on enforcement status, not implementation date i.e. if you start in 2010, this function will also work with interventions implemneted in 2009 but still in force in 2010. Use implementation.period parameter to change this.
 #' @param current.year.todate Should the coverage statistics for the current year be calculated as 'coverage for year to date' (TRUE) or 'coverage for entire current year' (FALSE). Default is TRUE.
 #' @param gta.evaluation Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.
-#' @param affected.flow Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
+#' @param affected.flows Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.
 #' @param group.importers Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
@@ -54,7 +54,7 @@ gta_trade_coverage <- function(
   coverage.period=NULL,
   current.year.todate=TRUE,
   gta.evaluation= NULL,
-  affected.flow = NULL,
+  affected.flows = NULL,
   importers = NULL,
   group.importers = TRUE,
   exporters = NULL,
@@ -99,10 +99,11 @@ gta_trade_coverage <- function(
   ## Collecting parameter values
   parameter.choices=data.frame(parameter=character(), choice=character())
 
+
   print("Slicing GTA master data set ...")
   gta_data_slicer(data.path=data.path,
                   gta.evaluation= gta.evaluation,
-                  affected.flow = affected.flow,
+                  affected.flows = affected.flows,
                   announcement.period = announcement.period,
                   implementation.period = implementation.period,
                   revocation.period = revocation.period,
