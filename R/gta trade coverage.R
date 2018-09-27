@@ -342,7 +342,7 @@ gta_trade_coverage <- function(
                             hs.codes = hs.codes,
                             keep.hs = TRUE)
 
-  trade.base.bilateral$iahs=paste("i.un","a.un", "hs6")
+  trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
   rm(parameter.choice.trade.base)
   print("Importing trade base values ... completed.")
 
