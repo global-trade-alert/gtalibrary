@@ -5,13 +5,16 @@
 \title{GTA trade coverage function}
 \usage{
 gta_trade_coverage(data.path = "data/master_plus.Rdata",
-  data.path.coverage = "data/trade coverage/trade coverage base file.Rdata",
+  replica.path = "data/database replica/database replica - parts - base.Rdata",
+  coverage.period = NULL, current.year.todate = TRUE,
   gta.evaluation = NULL, affected.flow = NULL, importers = NULL,
-  exporters = NULL, implementers = NULL, implementer.role = NULL,
+  group.importers = TRUE, exporters = NULL, group.exporter = TRUE,
+  implementers = NULL, implementer.role = NULL,
   announcement.period = NULL, implementation.period = NULL,
   revocation.period = NULL, in.force.today = NULL,
-  intervention.type = NULL, keep.type = NULL, mast.chapter = NULL,
-  keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
+  intervention.types = NULL, keep.type = NULL, group.type = TRUE,
+  mast.chapters = NULL, keep.mast = NULL, group.mast = TRUE,
+  implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.interventions = NULL,
@@ -21,15 +24,21 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
 
-\item{data.path.coverage}{Specifies where the GTA data file is located (Default: 'data/database replica'). Set to 'online' to download the latest copy.}
+\item{replica.path}{Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.}
+
+\item{coverage.period}{The calendar years for which to calculate the trade coverage shares. Default is c(2009,CURRENT.YEAR). Calculation includes interventions based on enforcement status, not implementation date i.e. if you start in 2010, this function will also work with interventions implemneted in 2009 but still in force in 2010. Use implementation.period parameter to change this.}
+
+\item{current.year.todate}{Should the coverage statistics for the current year be calculated as 'coverage for year to date' (TRUE) or 'coverage for entire current year' (FALSE). Default is TRUE.}
 
 \item{gta.evaluation}{Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.}
 
 \item{affected.flow}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
 
-\item{importers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. World will be added independent of the choice made. Default: All combinations.}
+\item{importers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.}
 
-\item{exporters}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. World will be added independent of the choice made. Default: All combinations.}
+\item{group.importers}{Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
+
+\item{exporters}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.}
 
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
 
@@ -43,13 +52,17 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
 
-\item{intervention.type}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
+\item{intervention.types}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
 
 \item{keep.type}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.}
 
-\item{mast.chapter}{Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.}
+\item{group.type}{Specify whether to aggregate the statistics for all remaining intervention types into one group (TRUE) or whether create the statistics for every single type (FALSE). Default is TRUE.}
+
+\item{mast.chapters}{Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.}
 
 \item{keep.mast}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated MAST chapter ID.}
+
+\item{group.mast}{Specify whether to aggregate the statistics for all remaining MAST chapters into one group (TRUE) or whether create the statistics for every single chapter (FALSE). Default is TRUE.}
 
 \item{implementation.level}{Specify the government level responsible for the intervention.  Default is 'any'. Permissible values are 'supranational', 'national', 'subnational', 'IFI', 'NFI' or combinations thereof. IFI and NFI refer to government-owned financial institutions that are owned by one ('NFI') or more ('IFI') governments.}
 
@@ -78,6 +91,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
 
 \item{testmode}{Can be set to TRUE or FALSE. If TRUE, sample will be minimized by 99 percent in order to speed up processing. Keep in mind that this will distort results significantly. Default: FALSE.}
+
+\item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 }
 \value{
 Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
