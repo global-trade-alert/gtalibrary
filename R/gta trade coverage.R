@@ -182,8 +182,10 @@ gta_trade_coverage <- function(
   ######## calculate implementer-importer-exporter-product tuples
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path,"'.", sep="")))
 
+  print("Building intervention-importer-exporter-product tuples ...")
   gta_imp_exp_hs_tuples(master.path='master.sliced',
                         master.data.frame=TRUE)
+  print("Building intervention-importer-exporter-product tuples ... complete.")
   rm(parameter.tuple)
 
   ## correct for user choice of implementers and roles
@@ -251,6 +253,8 @@ gta_trade_coverage <- function(
 
 
   ## create max duration for all instruments and per import-export-product year
+
+  print("Identifying the maximum duration per year and importer-exporter-product tuple ... (this will take a while)")
   master.tuple$iahs=paste(master.tuple$i.un,master.tuple$a.un, master.tuple$affected.product, sep="-")
 
   duration.max=data.frame(iahs=character(), year=numeric(), share=numeric())
@@ -326,7 +330,7 @@ gta_trade_coverage <- function(
     print(paste("Calculating maximum coverage per importer-exporter-product combination for all MAST chapters individually complete.",sep=""))
 
   }
-
+  print("Identifying the maximum duration per year and importer-exporter-product tuple ... complete.")
 
   ##### multiply in base values
   print("Importing trade base values ...")
