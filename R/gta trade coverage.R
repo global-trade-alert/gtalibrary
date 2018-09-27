@@ -139,7 +139,7 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice="All"))
   }else {
     exporting.country=gta_un_code_vector(exporters, "exporting")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, sep=", ")))
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, collapse=", ")))
   }
 
   ms=master.sliced[0,]
@@ -197,7 +197,7 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice="All"))
   }else {
     importing.country=gta_un_code_vector(importers, "importing")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, sep=", ")))
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, collapse=", ")))
   }
 
 
@@ -207,7 +207,7 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice="All"))
   }else {
     implementing.country=gta_un_code_vector(implementers, "implementing")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste(implementers, sep=", ")))
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste(implementers, collapse=", ")))
   }
 
 
@@ -226,7 +226,7 @@ gta_trade_coverage <- function(
       stop(paste("Unkown implementer role(s): ", role.error, ".", sep=""))
     }
   }
-  parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, sep=", ")))
+  parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, collapse=", ")))
 
 
   # filter master.tuple
@@ -540,11 +540,15 @@ gta_trade_coverage <- function(
     final.coverage=merge(final.coverage, mast.names, by="mast.chapter", all.x=T)
     final.coverage$mast.chapter.name[final.coverage$mast.chapter=="All included MAST chapters"]="All included MAST chapters"
 
-    final.coverage=reshape(final.coverage, idvar=c("importer","exporter","mast.chapter", "mast.chapter.name"), timevar = "year")
+    final.coverage=reshape(final.coverage, idvar=c("importer","exporter","mast.chapter", "mast.chapter.name"), timevar = "year", direction="wide")
 
 
     # pretty column names
-    names(final.coverage)[1:4]=c("Importing country", "Exporting country","MAST chapter ID", "MAST chapter name")
+    setnames(final.coverage, "importer", "Importing country")
+    setnames(final.coverage, "exporter", "Exporting country")
+    setnames(final.coverage, "mast.chapter", "MAST chapter ID")
+    setnames(final.coverage, "mast.chapter.name", "MAST chapter name")
+
     column.order=c("Importing country", "Exporting country","MAST chapter ID", "MAST chapter name")
     for(yr in year.start:year.end){
       names(final.coverage)[grepl(yr, names(final.coverage))==T]=paste("Trade coverage estimate for ",yr, sep="")
@@ -557,11 +561,14 @@ gta_trade_coverage <- function(
 
   if("intervention.type" %in% names(final.coverage)){
 
-    final.coverage=reshape(final.coverage, idvar=c("importer","exporter","intervention.type"), timevar = "year")
+    final.coverage=reshape(final.coverage, idvar=c("importer","exporter","intervention.type"), timevar = "year", direction="wide")
 
 
     # pretty column names
-    names(final.coverage)[1:3]=c("Importing country", "Exporting country","Intervention type")
+    setnames(final.coverage, "importer", "Importing country")
+    setnames(final.coverage, "exporter", "Exporting country")
+    setnames(final.coverage, "intervention.type", "Intervention type")
+
     column.order=c("Importing country", "Exporting country","Intervention type")
     for(yr in year.start:year.end){
       names(final.coverage)[grepl(yr, names(final.coverage))==T]=paste("Trade coverage estimate for ",yr, sep="")
@@ -572,8 +579,11 @@ gta_trade_coverage <- function(
   }
 
   if(sum(as.numeric(c("intervention.type","mast.chapter") %in% names(final.coverage)))==0){
+
+    final.coverage=reshape(final.coverage, idvar=c("importer","exporter"), timevar = "year", direction="wide")
     # pretty column names
-    names(final.coverage)[1:2]=c("Importing country", "Exporting country")
+    setnames(final.coverage, "importer", "Importing country")
+    setnames(final.coverage, "exporter", "Exporting country")
     column.order=c("Importing country", "Exporting country")
     for(yr in year.start:year.end){
       names(final.coverage)[grepl(yr, names(final.coverage))==T]=paste("Trade coverage estimate for ",yr, sep="")
@@ -591,12 +601,12 @@ gta_trade_coverage <- function(
   ## writing to disk
   print("Saving XLSX ...")
   if(is.null(output.path)){
-    write.xlsx(trade.coverage.estimates, file=paste("GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Estimates")
-    write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Parameter choices", append=T)
+    write.xlsx(trade.coverage.estimates, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Estimates", row.names = F)
+    write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
     print("Saving XLSX ... completed in working directory")
   } else {
-    write.xlsx(trade.coverage.estimates, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Estimates")
-    write.xlsx(parameter.choices, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(), sep=""), sheetName = "Parameter choices", append=T)
+    write.xlsx(trade.coverage.estimates, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Estimates", row.names = F)
+    write.xlsx(parameter.choices, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
     print("Saving XLSX ... completed in output path")
   }
 
