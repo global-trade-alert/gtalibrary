@@ -136,12 +136,12 @@ gta_trade_coverage <- function(
     year.start=2008
     year.end=year(Sys.Date())
   } else {
-    if(length(years)!=2){stop("Please supply a coverage period vector with two entries e.g. c(2008, 2018)")}
-    if((min(years)<2008)|(max(years)>year(Sys.Date())) ){stop(paste("Please only supply coverage period years between 2008 and ", year(Sys.Date()), sep=""))}
-    if(is.numeric(years)==F){stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
+    if(length(coverage.period)!=2){stop("Please supply a coverage period vector with two entries e.g. c(2008, 2018)")}
+    if((min(coverage.period)<2008)|(max(coverage.period)>year(Sys.Date())) ){stop(paste("Please only supply coverage period years between 2008 and ", year(Sys.Date()), sep=""))}
+    if(is.numeric(coverage.period)==F){stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
 
-    if(years[1]%%1==0){year.start=years[1]}else{stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
-    if(years[2]%%1==0){year.end=years[2]}else{stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
+    if(coverage.period[1]%%1==0){year.start=coverage.period[1]}else{stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
+    if(coverage.period[2]%%1==0){year.end=coverage.period[2]}else{stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
   }
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Coverage period years:", choice=paste(year.start, " to ",year.end, sep="")))
 
