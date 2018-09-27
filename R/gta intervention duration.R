@@ -92,7 +92,7 @@ gta_intervention_duration <- function(
   # duration is one
   duration$share[year(duration$date.implemented)<duration$year & year(duration$date.removed)>duration$year]=1
 
-  #○ durations for cases that start/end within the given year
+  # durations for cases that start/end within the given year
   intra.year=subset(duration, is.na(share))
   for(i in 1:nrow(intra.year)){
 

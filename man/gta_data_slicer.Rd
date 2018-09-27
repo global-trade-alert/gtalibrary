@@ -14,7 +14,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-  intervention.ids = NULL, keep.intervention = NULL,
+  intervention.ids = NULL, keep.interventions = NULL,
   lag.adjustment = NULL, df.name = "master.sliced",
   pc.name = "parameter.choice.slicer")
 }
@@ -67,7 +67,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{intervention.ids}{Provide a vector of intervention IDs.}
 
-\item{keep.intervention}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
+\item{keep.interventions}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
 
