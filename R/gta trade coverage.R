@@ -455,7 +455,7 @@ gta_trade_coverage <- function(
   ### by MAST chapter, if necessary
   if(is.null(mast.chapters)==F & group.mast==F){
     final.coverage$mast.chapter="All included MAST chapters"
-    print("Calculating aggregate annual trade coverage per included MAST chpater ...")
+    print("Calculating aggregate annual trade coverage per included MAST chapter ...")
 
     for(inst in unique(master.sliced$mast.chapter)){
       mc.inst=subset(master.coverage, mast.chapter==inst)
