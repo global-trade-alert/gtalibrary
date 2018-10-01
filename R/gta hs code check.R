@@ -42,13 +42,13 @@ gta_hs_code_check=function(codes){
 
       ## creating a vector of all 6-digit codes
 
-      if(length(codes[nchar(codes)%%2==0])>0 & codes[nchar(codes)%%2!=0]>0){
+      if(length(codes[nchar(codes)%%2==0])>0 & length(codes[nchar(codes)%%2!=0])>0){
         codes=c(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0]),1,nchar(codes[nchar(codes)%%2==0])) %in% codes[nchar(codes)%%2==0]],
                 unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2!=0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2!=0]),1,nchar(codes[nchar(codes)%%2!=0])) %in% codes[nchar(codes)%%2!=0]])
 
       } else {
 
-        if(length(codes[nchar(codes)%%2==0])>0 & codes[nchar(codes)%%2!=0]==0){
+        if(length(codes[nchar(codes)%%2==0])>0 & length(codes[nchar(codes)%%2!=0])==0){
           codes=c(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0]),1,nchar(codes[nchar(codes)%%2==0])) %in% codes[nchar(codes)%%2==0]])
 
         } else {
