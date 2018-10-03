@@ -210,7 +210,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     if(length(date.period)!=2){
       stop("Please specify the date pair (after.date, before.date) for the announcement period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
     } else{
-      dates=sum(as.numeric(is.na(date.period)))
+      dates=sum(as.numeric(is.na(date.period))==F)
 
       if(dates>0){
         if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
@@ -267,7 +267,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     if(length(date.period)!=2){
       stop("Please specify the date pair (after.date, before.date) for the implementation period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
     } else{
-      dates=sum(as.numeric(is.na(date.period)))
+
+      dates=sum(as.numeric(is.na(date.period))==F)
 
       if(dates>0){
         if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
@@ -324,7 +325,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     if(length(date.period)!=2){
       stop("Please specify the date pair (after.date, before.date) for the revocation period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
     } else{
-      dates=sum(as.numeric(is.na(date.period)))
+      dates=sum(as.numeric(is.na(date.period))==F)
 
       if(dates>0){
         if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
