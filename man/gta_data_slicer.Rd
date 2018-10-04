@@ -7,9 +7,10 @@
 gta_data_slicer(data.path = "data/master_plus.Rdata",
   gta.evaluation = NULL, affected.flows = NULL,
   implementing.country = NULL, keep.implementer = NULL,
-  affected.country = NULL, keep.affected = NULL,
-  announcement.period = NULL, implementation.period = NULL,
-  revocation.period = NULL, in.force.today = NULL,
+  affected.country = NULL, keep.affected = NULL, target = NULL,
+  additional.targets = NULL, announcement.period = NULL,
+  implementation.period = NULL, revocation.period = NULL,
+  keep.revocation.na = NULL, in.force.today = NULL,
   intervention.types = NULL, keep.type = NULL, mast.chapters = NULL,
   keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
@@ -33,11 +34,17 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{keep.affected}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.}
 
+\item{target}{Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.}
+
+\item{additional.targets}{Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.}
+
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
 \item{implementation.period}{Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.}
 
 \item{revocation.period}{Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
+
+\item{keep.revocation.na}{Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.}
 
 \item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
 

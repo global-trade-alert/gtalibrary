@@ -11,9 +11,12 @@
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
 #' @param affected.country Specify the affected countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
 #' @param keep.affected Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.
+#' @param target Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.
+#' @param additional.targets Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
+#' @param keep.revocation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.
 #' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
 #' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
 #' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
@@ -44,9 +47,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         keep.implementer = NULL,
                         affected.country = NULL,
                         keep.affected = NULL,
+                        target = NULL,
+                        additional.targets = NULL,
                         announcement.period = NULL,
                         implementation.period = NULL,
                         revocation.period = NULL,
+                        keep.revocation.na = NULL,
                         in.force.today = NULL,
                         intervention.types = NULL,
                         keep.type = NULL,
@@ -197,6 +203,38 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+
+  # targeted countries
+  # additional targets
+  if(is.null(target)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Targeted countries:", choice="Any"))
+
+  } else {
+    target <- gta_un_code_vector(target, role="targeted")
+
+    # unique id to a.un combinations
+    all.id <- subset(as.data.frame(unique(master[,c("intervention.id","a.un")])), is.na(a.un)==F)
+    # ids where all targets are affected
+    target.id <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == length(target))
+    # Subset all interventions and create frequency table and count sum of frequencies
+    target.id <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id$intervention.id))), sum)
+
+    # Filter for value of frequency
+    if(is.null(additional.targets)){
+      master <- subset(master, intervention.id %in% target.id$intervention.id)
+
+    } else {master <- subset(master, intervention.id %in% subset(target.id, Freq==(length(target)+additional.targets))$intervention.id)
+    }
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Targeted countries:", choice=paste(paste(target, collapse = ", "), " and ", additional.targets, " additional", sep="")))
+
+    rm(all.id, target.id)
+
+    }
+
   # announcement.period
   date.period=announcement.period
 
@@ -321,7 +359,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   } else {
 
-
     if(length(date.period)!=2){
       stop("Please specify the date pair (after.date, before.date) for the revocation period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
     } else{
@@ -341,18 +378,26 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
         if(dates==1){
 
-          if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
-            master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d"))
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Revocation period:", choice=paste(date.period[1]," or more recent", sep="")))
-          }
+          if(is.null(keep.revocation.na)){
+            stop("Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F).")
+          } else{
 
-          if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-            master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d"))
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Revocation period:", choice=paste(date.period[2]," or earlier", sep="")))
-          }
+            if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
 
+              if(keep.revocation.na==T) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") | is.na(date.removed)==T)}
+              if(keep.revocation.na==F) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d"))}
+              parameter.choices=rbind(parameter.choices,
+                                      data.frame(parameter="Revocation period:", choice=paste(date.period[1]," or more recent", sep="")))
+            }
+
+            if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
+
+              if(keep.revocation.na==T){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d") | is.na(date.removed)==T)}
+              if(keep.revocation.na==F){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d"))}
+              parameter.choices=rbind(parameter.choices,
+                                      data.frame(parameter="Revocation period:", choice=paste(date.period[2]," or earlier", sep="")))
+            }
+          }
         }
 
       } else {
