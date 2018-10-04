@@ -101,7 +101,6 @@ gta_bulk_prep = function(
   master=master[,given.names]
   names(master)=fct.names
 
-
   #### state act CSV
 
   master$author.id=29
