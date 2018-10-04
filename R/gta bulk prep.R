@@ -147,14 +147,14 @@ gta_bulk_prep = function(
 
   ## eligible firms id
   master$eligible.firm.id=NA
-  master$eligible.firm.id[tolower(master$eligible.firm)=="all"]=1
-  master$eligible.firm.id[tolower(master$eligible.firm)=="smes"]=2
-  master$eligible.firm.id[tolower(master$eligible.firm)=="firm-specific"]=3
-  master$eligible.firm.id[tolower(master$eligible.firm)=="state-controlled"]=4
-  master$eligible.firm.id[tolower(master$eligible.firm)=="state trading enterprise"]=5
+  master$eligible.firm.id[tolower(master$eligible.firms)=="all"]=1
+  master$eligible.firm.id[tolower(master$eligible.firms)=="smes"]=2
+  master$eligible.firm.id[tolower(master$eligible.firms)=="firm-specific"]=3
+  master$eligible.firm.id[tolower(master$eligible.firms)=="state-controlled"]=4
+  master$eligible.firm.id[tolower(master$eligible.firms)=="state trading enterprise"]=5
 
   if(nrow(subset(master, is.na(eligible.firm.id)))>0){
-    stop(paste("Unkown eligible firm(s): ", paste(unique(subset(master, is.na(eligible.firm.id))$eligible.firm), collapse="; "), sep=""))
+    stop(paste("Unkown eligible firm(s): ", paste(unique(subset(master, is.na(eligible.firm.id))$eligible.firms), collapse="; "), sep=""))
   }
 
 
@@ -185,6 +185,7 @@ gta_bulk_prep = function(
   master$research.evaluation.id[tolower(master$research.evaluation)=="red"]=1
   master$research.evaluation.id[tolower(master$research.evaluation)=="amber"]=2
   master$research.evaluation.id[tolower(master$research.evaluation)=="green"]=3
+  master$research.evaluation.id[is.na(master$research.evaluation)]=""
 
   if(nrow(subset(master, is.na(research.evaluation.id)))>0){
     stop(paste("Unkown research evaluation(s): ", paste(unique(subset(master, is.na(research.evaluation.id))$research.evaluation), collapse="; "), sep=""))
