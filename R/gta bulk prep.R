@@ -201,10 +201,31 @@ gta_bulk_prep = function(
   master$date.removed=as.factor(master$date.removed)
 
   ## country ids
-  master$implementing.jurisdiction.id
-  master$distorted.market.id
-  master$affected.jurisdiction.id
+  gta.jur=gtalibrary::country.names
+  gta.jur=gta.jur[,c("name","jurisdiction.id")]
 
+  names(gta.jur)=c("implementing.jurisdiction","implementing.jurisdiction.id")
+  master=merge(master, gta.jur, by="implementing.jurisdiction", all.x=T)
+
+  if(nrow(subset(master, is.na(implementing.jurisdiction.id)))>0){
+    stop(paste("Unkown implementer(s): ", paste(unique(subset(master, is.na(implementing.jurisdiction.id))$implementing.jurisdiction), collapse="; "), sep=""))
+  }
+
+  names(gta.jur)=c("affected.jurisdiction","affected.jurisdiction.id")
+  master=merge(master, gta.jur, by="affected.jurisdiction", all.x=T)
+
+  if(nrow(subset(master, is.na(affected.jurisdiction.id)))>0){
+    stop(paste("Unkown affected jurisdiction(s): ", paste(unique(subset(master, is.na(affected.jurisdiction.id))$affected.jurisdiction), collapse="; "), sep=""))
+  }
+
+  names(gta.jur)=c("distorted.market","distorted.market.id")
+  master=merge(master, gta.jur, by="distorted.market", all.x=T)
+
+  if(nrow(subset(master, is.na(distorted.market.id)))>0){
+    stop(paste("Unkown distorted market(s): ", paste(unique(subset(master, is.na(distorted.market.id))$distorted.market), collapse="; "), sep=""))
+  }
+
+  # generate intervention frame
   intervention=data.frame(import_id=master$intervention.id,
                           import_measure_id=master$state.act.id,
                           measure_type_id=master$intervention.type.id,
