@@ -192,9 +192,9 @@ gta_bulk_prep = function(
 
 
   ## levels
-  master$int.prior=as.character(master$int.prior)
-  master$int.new=as.character(master$int.new)
-  master$int.unit.id="check me"
+  master$level.prior=as.character(master$level.prior)
+  master$level.new=as.character(master$level.new)
+  master$level.unit.id="check me"
 
   ## dates
   master$date.implemented=as.factor(master$date.implemented)
@@ -247,9 +247,9 @@ gta_bulk_prep = function(
                           is_horizontal_measure=master$horizontal,
                           is_jumbo=0,
                           is_fta_included=master$include.fta,
-                          prior_level=master$int.prior,
-                          new_level=master$int.new,
-                          unit=master$int.unit.id,
+                          prior_level=master$level.prior,
+                          new_level=master$level.new,
+                          unit=master$level.unit.id,
                           tariff_peak=0,
                           affected_sectors=master$affected.sectors.nonhs,
                           IJ=master$implementing.jurisdiction.id,
