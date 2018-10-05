@@ -194,7 +194,7 @@ gta_bulk_prep = function(
   ## levels
   master$level.prior=as.character(master$level.prior)
   master$level.new=as.character(master$level.new)
-  master$level.unit.id="check me"
+  master$level.unit.id=2
 
   ## dates
   master$date.implemented=as.factor(master$date.implemented)
@@ -215,18 +215,18 @@ gta_bulk_prep = function(
     stop(paste("Unkown implementer(s): ", paste(unique(subset(master, is.na(implementing.jurisdiction.id))$implementing.jurisdiction), collapse="; "), sep=""))
   }
 
-  names(gta.jur)=c("affected.jurisdiction","affected.jurisdiction.id")
-  master=merge(master, gta.jur, by="affected.jurisdiction", all.x=T)
+  names(gta.jur)=c("aj.editor.choice","affected.jurisdiction.id")
+  master=merge(master, gta.jur, by="aj.editor.choice", all.x=T)
 
-  if(nrow(subset(master, is.na(affected.jurisdiction.id)))>0){
-    stop(paste("Unkown affected jurisdiction(s): ", paste(unique(subset(master, is.na(affected.jurisdiction.id))$affected.jurisdiction), collapse="; "), sep=""))
+  if(nrow(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice)==F))>0){
+    stop(paste("Unkown affected jurisdiction(s): ", paste(unique(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice)==F)$aj.editor.choice), collapse="; "), sep=""))
   }
 
-  names(gta.jur)=c("distorted.market","distorted.market.id")
-  master=merge(master, gta.jur, by="distorted.market", all.x=T)
+  names(gta.jur)=c("dm.editor.choice","distorted.market.id")
+  master=merge(master, gta.jur, by="dm.editor.choice", all.x=T)
 
-  if(nrow(subset(master, is.na(distorted.market.id)))>0){
-    stop(paste("Unkown distorted market(s): ", paste(unique(subset(master, is.na(distorted.market.id))$distorted.market), collapse="; "), sep=""))
+  if(nrow(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice)==F))>0){
+    stop(paste("Unkown distorted market(s): ", paste(unique(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice)==F)$dm.editor.choice), collapse="; "), sep=""))
   }
 
   # generate intervention frame
@@ -240,7 +240,7 @@ gta_bulk_prep = function(
                           inception_date=master$date.implemented,
                           removal_date=master$date.removed,
                           is_duration_limited=master$duration.limited,
-                          eligible_firms_id=master$eligible.firms.id,
+                          eligible_firms_id=master$eligible.firm.id,
                           implementation_level_id=master$implementation.level.id,
                           is_non_trade_related_rationale=master$non.commercial,
                           is_chain_measure=0,
@@ -262,8 +262,8 @@ gta_bulk_prep = function(
 
   ## affected.TL
   ## level formatting
-  master$atl.unit="check me"
-  master$atl.peak=as.numeric(master$atl.unit==CHECK & master$atl.new>=15)
+  master$atl.unit.id=2
+  master$atl.peak=as.numeric(master$atl.unit=="check me" & master$atl.new>=15)
 
   master$atl.prior=as.character(master$atl.prior)
   master$atl.new=as.character(master$atl.new)
