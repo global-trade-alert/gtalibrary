@@ -202,7 +202,7 @@ gta_bulk_prep = function(
 
   ## sectors
   master$affected.sectors.nonhs=as.character(master$affected.sectors.nonhs)
-  master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs)==2]=paste(0,master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs)==2], sep="")
+  master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs)==2 & is.na(master$affected.sectors.nonhs)==F]=paste(0,master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs)==2  & is.na(master$affected.sectors.nonhs)==F], sep="")
 
   ## country ids
   gta.jur=gtalibrary::country.names
