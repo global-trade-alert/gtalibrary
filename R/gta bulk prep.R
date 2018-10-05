@@ -311,9 +311,9 @@ gta_bulk_prep = function(
 
   ## exporting CSVs
   # test
-  state.act.test=state.act[1:test.size,]
-  intervention.test=subset(intervention, import_measure_id %in% state.act.test$state.act.id)
-  affected.tl.test=subset(affected.tl, import_intervention_id %in% intervention.test$intervention.id)
+  state.act.test=subset(state.act, import_id %in% unique(state.act$import_id)[1:test.size])
+  intervention.test=subset(intervention, import_measure_id %in% state.act.test$import_id)
+  affected.tl.test=subset(affected.tl, import_intervention_id %in% intervention.test$import_id)
 
   write.csv(state.act.test, file=paste(dump.name," - ",Sys.Date()," - test - measure.csv",sep=""), row.names=F, na="")
   write.csv(intervention.test,  file=paste(dump.name," - ",Sys.Date()," - test - intervention.csv",sep=""), row.names=F, na="")
@@ -321,9 +321,9 @@ gta_bulk_prep = function(
 
 
   # remaining full set
-  state.act.full=subset(state.act, ! import_id %in% state.act.test$state.act.id)
-  intervention.full=subset(intervention, ! import_measure_id %in% state.act.test$state.act.id)
-  affected.tl.full=subset(affected.tl, ! import_intervention_id %in% intervention.test$intervention.id)
+  state.act.full=subset(state.act, ! import_id %in% state.act.test$import_id)
+  intervention.full=subset(intervention, ! import_measure_id %in% state.act.test$import_id)
+  affected.tl.full=subset(affected.tl, ! import_intervention_id %in% intervention.test$import_id)
 
   write.csv(state.act.full, file=paste(dump.name," - ",Sys.Date()," - full - measure.csv",sep=""), row.names=F, na="")
   write.csv(intervention.full,  file=paste(dump.name," - ",Sys.Date()," - full - intervention.csv",sep=""), row.names=F, na="")
