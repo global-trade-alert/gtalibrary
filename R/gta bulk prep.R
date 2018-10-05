@@ -111,14 +111,14 @@ gta_bulk_prep = function(
   master$date.announced=as.factor(master$date.announced)
   master$source=as.character(master$source)
 
-  state.act=data.frame(import_id=master$state.act.id,
+  state.act=unique(data.frame(import_id=master$state.act.id,
                        author_id=master$author.id,
                        title=master$title,
                        description=master$announcement.description,
                        announcement_date=master$date.announced,
                        source=master$source,
                        is_source_official=master$source.official,
-                       status_id=4)
+                       status_id=4))
 
 
   #### intervention CSV
@@ -230,7 +230,7 @@ gta_bulk_prep = function(
   }
 
   # generate intervention frame
-  intervention=data.frame(import_id=master$intervention.id,
+  intervention=unique(data.frame(import_id=master$intervention.id,
                           import_measure_id=master$state.act.id,
                           measure_type_id=master$intervention.type.id,
                           description=master$intervention.description,
@@ -256,7 +256,7 @@ gta_bulk_prep = function(
                           DM=master$distorted.market.id,
                           dm_freeze=master$freeze.dm,
                           AJ=master$affected.jurisdiction.id,
-                          aj_freeze=master$freeze.aj)
+                          aj_freeze=master$freeze.aj))
 
 
 
@@ -297,7 +297,7 @@ gta_bulk_prep = function(
   master$atl.sector=as.character(master$atl.sector)
   master$atl.sector[nchar(master$atl.sector)==2]=paste(0, master$atl.sector[nchar(master$atl.sector)==2], sep="")
 
-  affected.tl=data.frame(import_intervention_id=master$intervention.id,
+  affected.tl=unique(data.frame(import_intervention_id=master$intervention.id,
                          tariff_line_code=master$affected.product,
                          prior_level=master$atl.prior,
                          new_level=master$atl.new,
@@ -306,7 +306,7 @@ gta_bulk_prep = function(
                          is_tariff_line_official=master$atl.official,
                          sector_code=master$atl.sector,
                          inception_date=master$atl.implemented,
-                         removal_date=master$atl.removed)
+                         removal_date=master$atl.removed))
 
 
   ## exporting CSVs
