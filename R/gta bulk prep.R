@@ -329,6 +329,10 @@ gta_bulk_prep = function(
   write.csv(intervention.full,  file=paste(dump.name," - ",Sys.Date()," - full - intervention.csv",sep=""), row.names=F, na="")
   write.csv(affected.tl.full,  file=paste(dump.name," - ",Sys.Date()," - full - atl.csv",sep=""), row.names=F, na="")
 
-  ## returning modified DF into global environment
+  # returning modified DF into global environment
   master.bulk<<-master
+  state.act.csv<<- state.act
+  intervention.csv<<-intervention
+  affected.tl.csv<<-affected.tl
+
 }
