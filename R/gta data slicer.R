@@ -16,6 +16,7 @@
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
+#' @param submission.period Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param keep.revocation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.
 #' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
 #' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
@@ -403,6 +404,62 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       } else {
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Revocation period:", choice="None specified"))
+      }
+
+
+    }
+
+    remove(date.period)
+
+  }
+
+
+  # submission.period
+  date.period=submission.period
+
+  if(is.null(date.period)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Submission period:", choice="Full GTA monitoring period"))
+
+  } else {
+
+    if(length(date.period)!=2){
+      stop("Please specify the date pair (after.date, before.date) for the submission period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
+    } else{
+      dates=sum(as.numeric(is.na(date.period))==F)
+
+      if(dates>0){
+        if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
+          stop("At least one of the submission dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+        }
+
+        if(dates==2){
+          master=subset(master, date.published>=as.Date(date.period[1], "%Y-%m-%d") & date.published<=as.Date(date.period[2], "%Y-%m-%d"))
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Submission period:", choice=paste(date.period[1]," - ",date.period[2], sep="")))
+
+        }
+
+        if(dates==1){
+
+          if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
+            master=subset(master, date.published>=as.Date(date.period[1], "%Y-%m-%d"))
+            parameter.choices=rbind(parameter.choices,
+                                    data.frame(parameter="Submission period:", choice=paste(date.period[1]," or more recent", sep="")))
+          }
+
+          if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
+            master=subset(master, date.published<=as.Date(date.period[2], "%Y-%m-%d"))
+            parameter.choices=rbind(parameter.choices,
+                                    data.frame(parameter="Submission period:", choice=paste(date.period[2]," or earlier", sep="")))
+          }
+
+        }
+
+      } else {
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Submission period:", choice="Full GTA monitoring period"))
       }
 
 

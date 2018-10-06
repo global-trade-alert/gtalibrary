@@ -81,6 +81,8 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 \item{df.name}{Set the name of the generated result data frame. Default is master.sliced.}
 
 \item{pc.name}{Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.}
+
+\item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 }
 \description{
 Make use of the many variables captured in the taxonomy of the Global Trade Alert and tailor the data to your needs. This function returns a list of 2 data frames. The first, master, contains the subset of GTA data you requested. The second, parameter.choices, lists all implicit or exlicited choices that led to the subset.
