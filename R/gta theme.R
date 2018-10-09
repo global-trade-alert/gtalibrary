@@ -31,7 +31,7 @@ gta_theme <- function(base.size=11,
                       y.right.angle = y.left.angle
                       ){
 
-  theme(line = element_line(colour = "#FFFFFF", size= 0.5, linetype = 1, lineend = "straight"),
+  theme(line = element_line(colour = "#FFFFFF", size= 0.5, linetype = 1, lineend = "square"),
         rect = element_rect(fill = "#FFFFFF", colour="#FFFFFF",size=0, linetype = 1),
         text = element_text(family=base.family, colour = font.colour, size=base.size),
         title = element_text(family=base.family, colour= font.colour, size=base.size),
