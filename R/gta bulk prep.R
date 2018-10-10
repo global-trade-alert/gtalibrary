@@ -206,7 +206,7 @@ gta_bulk_prep = function(
   print("... reformatting levels, dates etc.")
   master$level.prior=as.character(master$level.prior)
   master$level.new=as.character(master$level.new)
-  master$level.unit.id=2
+  master$level.unit.id=1
 
   ## dates
   master$date.implemented=as.factor(master$date.implemented)
@@ -305,7 +305,7 @@ gta_bulk_prep = function(
   ## level formatting
   print("Generating affected product data frame ...")
 
-  master$atl.unit.id=2
+  master$atl.unit.id=1
   master$atl.peak=as.numeric(master$atl.unit=="check me" & master$atl.new>=15)
 
   master$atl.prior=as.character(master$atl.prior)
