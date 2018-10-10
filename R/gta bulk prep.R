@@ -215,6 +215,7 @@ gta_bulk_prep = function(
     stop(paste("Unkown implementer(s): ", paste(unique(subset(master, is.na(implementing.jurisdiction.id))$implementing.jurisdiction), collapse="; "), sep=""))
   }
 
+  ## AJ
   names(gta.jur)=c("aj.editor.choice","affected.jurisdiction.id")
   master=merge(master, gta.jur, by="aj.editor.choice", all.x=T)
 
@@ -222,11 +223,37 @@ gta_bulk_prep = function(
     stop(paste("Unkown affected jurisdiction(s): ", paste(unique(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice)==F)$aj.editor.choice), collapse="; "), sep=""))
   }
 
+  ### CSVs
+  if(nrow(subset(master, is.na(affected.jurisdiction.id)==F))>0){
+    aj=unique(master[,c("intervention.id", "aj.editor.choice", "affected.jurisdiction.id")])
+    aj=merge(aggregate(aj.editor.choice ~intervention.id, aj, function(x) paste(unique(x), collapse=",")),
+             aggregate(affected.jurisdiction.id ~intervention.id, aj, function(x) paste(unique(x), collapse=",")),
+             by="intervention.id")
+
+    master$affected.jurisdiction.id=NULL
+    master$aj.editor.choice=NULL
+    master=merge(unique(master), aj, by="intervention.id", all.x=T)
+  }
+
+  ## DM
   names(gta.jur)=c("dm.editor.choice","distorted.market.id")
   master=merge(master, gta.jur, by="dm.editor.choice", all.x=T)
 
   if(nrow(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice)==F))>0){
     stop(paste("Unkown distorted market(s): ", paste(unique(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice)==F)$dm.editor.choice), collapse="; "), sep=""))
+  }
+
+
+  ### CSVs
+  if(nrow(subset(master, is.na(distorted.market.id)==F))>0){
+    aj=unique(master[,c("intervention.id", "dm.editor.choice", "distorted.market.id")])
+    aj=merge(aggregate(dm.editor.choice ~intervention.id, aj, function(x) paste(unique(x), collapse=",")),
+             aggregate(distorted.market.id ~intervention.id, aj, function(x) paste(unique(x), collapse=",")),
+             by="intervention.id")
+
+    master$distorted.market.id=NULL
+    master$dm.editor.choice=NULL
+    master=merge(unique(master), aj, by="intervention.id", all.x=T)
   }
 
   # generate intervention frame
