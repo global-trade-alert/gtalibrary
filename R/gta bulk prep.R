@@ -93,6 +93,7 @@ gta_bulk_prep = function(
 
 ){
   ## loading and renaming the master data frame
+  print("Loading and formatting master data frame ...")
   eval(parse(text=paste("master=", master.frame, sep="")))
 
   given.names=c(sa.id, sa.title, sa.description, announcement.date, sa.source, source.off, int.id, implementer, int.type, int.description, int.flow, eval.gta, eval.research, inception.date, removal.date, temporary, firms, imp.level, is.noncommercial, is.horizontal, is.fta, int.prior, int.new, int.unit, sectors.nonhs, dm.nonsupport, dm.freeze, aj.nonsupport, aj.freeze, hs.code, hs.prior, hs.new, hs.unit, hs.official, hs.inception, hs.removed)
@@ -100,9 +101,11 @@ gta_bulk_prep = function(
 
   master=master[,given.names]
   names(master)=fct.names
+  print("Loading and formatting master data frame ... complete.")
 
   #### state act CSV
 
+  print("Generating state act data frame ...")
   master$author.id=29
   master$author.id[author=="Johannes"]=1
 
@@ -120,12 +123,16 @@ gta_bulk_prep = function(
                        is_source_official=master$source.official,
                        status_id=4))
 
+  print("State act data frame is ready.")
+
 
   #### intervention CSV
 
   ## intervention type conversion
+  print("Generating intervention data frame ...")
   int.type=gtalibrary::int.mast.types
 
+  print("... adding intervention types.")
   master=merge(master, int.type[,c("intervention.type", "intervention.type.id")], by="intervention.type", all.x=T)
 
   if(nrow(subset(master, is.na(intervention.type.id)))>0){
@@ -135,6 +142,7 @@ gta_bulk_prep = function(
 
 
   ## affected flow id
+  print("... adding affected flow IDs.")
   master$affected.flow.id=NA
   master$affected.flow.id[tolower(master$affected.flow)=="inward"]=1
   master$affected.flow.id[tolower(master$affected.flow)=="outward"]=2
@@ -145,6 +153,7 @@ gta_bulk_prep = function(
   }
 
   ## eligible firms id
+  print("... adding eligible firm IDs.")
   master$eligible.firm.id=NA
   master$eligible.firm.id[tolower(master$eligible.firms)=="all"]=1
   master$eligible.firm.id[tolower(master$eligible.firms)=="smes"]=2
@@ -158,6 +167,7 @@ gta_bulk_prep = function(
 
 
   ## implementation level id
+  print("... adding intervention level IDs.")
   master$implementation.level.id=NA
   master$implementation.level.id[tolower(master$implementation.level)=="supranational"]=1
   master$implementation.level.id[tolower(master$implementation.level)=="national"]=2
@@ -171,6 +181,7 @@ gta_bulk_prep = function(
   }
 
   ## evaluation ids
+  print("... adding evaluation IDs.")
   master$gta.evaluation.id=NA
   master$gta.evaluation.id[tolower(master$gta.evaluation)=="red"]=1
   master$gta.evaluation.id[tolower(master$gta.evaluation)=="amber"]=2
@@ -192,6 +203,7 @@ gta_bulk_prep = function(
 
 
   ## levels
+  print("... reformatting levels, dates etc.")
   master$level.prior=as.character(master$level.prior)
   master$level.new=as.character(master$level.new)
   master$level.unit.id=2
@@ -208,6 +220,7 @@ gta_bulk_prep = function(
   gta.jur=gtalibrary::country.names
   gta.jur=gta.jur[,c("name","jurisdiction.id")]
 
+  print("... adding country IDs.")
   names(gta.jur)=c("implementing.jurisdiction","implementing.jurisdiction.id")
   master=merge(master, gta.jur, by="implementing.jurisdiction", all.x=T)
 
@@ -286,9 +299,12 @@ gta_bulk_prep = function(
                           aj_freeze=master$freeze.aj))
 
 
+  print("Intervention data frame is ready.")
 
   ## affected.TL
   ## level formatting
+  print("Generating affected product data frame ...")
+
   master$atl.unit.id=2
   master$atl.peak=as.numeric(master$atl.unit=="check me" & master$atl.new>=15)
 
@@ -298,18 +314,7 @@ gta_bulk_prep = function(
 
   ## dates
   master$atl.implemented=as.factor(master$atl.implemented)
-  # master$atl.implemented=as.character(paste(year(master$atl.implemented),
-  #                                           month(master$atl.implemented),
-  #                                           day(master$atl.implemented), sep="-"))
-  # master$atl.implemented=gsub("-([0-9]-)","-0\\1")
-  # master$atl.implemented=gsub("-([0-9])$","-0\\1")
-  #
   master$atl.removed=as.factor(master$atl.removed)
-  # master$atl.removed=as.character(paste(year(master$atl.removed),
-  #                                           month(master$atl.removed),
-  #                                           day(master$atl.removed), sep="-"))
-  # master$atl.removed=gsub("-([0-9]-)","-0\\1")
-  # master$atl.removed=gsub("-([0-9])$","-0\\1")
 
 
   ## adding sectors
@@ -335,6 +340,8 @@ gta_bulk_prep = function(
                          inception_date=master$atl.implemented,
                          removal_date=master$atl.removed))
 
+  print("Affected product data frame is ready.")
+
 
   ## exporting CSVs
   # test
@@ -342,6 +349,7 @@ gta_bulk_prep = function(
   intervention.test=subset(intervention, import_measure_id %in% state.act.test$import_id)
   affected.tl.test=subset(affected.tl, import_intervention_id %in% intervention.test$import_id)
 
+  print("Writing test CSVs ...")
   write.csv(state.act.test, file=paste(dump.name," - ",Sys.Date()," - test - measure.csv",sep=""), row.names=F, na="")
   write.csv(intervention.test,  file=paste(dump.name," - ",Sys.Date()," - test - intervention.csv",sep=""), row.names=F, na="")
   write.csv(affected.tl.test,  file=paste(dump.name," - ",Sys.Date()," - test - atl.csv",sep=""), row.names=F, na="")
@@ -352,10 +360,12 @@ gta_bulk_prep = function(
   intervention.full=subset(intervention, ! import_measure_id %in% state.act.test$import_id)
   affected.tl.full=subset(affected.tl, ! import_intervention_id %in% intervention.test$import_id)
 
+  print("Writing full CSVs ...")
   write.csv(state.act.full, file=paste(dump.name," - ",Sys.Date()," - full - measure.csv",sep=""), row.names=F, na="")
   write.csv(intervention.full,  file=paste(dump.name," - ",Sys.Date()," - full - intervention.csv",sep=""), row.names=F, na="")
   write.csv(affected.tl.full,  file=paste(dump.name," - ",Sys.Date()," - full - atl.csv",sep=""), row.names=F, na="")
 
+  print("Voilà!")
   # returning modified DF into global environment
   master.bulk<<-master
   state.act.csv<<- state.act
