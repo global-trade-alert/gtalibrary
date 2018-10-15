@@ -107,8 +107,13 @@ gta_bulk_prep = function(
 
   print("Generating state act data frame ...")
   master$author.id=29
-  master$author.id[author=="Johannes"]=1
-  master$author.id[author=="Josse"]=30
+  if(author=="Johannes"){
+    master$author.id=1
+  }
+  if(author=="Josse"){
+    master$author.id=30
+  }
+
 
   master$title=as.character(master$title)
   master$announcement.description=as.character(master$announcement.description)
