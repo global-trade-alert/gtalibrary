@@ -108,6 +108,7 @@ gta_bulk_prep = function(
   print("Generating state act data frame ...")
   master$author.id=29
   master$author.id[author=="Johannes"]=1
+  master$author.id[author=="Josse"]=30
 
   master$title=as.character(master$title)
   master$announcement.description=as.character(master$announcement.description)
@@ -203,10 +204,20 @@ gta_bulk_prep = function(
 
 
   ## levels
+  unit.df=data.frame(level.unit.id=c(1:19),
+                     level.unit=c("percent", "total budget (USD)", "firm-specific budget (USD)", "USD/MT", "USD/KG", "USD/tonne", "USD/unit", "count", "USD/litre", "USD/pc", "USD/squaremetre", "USD/pair", "USD/ldt", "USD/lb", "USD/gallon", "USD/hl", "USD/LAL", "USD/tyre", "USD/stick"))
+  unit.df$level.unit=as.character(unit.df$level.unit)
+  master$level.unit=as.character(master$level.unit)
+
+
   print("... reformatting levels, dates etc.")
   master$level.prior=as.character(master$level.prior)
   master$level.new=as.character(master$level.new)
-  master$level.unit.id=1
+  master=merge(master, unit.df, by="level.unit")
+
+  if(nrow(subset(master, is.na(level.unit.id)))>0){
+    stop(paste("Unkown level unit(s): ", paste(unique(subset(master, is.na(level.unit.id))$level.unit), collapse="; "), sep=""))
+  }
 
   ## dates
   master$date.implemented=as.factor(master$date.implemented)
@@ -305,8 +316,14 @@ gta_bulk_prep = function(
   ## level formatting
   print("Generating affected product data frame ...")
 
-  master$atl.unit.id=1
-  master$atl.peak=as.numeric(master$atl.unit=="check me" & master$atl.new>=15)
+  names(unit.df)=c("atl.unit.id","atl.unit")
+  master=merge(master, unit.df, by="atl.unit")
+
+  if(nrow(subset(master, is.na(atl.unit.id)))>0){
+    stop(paste("Unkown level unit(s) at the HS code level: ", paste(unique(subset(master, is.na(atl.unit.id))$atl.unit), collapse="; "), sep=""))
+  }
+
+  master$atl.peak=as.numeric(master$atl.unit==1 & master$atl.new>=15)
 
   master$atl.prior=as.character(master$atl.prior)
   master$atl.new=as.character(master$atl.new)
