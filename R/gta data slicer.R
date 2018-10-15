@@ -103,7 +103,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
     check=gta_parameter_check(tolower(gta.evaluation), c("red", "amber", "green"))
     if(check!="OK"){
-      print(paste("Unkown GTA evaluation(s): ", check, ".", sep=""))
+      print(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
     } else {
         eval=tolower(gta.evaluation)
         master=subset(master, tolower(gta.evaluation) %in% eval)
@@ -126,7 +126,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
     check=gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"))
     if(check!="OK"){
-      print(paste("Unkown GTA evaluation(s): ", check, ".", sep=""))
+      print(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
     } else {
       flow=tolower(affected.flows)
       master=subset(master, tolower(affected.flow) %in% flow)
@@ -518,7 +518,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(intervention.types), tolower(int.mast.types$intervention.type))
 
       if(check!="OK"){
-        print(paste("Unkown intervention type(s): ", check, ".", sep=""))
+        print(paste("Unknown intervention type(s): ", check, ".", sep=""))
 
         } else {
           if(keep.type==T){
@@ -564,7 +564,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(mast.letter), tolower(int.mast.types$mast.chapter.id))
 
       if(check!="OK"){
-        print(paste("Unkown mast chapter(s): ", check, ".", sep=""))
+        print(paste("Unknown mast chapter(s): ", check, ".", sep=""))
 
       } else {
 
@@ -609,7 +609,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(implementation.level), tolower(imp.levels$implementation.levels))
 
       if(check!="OK"){
-        print(paste("Unkown implementation level(s): ", check, ".", sep=""))
+        print(paste("Unknown implementation level(s): ", check, ".", sep=""))
 
       } else {
 
@@ -653,7 +653,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(eligible.firms), tolower(elig.firms$eligible.firms))
 
       if(check!="OK"){
-        print(paste("Unkown eligible firms categorie(s): ", check, ".", sep=""))
+        print(paste("Unknown eligible firms categorie(s): ", check, ".", sep=""))
 
       } else {
 
@@ -827,51 +827,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
 
-  # intervention.id
-  # keep.intervention
-  if(is.null(intervention.ids)){
-
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Intervention IDs included:", choice="All"))
-
-  } else {
-
-    if(is.null(keep.intervention)){
-      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.intervention=T/F).")
-
-    } else{
-
-      gta.interventions = unique(master$intervention.id)
-
-      check=gta_parameter_check(intervention.ids, gta.interventions)
-
-      if(check!="OK"){
-        print(paste("Unkown interventions IDs: ", check, ".", sep=""))
-
-      } else {
-
-        if(keep.intervention==T){
-          master=subset(master, intervention.id %in% intervention.ids)
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Intervention IDs included:", choice=paste(intervention.ids, collapse = ", ")))
-
-        } else {
-          master=subset(master, ! intervention.id %in% intervention.ids)
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.ids, collapse = ", "), sep="")))
-
-        }
-
-      }
-
-      rm(check, gta.interventions)
-    }
-  }
-
-
-
   # reporting lag adjustment
   if(is.null(lag.adjustment)){
 
@@ -899,6 +854,52 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         }
 
       }
+
+######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
+  # intervention.id
+  # keep.intervention
+  if(is.null(intervention.ids)){
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Intervention IDs included:", choice="All"))
+
+  } else {
+
+    if(is.null(keep.intervention)){
+      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.intervention=T/F).")
+
+    } else{
+
+      gta.interventions = unique(master$intervention.id)
+
+      if(keep.intervention==T){
+
+        check=gta_parameter_check(intervention.ids, gta.interventions)
+
+        if(check!="OK"){
+          print(paste("Unknown intervention IDs: ", check, ". You may have removed them with another parameter choice.", sep=""))
+
+        }
+
+        master=subset(master, intervention.id %in% intervention.ids)
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Intervention IDs included:", choice=paste(intervention.ids, collapse = ", ")))
+
+      } else {
+        master=subset(master, ! intervention.id %in% intervention.ids)
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.ids, collapse = ", "), sep="")))
+
+      }
+
+
+
+
+      rm(check, gta.interventions)
+    }
+  }
 
 
   ## Returning the result

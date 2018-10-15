@@ -224,7 +224,7 @@ gta_trade_coverage <- function(
 
     if(sum(as.numeric((implementer.role %in% c("any","importer","exporter", "3rd country"))==F))>0){
       role.error=paste("'",paste(implementer.role[(implementer.role %in% c("any","importer","exporter", "3rd country"))==F], collapse="; "),"'", sep="")
-      stop(paste("Unkown implementer role(s): ", role.error, ".", sep=""))
+      stop(paste("Unknown implementer role(s): ", role.error, ".", sep=""))
     }
   }
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, collapse=", ")))
@@ -270,9 +270,9 @@ gta_trade_coverage <- function(
       duration.temp$share=NA
       duration.temp$share=apply(duration.temp,1, function(x) max(subset(intervention.duration, year==yr & intervention.id %in% subset(master.tuple, iahs==x[1])$intervention.id)$share))
       duration.max=rbind(duration.max,duration.temp)
-    }
+      rm(duration.temp)
+     }
 
-    rm(duration.temp)
     print(paste("Calculating maximum coverage per importer-exporter-product combination across all instruments in year ",yr,".",sep=""))
 
   }
