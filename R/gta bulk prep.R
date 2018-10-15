@@ -286,6 +286,7 @@ gta_bulk_prep = function(
   }
 
   # generate intervention frame
+  print("... pulling it all together.")
   intervention=unique(data.frame(import_id=master$intervention.id,
                           import_measure_id=master$state.act.id,
                           measure_type_id=master$intervention.type.id,
@@ -351,6 +352,7 @@ gta_bulk_prep = function(
   master$atl.sector=as.character(master$atl.sector)
   master$atl.sector[nchar(master$atl.sector)==2]=paste(0, master$atl.sector[nchar(master$atl.sector)==2], sep="")
 
+  print("... pulling it all together.")
   affected.tl=unique(data.frame(import_intervention_id=master$intervention.id,
                          tariff_line_code=master$affected.product,
                          prior_level=master$atl.prior,
