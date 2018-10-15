@@ -218,10 +218,10 @@ gta_bulk_prep = function(
   print("... reformatting levels, dates etc.")
   master$level.prior=as.character(master$level.prior)
   master$level.new=as.character(master$level.new)
-  master=merge(master, unit.df, by="level.unit")
+  master=merge(master, unit.df, by="level.unit", all.x=T)
 
-  if(nrow(subset(master, is.na(level.unit.id)))>0){
-    stop(paste("Unkown level unit(s): ", paste(unique(subset(master, is.na(level.unit.id))$level.unit), collapse="; "), sep=""))
+  if(nrow(subset(master, is.na(level.unit.id) & is.na(level.unit)==F))>0){
+    stop(paste("Unkown level unit(s): ", paste(unique(subset(master, is.na(level.unit.id) & is.na(level.unit)==F)$level.unit), collapse="; "), sep=""))
   }
 
   ## dates
@@ -322,10 +322,10 @@ gta_bulk_prep = function(
   print("Generating affected product data frame ...")
 
   names(unit.df)=c("atl.unit.id","atl.unit")
-  master=merge(master, unit.df, by="atl.unit")
+  master=merge(master, unit.df, by="atl.unit", all.x=T)
 
-  if(nrow(subset(master, is.na(atl.unit.id)))>0){
-    stop(paste("Unkown level unit(s) at the HS code level: ", paste(unique(subset(master, is.na(atl.unit.id))$atl.unit), collapse="; "), sep=""))
+  if(nrow(subset(master, is.na(atl.unit.id) & is.na(atl.unit)==F))>0){
+    stop(paste("Unkown level unit(s) at the HS code level: ", paste(unique(subset(master, is.na(atl.unit.id) & is.na(atl.unit)==F)$atl.unit), collapse="; "), sep=""))
   }
 
   master$atl.peak=as.numeric(master$atl.unit==1 & master$atl.new>=15)
