@@ -195,7 +195,7 @@ gta_bulk_prep = function(
   master$research.evaluation.id[tolower(master$research.evaluation)=="red"]=1
   master$research.evaluation.id[tolower(master$research.evaluation)=="amber"]=2
   master$research.evaluation.id[tolower(master$research.evaluation)=="green"]=3
-  master$research.evaluation.id[is.na(master$research.evaluation)]="NULL"
+
 
   if(nrow(subset(master, is.na(research.evaluation.id)))>0){
     stop(paste("Unkown research evaluation(s): ", paste(unique(subset(master, is.na(research.evaluation.id))$research.evaluation), collapse="; "), sep=""))
