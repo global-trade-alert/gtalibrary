@@ -106,7 +106,7 @@ if (tolower(y.data.type) == "continuous"){
                          breaks = y.left.breaks,
                          expand = y.left.expand,
                          labels = y.left.labels,
-                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.",y.right.transform))),
+                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",y.right.transform))),
                                              name = y.right.name,
                                              labels = y.right.labels,
                                              breaks = y.right.breaks))
@@ -122,7 +122,7 @@ if (tolower(y.data.type) == "continuous"){
                            breaks = y.left.breaks,
                            expand = y.left.expand,
                            labels = y.left.labels,
-                           sec.axis = sec_axis(trans = eval(parse(text=paste("~.",y.right.transform))),
+                           sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",y.right.transform))),
                                                name = y.right.name,
                                                labels = y.right.labels,
                                                breaks = y.right.breaks))
@@ -144,7 +144,7 @@ if (tolower(y.data.type) == "continuous"){
                            breaks = x.bottom.breaks,
                            expand = x.bottom.expand,
                            labels = x.bottom.labels,
-                           sec.axis = sec_axis(trans = eval(parse(text=paste("~.",x.top.transform))),
+                           sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",x.top.transform))),
                                                name = x.top.name,
                                                labels = x.top.labels,
                                                breaks = x.top.breaks))
@@ -160,7 +160,7 @@ if (tolower(y.data.type) == "continuous"){
                              breaks = x.bottom.breaks,
                              expand = x.bottom.expand,
                              labels = x.bottom.labels,
-                             sec.axis = sec_axis(trans = eval(parse(text=paste("~.",x.top.transform))),
+                             sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",x.top.transform))),
                                                  name = x.top.name,
                                                  labels = x.top.labels,
                                                  breaks = x.top.breaks))
