@@ -99,7 +99,7 @@ gta_bulk_prep = function(
   given.names=c(sa.id, sa.title, sa.description, announcement.date, sa.source, source.off, int.id, implementer, int.type, int.description, int.flow, eval.gta, eval.research, inception.date, removal.date, temporary, firms, imp.level, is.noncommercial, is.horizontal, is.fta, int.prior, int.new, int.unit, sectors.nonhs, dm.nonsupport, dm.freeze, aj.nonsupport, aj.freeze, hs.code, hs.prior, hs.new, hs.unit, hs.official, hs.inception, hs.removed)
   fct.names=c("state.act.id", "title", "announcement.description", "date.announced", "source", "source.official", "intervention.id", "implementing.jurisdiction", "intervention.type", "intervention.description", "affected.flow", "gta.evaluation", "research.evaluation", "date.implemented", "date.removed", "duration.limited", "eligible.firms", "implementation.level", "non.commercial", "horizontal", "include.fta", "level.prior", "level.new", "level.unit", "affected.sectors.nonhs", "dm.editor.choice", "freeze.dm", "aj.editor.choice", "freeze.aj", "affected.product", "atl.prior", "atl.new", "atl.unit", "atl.official", "atl.implemented","atl.removed")
 
-  master=master[,given.names]
+  master=unique(master[,given.names])
   names(master)=fct.names
   print("Loading and formatting master data frame ... complete.")
 
