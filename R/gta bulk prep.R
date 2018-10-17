@@ -210,9 +210,9 @@ gta_bulk_prep = function(
 
   ## levels
   unit.df=data.frame(level.unit.id=c(1,1,1:19),
-                     level.unit=c("percent","%","per cent", "total budget (USD)", "firm-specific budget (USD)", "USD/MT", "USD/KG", "USD/tonne", "USD/unit", "count", "USD/litre", "USD/pc", "USD/squaremetre", "USD/pair", "USD/ldt", "USD/lb", "USD/gallon", "USD/hl", "USD/LAL", "USD/tyre", "USD/stick"))
-  unit.df$level.unit=as.character(unit.df$level.unit)
-  master$level.unit=as.character(master$level.unit)
+                     level.unit=c("percent","%","per cent", "total budget (USD)", "firm-specific budget (USD)", "USD/MT", "USD/kg", "USD/tonne", "USD/unit", "count", "USD/litre", "USD/pc", "USD/squaremetre", "USD/pair", "USD/ldt", "USD/lb", "USD/gallon", "USD/hl", "USD/LAL", "USD/tyre", "USD/stick"))
+  unit.df$level.unit=tolower(as.character(unit.df$level.unit))
+  master$level.unit=tolower(as.character(master$level.unit))
 
 
   print("... reformatting levels, dates etc.")
@@ -321,7 +321,7 @@ gta_bulk_prep = function(
   ## affected.TL
   ## level formatting
   print("Generating affected product data frame ...")
-
+  master$atl.unit=tolower(as.character(master$atl.unit))
   names(unit.df)=c("atl.unit.id","atl.unit")
   master=merge(master, unit.df, by="atl.unit", all.x=T)
 
