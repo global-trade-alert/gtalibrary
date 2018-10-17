@@ -8,9 +8,10 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   gta.evaluation = NULL, affected.flows = NULL,
   implementing.country = NULL, keep.implementer = NULL,
   affected.country = NULL, keep.affected = NULL, target = NULL,
-  additional.targets = NULL, announcement.period = NULL,
-  implementation.period = NULL, revocation.period = NULL,
-  keep.revocation.na = NULL, in.force.today = NULL,
+  additional.targets = NULL, targets.combined = TRUE,
+  announcement.period = NULL, implementation.period = NULL,
+  revocation.period = NULL, keep.revocation.na = NULL,
+  submission.period = NULL, in.force.today = NULL,
   intervention.types = NULL, keep.type = NULL, mast.chapters = NULL,
   keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
@@ -38,6 +39,8 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{additional.targets}{Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.}
 
+\item{targets.combined}{Specify whether interventions shall affect all targets combined ('TRUE') or combined as well as uniquely ('FALSE'). Default is 'TRUE'.}
+
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
 \item{implementation.period}{Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.}
@@ -45,6 +48,8 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 \item{revocation.period}{Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 
 \item{keep.revocation.na}{Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.}
+
+\item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 
 \item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
 
@@ -81,8 +86,6 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 \item{df.name}{Set the name of the generated result data frame. Default is master.sliced.}
 
 \item{pc.name}{Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.}
-
-\item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 }
 \description{
 Make use of the many variables captured in the taxonomy of the Global Trade Alert and tailor the data to your needs. This function returns a list of 2 data frames. The first, master, contains the subset of GTA data you requested. The second, parameter.choices, lists all implicit or exlicited choices that led to the subset.

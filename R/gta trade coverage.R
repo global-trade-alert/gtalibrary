@@ -19,6 +19,9 @@
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
 #' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 #' @param testmode Can be set to TRUE or FALSE. If TRUE, sample will be minimized by 99 percent in order to speed up processing. Keep in mind that this will distort results significantly. Default: FALSE.
+#' @param target Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.
+#' @param additional.targets Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.
+#' @param targets.combined Specify whether interventions shall affect all targets combined ('TRUE') or combined as well as uniquely ('FALSE'). Default is 'TRUE'.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
@@ -61,6 +64,9 @@ gta_trade_coverage <- function(
   group.exporters = TRUE,
   implementers = NULL,
   implementer.role = NULL,
+  target = NULL,
+  additional.targets = NULL,
+  targets.combined = TRUE,
   announcement.period = NULL,
   implementation.period = NULL,
   revocation.period = NULL,
@@ -104,6 +110,9 @@ gta_trade_coverage <- function(
   gta_data_slicer(data.path=data.path,
                   gta.evaluation= gta.evaluation,
                   affected.flows = affected.flows,
+                  target = target,
+                  additional.targets = additional.targets,
+                  targets.combined = targets.combined,
                   announcement.period = announcement.period,
                   implementation.period = implementation.period,
                   revocation.period = revocation.period,

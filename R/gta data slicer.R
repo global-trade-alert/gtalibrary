@@ -13,6 +13,7 @@
 #' @param keep.affected Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.
 #' @param target Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.
 #' @param additional.targets Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.
+#' @param targets.combined Specify whether interventions shall affect all targets combined ('TRUE') or combined as well as uniquely ('FALSE'). Default is 'TRUE'.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
@@ -50,6 +51,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         keep.affected = NULL,
                         target = NULL,
                         additional.targets = NULL,
+                        targets.combined = TRUE,
                         announcement.period = NULL,
                         implementation.period = NULL,
                         revocation.period = NULL,
@@ -218,20 +220,42 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     # unique id to a.un combinations
     all.id <- subset(as.data.frame(unique(master[,c("intervention.id","a.un")])), is.na(a.un)==F)
-    # ids where all targets are affected
-    target.id <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == length(target))
-    # Subset all interventions and create frequency table and count sum of frequencies
-    target.id <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id$intervention.id))), sum)
+
+    if (targets.combined==T){
+      # ids where all targets are affected
+      target.id <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == length(target))
+      # Subset all interventions and create frequency table and count sum of frequencies
+      target.id <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id$intervention.id))), sum)
+
+    } else if (targets.combined == F){
+      # ids where all targets, as well as single targets are affected
+      target.id.single <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == 1)
+      target.id.combined <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == length(target))
+      # Subset all interventions and create frequency table and count sum of frequencies
+      target.id.single <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id.single$intervention.id))), sum)
+      target.id.combined <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id.combined$intervention.id))), sum)
+
+      } else {
+      stop("Please specify whether to combine targets or not. targets.combined = T/F")
+    }
 
     # Filter for value of frequency
     if(is.null(additional.targets)){
-      master <- subset(master, intervention.id %in% target.id$intervention.id)
+      if (targets.combined==T){
+        master <- subset(master, intervention.id %in% target.id$intervention.id)
 
-    } else {master <- subset(master, intervention.id %in% subset(target.id, Freq==(length(target)+additional.targets))$intervention.id)
+      } else if (targets.combined==F){
+        target.id = rbind(target.id.combined, target.id.single)
+        master <- subset(master, intervention.id %in% target.id$intervention.id)
+      }
+
+    } else if (targets.combined == T) {master <- subset(master, intervention.id %in% subset(target.id, Freq==(length(target)+additional.targets))$intervention.id)
+    } else if (targets.combined == F) {master <- subset(master, intervention.id %in% subset(target.id.single, Freq==(1 + additional.targets))$intervention.id | intervention.id %in% subset(target.id.combined, Freq==(length(target)+additional.targets))$intervention.id)
+
     }
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Targeted countries:", choice=paste(paste(target, collapse = ", "), " and ", additional.targets, " additional", sep="")))
+                            data.frame(parameter="Targeted countries:", choice=paste(paste(target, collapse = ", "), " and ", additional.targets, " additional, targets combined = ",targets.combined, sep="")))
 
     rm(all.id, target.id)
 

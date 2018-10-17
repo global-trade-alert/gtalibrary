@@ -9,7 +9,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
   gta.evaluation = NULL, affected.flows = NULL, importers = NULL,
   group.importers = TRUE, exporters = NULL, group.exporters = TRUE,
-  implementers = NULL, implementer.role = NULL,
+  implementers = NULL, implementer.role = NULL, target = NULL,
+  additional.targets = NULL, targets.combined = TRUE,
   announcement.period = NULL, implementation.period = NULL,
   revocation.period = NULL, in.force.today = NULL,
   intervention.types = NULL, keep.type = NULL, group.type = TRUE,
@@ -45,6 +46,12 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
 
 \item{implementer.role}{Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').}
+
+\item{target}{Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.}
+
+\item{additional.targets}{Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.}
+
+\item{targets.combined}{Specify whether interventions shall affect all targets combined ('TRUE') or combined as well as uniquely ('FALSE'). Default is 'TRUE'.}
 
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
