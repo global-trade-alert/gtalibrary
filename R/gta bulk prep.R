@@ -236,12 +236,26 @@ gta_bulk_prep = function(
   gta.jur=gtalibrary::country.names
   gta.jur=gta.jur[,c("name","jurisdiction.id")]
 
+  ## IJ
   print("... adding country IDs.")
   names(gta.jur)=c("implementing.jurisdiction","implementing.jurisdiction.id")
   master=merge(master, gta.jur, by="implementing.jurisdiction", all.x=T)
 
   if(nrow(subset(master, is.na(implementing.jurisdiction.id)))>0){
     stop(paste("Unkown implementer(s): ", paste(unique(subset(master, is.na(implementing.jurisdiction.id))$implementing.jurisdiction), collapse="; "), sep=""))
+  }
+
+
+  ### CSVs
+  if(nrow(subset(master, is.na(implementing.jurisdiction.id)==F))>0){
+    ij=unique(master[,c("intervention.id", "implementing.jurisdiction", "implementing.jurisdiction.id")])
+    ij=merge(aggregate(implementing.jurisdiction ~intervention.id, ij, function(x) paste(unique(x), collapse=",")),
+             aggregate(implementing.jurisdiction.id ~intervention.id, ij, function(x) paste(unique(x), collapse=",")),
+             by="intervention.id")
+
+    master$implementing.jurisdiction.id=NULL
+    master$implementing.jurisdiction=NULL
+    master=merge(unique(master), ij, by="intervention.id", all.x=T)
   }
 
   ## AJ
