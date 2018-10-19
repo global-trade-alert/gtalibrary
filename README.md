@@ -6,4 +6,4 @@ Install using:
 ```
 devtools::install_github("global-trade-alert/gtalibrary", force=T)
 ```
-We are working continuously on bugfixes and extensions, so update regularly.
+We are working continuously on bugfixes and extensions, so update this regularly ("gta_update_library()").
