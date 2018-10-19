@@ -1,5 +1,5 @@
 # gtalibrary
-R package containing functions to work with Global Trade Alert data
+A nascent R package containing functions to work with Global Trade Alert data.
 
 
 Install using:
