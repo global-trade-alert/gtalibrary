@@ -56,7 +56,7 @@ gta_plot_3d_map <- function(data = NULL,
   # Load map data
   gta_colour_palette()
 
-  load("data/world_geo_final.Rdata")
+  world <- gtalibrary::world.geo
 
   data[,c("UN","value.x","value.y")] <- data[,c(countries,value.x,value.y)]
 
