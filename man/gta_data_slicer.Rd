@@ -11,7 +11,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   additional.targets = NULL, targets.combined = TRUE,
   announcement.period = NULL, implementation.period = NULL,
   revocation.period = NULL, keep.revocation.na = NULL,
-  submission.period = NULL, in.force.today = NULL,
+  submission.period = NULL, in.force.today = "Any",
   intervention.types = NULL, keep.type = NULL, mast.chapters = NULL,
   keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
@@ -51,7 +51,7 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 
-\item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
+\item{in.force.today}{Specify whether you want to focus on interventions in force today ('Yes') or no longer in force today ('No'). Default is 'any' i.e. regardless of current enforcement status.}
 
 \item{intervention.types}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
 
