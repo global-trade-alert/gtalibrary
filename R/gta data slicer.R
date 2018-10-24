@@ -19,7 +19,7 @@
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param submission.period Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param keep.revocation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.
-#' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
+#' @param in.force.today Specify whether you want to focus on interventions in force today ('Yes') or no longer in force today ('No'). Default is 'any' i.e. regardless of current enforcement status.
 #' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
 #' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
 #' @param mast.chapters Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.
@@ -57,7 +57,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                         revocation.period = NULL,
                         keep.revocation.na = NULL,
                         submission.period = NULL,
-                        in.force.today = NULL,
+                        in.force.today = 'Any',
                         intervention.types = NULL,
                         keep.type = NULL,
                         mast.chapters = NULL,
@@ -496,14 +496,14 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
   # in.force.today
-  if(is.null(in.force.today)){
+  if(in.force.today=="Any"){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Currently in force:", choice="Regardless"))
 
   } else {
 
-    if(in.force.today==T){
+    if(tolower(in.force.today)=="yes"){
 
       master=subset(master, date.implemented<=Sys.Date() & (is.na(date.removed)==T|date.removed>=Sys.Date()))
 
@@ -511,7 +511,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                               data.frame(parameter="Currently in force:", choice="Yes"))
 
     } else {
-      if(in.force.today==F){
+      if(tolower(in.force.today)=='no'){
 
         master=subset(master, (date.implemented<Sys.Date() & is.na(date.removed)==F & date.removed<Sys.Date()) | is.na(date.implemented))
 
@@ -519,7 +519,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                                 data.frame(parameter="Currently in force:", choice="No"))
 
       }else{
-        stop("Please specify in.force.today as either TRUE or FALSE.")
+        stop("Please specify in.force.today as either 'yes', 'no' or 'any'.")
       }
     }
 
