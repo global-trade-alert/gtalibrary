@@ -630,7 +630,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       imp.levels <- gtalibrary::imp.levels
 
-      check=gta_parameter_check(tolower(implementation.level), tolower(imp.levels$implementation.levels))
+      check=gta_parameter_check(tolower(implementation.level), tolower(imp.levels$implementation.level))
 
       if(check!="OK"){
         stop(paste("Unknown implementation level(s): ", check, ".", sep=""))
