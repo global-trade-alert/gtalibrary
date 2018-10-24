@@ -105,7 +105,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
     check=gta_parameter_check(tolower(gta.evaluation), c("red", "amber", "green"))
     if(check!="OK"){
-      print(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
+      stop(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
     } else {
         eval=tolower(gta.evaluation)
         master=subset(master, tolower(gta.evaluation) %in% eval)
@@ -128,7 +128,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
     check=gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"))
     if(check!="OK"){
-      print(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
+      stop(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
     } else {
       flow=tolower(affected.flows)
       master=subset(master, tolower(affected.flow) %in% flow)
@@ -542,7 +542,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(intervention.types), tolower(int.mast.types$intervention.type))
 
       if(check!="OK"){
-        print(paste("Unknown intervention type(s): ", check, ".", sep=""))
+        stop(paste("Unknown intervention type(s): ", check, ".", sep=""))
 
         } else {
           if(keep.type==T){
@@ -588,7 +588,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(mast.letter), tolower(int.mast.types$mast.chapter.id))
 
       if(check!="OK"){
-        print(paste("Unknown mast chapter(s): ", check, ".", sep=""))
+        stop(paste("Unknown mast chapter(s): ", check, ".", sep=""))
 
       } else {
 
@@ -633,7 +633,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(implementation.level), tolower(imp.levels$implementation.levels))
 
       if(check!="OK"){
-        print(paste("Unknown implementation level(s): ", check, ".", sep=""))
+        stop(paste("Unknown implementation level(s): ", check, ".", sep=""))
 
       } else {
 
@@ -663,7 +663,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   if(is.null(eligible.firms)){
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Eligible firms categories included:", choice="All"))
+                            data.frame(parameter="Eligible firms categories included:", choice="Any"))
 
   } else {
 
@@ -677,7 +677,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(eligible.firms), tolower(elig.firms$eligible.firms))
 
       if(check!="OK"){
-        print(paste("Unknown eligible firms categorie(s): ", check, ".", sep=""))
+        stop(paste("Unknown eligible firms categorie(s): ", check, ".", sep=""))
 
       } else {
 
@@ -901,7 +901,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         check=gta_parameter_check(intervention.ids, gta.interventions)
 
         if(check!="OK"){
-          print(paste("Unknown intervention IDs: ", check, ". You may have removed them with another parameter choice.", sep=""))
+          stop(paste("Unknown intervention IDs: ", check, ". You may have removed them with another parameter choice.", sep=""))
 
         }
 
