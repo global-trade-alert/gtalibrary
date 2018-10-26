@@ -136,7 +136,7 @@ gta_trade_coverage <- function(
 
   ##### Extracting Parameter Choices from data slicer
   parameter.choices <- rbind(parameter.choices, parameter.choice.slicer)
-  rm(parameter.choice.slicer)
+  # rm(parameter.choice.slicer)
   print("Slicing GTA master data set ... complete.")
 
 
@@ -186,7 +186,7 @@ gta_trade_coverage <- function(
                             is.data.frame=TRUE,
                             years=c(year.start,year.end),
                             current.year.todate=current.year.todate)
-  rm(parameter.choice.duration)
+  # rm(parameter.choice.duration)
   print("Calculating intervention durations ... complete.")
 
   ######## calculate implementer-importer-exporter-product tuples
@@ -196,7 +196,7 @@ gta_trade_coverage <- function(
   gta_imp_exp_hs_tuples(master.path='master.sliced',
                         master.data.frame=TRUE)
   print("Building intervention-importer-exporter-product tuples ... complete.")
-  rm(parameter.tuple)
+  # rm(parameter.tuple)
 
   ## correct for user choice of implementers and roles
   ## relevant parameters: importers, exporters, implementers/roles.
@@ -353,7 +353,7 @@ gta_trade_coverage <- function(
                             keep.hs = TRUE)
 
   trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
-  rm(parameter.choice.trade.base)
+  # rm(parameter.choice.trade.base)
   print("Importing trade base values ... completed.")
 
 
