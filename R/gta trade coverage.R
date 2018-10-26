@@ -530,7 +530,7 @@ gta_trade_coverage <- function(
   countries=gtalibrary::country.names
   countries$name=as.character(countries$name)
 
-  countries=rbind(countries, data.frame(name="All included importers", un_code=999))
+  countries=rbind(countries[,c("name","un_code")], data.frame(name="All included importers", un_code=999))
   names(countries)=c("importer", "i.un")
   final.coverage=merge(final.coverage, countries, by="i.un", all.x=T)
   final.coverage$i.un=NULL
