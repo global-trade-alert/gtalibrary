@@ -30,7 +30,7 @@ gta_plot_map <- function(data = NULL,
   # Load map data
   gta_colour_palette()
 
-  load("data/world.geo.rda")
+  world <- gtalibrary::world.geo
 
   setnames(data, paste0(countries),"UN")
   setnames(data, paste0(value),"value")
