@@ -7,7 +7,6 @@
 #' @param data Specify the dataframe with the relevant columns.
 #' @param countries Specify the name of the column containing the countries.
 #' @param value Specify the name of the column containing the value for each country.
-#' @param value.center Specify the name of the column containing values for an area variable in the center of each country.
 #' @param colour.low Specifiy a color from the gta colour palette for the low part of the gradient. Default: GTA dark blue
 #' @param colour.high Specify a color from the gta colour palette for the high part of the gradient. Default: GTA light blue
 #' @param colour.breaks Specify the breaks for the colour gradient. Default: ggplot automatic.
@@ -20,7 +19,6 @@
 gta_plot_map <- function(data = NULL,
                          countries = NULL,
                          value = NULL,
-                         value.center = NULL,
                          colour.low = blue[4],
                          colour.high = blue[1],
                          colour.breaks = waiver(),
@@ -32,7 +30,7 @@ gta_plot_map <- function(data = NULL,
   # Load map data
   gta_colour_palette()
 
-  load("data/world_geo_final.Rdata")
+  load("data/world.geo.rda")
 
   setnames(data, paste0(countries),"UN")
   setnames(data, paste0(value),"value")

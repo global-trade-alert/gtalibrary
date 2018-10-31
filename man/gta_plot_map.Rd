@@ -5,7 +5,7 @@
 \title{Create ggplot maps.}
 \usage{
 gta_plot_map(data = NULL, countries = NULL, value = NULL,
-  value.center = NULL, colour.low = blue[4], colour.high = blue[1],
+  colour.low = blue[4], colour.high = blue[1],
   colour.breaks = waiver(), colour.legend.title = NULL)
 }
 \arguments{
@@ -14,8 +14,6 @@ gta_plot_map(data = NULL, countries = NULL, value = NULL,
 \item{countries}{Specify the name of the column containing the countries.}
 
 \item{value}{Specify the name of the column containing the value for each country.}
-
-\item{value.center}{Specify the name of the column containing values for an area variable in the center of each country.}
 
 \item{colour.low}{Specifiy a color from the gta colour palette for the low part of the gradient. Default: GTA dark blue}
 
