@@ -29,13 +29,28 @@ gta_plot_map <- function(data = NULL,
   library("data.table")
   library("ggplot2")
 
+  data = NULL
+  countries = NULL
+  value = NULL
+  colour.low = blue[4]
+  colour.high = blue[1]
+  colour.breaks = waiver()
+  legend.title = NULL
+  title = NULL
+
+  data = agg
+  countries = countries
+  value = value
+  title = title
+  legend.title = legend.title
+
+
   # Load map data
   gta_colour_palette()
 
   world <- gtalibrary::world.geo
 
-  setnames(data, paste0(countries),"UN")
-  setnames(data, paste0(value),"value")
+  data[,c("UN","value")] <- data[,c(countries,value)]
 
   # merge data with map data
   world = merge(world, data[,c("UN","value")], by="UN", all.x=T)
@@ -57,9 +72,16 @@ gta_plot_map <- function(data = NULL,
           axis.text.y=element_blank(),
           axis.ticks.y=element_blank(),
           panel.background = element_blank(),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          plot.title = element_text(family = "Open Sans", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b=10)),
+          legend.title = element_text(vjust= 0.2, family="Open Sans", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
+          legend.text = element_text(family="Open Sans", colour = "#333333", size = 11*0.8)
+
+    ) +
     guides(fill=guide_legend(title=legend.title, label.position = "top"),
            ymax=guide_legend(titel="size"))
+
+  plot
 
   return(plot)
 }
