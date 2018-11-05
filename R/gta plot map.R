@@ -20,30 +20,14 @@
 gta_plot_map <- function(data = NULL,
                          countries = NULL,
                          value = NULL,
-                         colour.low = blue[4],
-                         colour.high = blue[1],
+                         colour.low = gta_colour$blue[4],
+                         colour.high = gta_colour$blue[1],
                          colour.breaks = waiver(),
                          legend.title = NULL,
                          title = NULL) {
 
   library("data.table")
   library("ggplot2")
-
-  data = NULL
-  countries = NULL
-  value = NULL
-  colour.low = blue[4]
-  colour.high = blue[1]
-  colour.breaks = waiver()
-  legend.title = NULL
-  title = NULL
-
-  data = agg
-  countries = countries
-  value = value
-  title = title
-  legend.title = legend.title
-
 
   # Load map data
   gta_colour_palette()

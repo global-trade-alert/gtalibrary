@@ -24,8 +24,8 @@ gta_plot_tile <- function(data = NULL,
                          value.x = NULL,
                          value.y = NULL,
                          values = NULL,
-                         colour.low = blue[4],
-                         colour.high = blue[1],
+                         colour.low = gta_colour$blue[4],
+                         colour.high = gta_colour$blue[1],
                          legend.title = NULL,
                          title = NULL,
                          x.axis.name = NULL,
@@ -33,22 +33,22 @@ gta_plot_tile <- function(data = NULL,
 
   library("data.table")
   library("ggplot2")
-  library(lubridate)
+  library("lubridate")
 
-  data = master.0
-  value.x = "year(date.implemented)"
-  value.y = "month(date.implemented)"
-  values = "intervention.id"
-  colour.low = blue[4]
-  colour.high = blue[1]
-  legend.title = NULL
-  title = NULL
-  x.axis.name = NULL
-  y.axis.name = NULL
+  # data = master.0
+  # value.x = "year(date.implemented)"
+  # value.y = "month(date.implemented)"
+  # values = "intervention.id"
+  # colour.low = gta_colour$blue[4]
+  # colour.high = gta_colour$blue[1]
+  # legend.title = NULL
+  # title = NULL
+  # x.axis.name = NULL
+  # y.axis.name = NULL
 
-  load("data/master_plus.Rdata")
+  # load("data/master_plus.Rdata")
 
-  master.0 <- aggregate(intervention.id~year(date.implemented)+month(date.implemented), master, function(x) length(unique(x)))
+  # master.0 <- aggregate(intervention.id~year(date.implemented)+month(date.implemented), master, function(x) length(unique(x)))
 
   # Load map data
   gta_colour_palette()
