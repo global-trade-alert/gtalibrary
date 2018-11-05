@@ -58,7 +58,7 @@ gta_plot_map <- function(data = NULL,
           axis.ticks.y=element_blank(),
           panel.background = element_blank(),
           legend.position = "bottom") +
-    guides(fill=guide_legend(title=colour.legend.title, label.position = "top"),
+    guides(fill=guide_legend(title=legend.title, label.position = "top"),
            ymax=guide_legend(titel="size"))
 
   return(plot)
