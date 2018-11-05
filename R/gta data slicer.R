@@ -889,14 +889,14 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   } else {
 
-    if(is.null(keep.intervention)){
-      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.intervention=T/F).")
+    if(is.null(keep.interventions)){
+      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.interventions=T/F).")
 
     } else{
 
       gta.interventions = unique(master$intervention.id)
 
-      if(keep.intervention==T){
+      if(keep.interventions==T){
 
         check=gta_parameter_check(intervention.ids, gta.interventions)
 
