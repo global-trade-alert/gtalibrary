@@ -1,3 +1,16 @@
+# Roxygen documentation
+
+#' GTA Colour Palette .
+#'
+#' Access any colour by calling e.g. gta_colour$green[1]. Every colour comes in 4 predefined shades (index 1 to 4 or dark to light).
+#'
+#' 'qualitative' contains 8 neutral colours. Shade functions can be filled with any numeric value indicating the number of shades needed.
+#'
+#' Applicable values are: green, liberalising, green.light, red, harmful, red.light, amber, blue, brown, turquoise, desert, grey, blue.complement, qualitative, green.shades(), red.shades(), amber.shades(), blue.shades(), turquoise.shades(), desert.shades(), brown.shades(), grey.shades().
+#'
+#' @references www.globaltradealert.org
+#' @author Global Trade Alert
+
 
 gta_colour_palette <- function(){
 
@@ -8,34 +21,18 @@ gta_colour_palette <- function(){
   liberalising <- green
   green.light <- green[4]
 
-  assign("green", green, envir = .GlobalEnv)
-  assign("liberalising", liberalising, envir = .GlobalEnv)
-  assign("green.light", green.light, envir = .GlobalEnv)
-
   red <- c("#d42e59", "#e26888", "#f1a1b7", "#ffdbe6")
   harmful <- red
   light.red <- red[4]
 
-  assign("red", red, envir = .GlobalEnv)
-  assign("harmful", harmful, envir = .GlobalEnv)
-  assign("light.red", light.red, envir = .GlobalEnv)
-
   amber <- c("#f59b07", "#f8b23a", "#fcc96e", "#ffe0a1")
-
-  assign("amber", amber, envir = .GlobalEnv)
 
   # Neutral colours
   blue <- c("#134d6a", "#417895", "#6ea2c0", "#9ccdeb")
   brown <- c("#826448", "#9b8162", "#b39d7c", "#ccb997")
   turquoise <- c("#3f8c8c", "#5aa09d", "#76b3ae", "#91c7bf")
   desert <- c("#c46e2f", "#d48847", "#e3a25f", "#f2bd77")
-  gta.grey <- c("#808080", "#9a9a9a", "#b4b4b4", "#cfcfce")
-
-  assign("blue", blue, envir = .GlobalEnv)
-  assign("brown", brown, envir = .GlobalEnv)
-  assign("turquoise", turquoise, envir = .GlobalEnv)
-  assign("desert", desert, envir = .GlobalEnv)
-  assign("grey", gta.grey, envir = .GlobalEnv)
+  grey <- c("#808080", "#9a9a9a", "#b4b4b4", "#cfcfce")
 
 
   # Legacy code (blue complement = brown)
@@ -47,12 +44,9 @@ gta_colour_palette <- function(){
 
   qualitative <<-  c(blue[1], blue[4], brown[1], brown[4], turquoise[1], turquoise[4], desert[1], desert[4])
 
-  assign("qualitative", qualitative, envir = .GlobalEnv)
 
   # General plot colours
   panel.bg <<- "#EDF2F6"
-
-  assign("panel.bg", panel.bg, envir = .GlobalEnv)
 
   # Automatic Shades
   green.shades <- colorRampPalette(c(green[1], green[4]))
@@ -62,14 +56,31 @@ gta_colour_palette <- function(){
   brown.shades <- colorRampPalette(c(brown[1], brown[4]))
   desert.shades <- colorRampPalette(c(desert[1], desert[4]))
   turquoise.shades <- colorRampPalette(c(turquoise[1], turquoise[4]))
-  grey.shades <- colorRampPalette(c(gta.grey[1], gta.grey[4]))
+  grey.shades <- colorRampPalette(c(grey[1], grey[4]))
 
-  assign("green.shades", green.shades, envir = .GlobalEnv)
-  assign("red.shades", red.shades, envir = .GlobalEnv)
-  assign("blue.shades", blue.shades, envir = .GlobalEnv)
-  assign("amber.shades", amber.shades, envir = .GlobalEnv)
-  assign("brown.shades", brown.shades, envir = .GlobalEnv)
-  assign("desert.shades", desert.shades, envir = .GlobalEnv)
-  assign("turquoise.shades", turquoise.shades, envir = .GlobalEnv)
-  assign("grey.shades", grey.shades, envir = .GlobalEnv)
+
+  gta_colour = list("green" = green,
+                            "liberalising" = liberalising,
+                            "green.light" = green.light,
+                            "red" = red,
+                            "harmful" = harmful,
+                            "light.red" = light.red,
+                            "amber" = amber,
+                            "blue" = blue,
+                            "brown" = brown,
+                            "turquoise" = turquoise,
+                            "desert" = desert,
+                            "grey" = grey,
+                            "qualitative" = qualitative,
+                            "panel.bg" = panel.bg,
+                            "green.shades" = green.shades,
+                            "red.shades" = red.shades,
+                            "blue.shades" = blue.shades,
+                            "amber.shades" = amber.shades,
+                            "brown.shades" = brown.shades,
+                            "desert.shades" = desert.shades,
+                            "turquoise.shades" = turquoise.shades,
+                            "grey.shades" = grey.shades)
+
+  gta_colour <<- gta_colour
 }
