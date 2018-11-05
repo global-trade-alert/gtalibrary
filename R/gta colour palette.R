@@ -36,17 +36,14 @@ gta_colour_palette <- function(){
 
 
   # Legacy code (blue complement = brown)
-  blue.complement <<- c(brown[1], brown[2], brown[3], brown[4])
-
-  assign("blue.complement", blue.complement, envir = .GlobalEnv)
+  blue.complement <- c(brown[1], brown[2], brown[3], brown[4])
 
   # Qualitative colors
 
-  qualitative <<-  c(blue[1], blue[4], brown[1], brown[4], turquoise[1], turquoise[4], desert[1], desert[4])
-
+  qualitative <-  c(blue[1], blue[4], brown[1], brown[4], turquoise[1], turquoise[4], desert[1], desert[4])
 
   # General plot colours
-  panel.bg <<- "#EDF2F6"
+  panel.bg <- "#EDF2F6"
 
   # Automatic Shades
   green.shades <- colorRampPalette(c(green[1], green[4]))
@@ -71,6 +68,7 @@ gta_colour_palette <- function(){
                             "turquoise" = turquoise,
                             "desert" = desert,
                             "grey" = grey,
+                            "blue.complement" = blue.complement,
                             "qualitative" = qualitative,
                             "panel.bg" = panel.bg,
                             "green.shades" = green.shades,
