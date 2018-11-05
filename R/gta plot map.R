@@ -10,7 +10,8 @@
 #' @param colour.low Specifiy a color from the gta colour palette for the low part of the gradient. Default: GTA dark blue
 #' @param colour.high Specify a color from the gta colour palette for the high part of the gradient. Default: GTA light blue
 #' @param colour.breaks Specify the breaks for the colour gradient. Default: ggplot automatic.
-#' @param colour.legend.title Specify a title for the colour legend. Default: No title.
+#' @param legend.title Specify a title for the colour legend. Default: No title.
+#' @param title Specify a title for the map plot. Default: No title.
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -22,7 +23,8 @@ gta_plot_map <- function(data = NULL,
                          colour.low = blue[4],
                          colour.high = blue[1],
                          colour.breaks = waiver(),
-                         colour.legend.title = NULL) {
+                         legend.title = NULL,
+                         title = NULL) {
 
   library("data.table")
   library("ggplot2")
@@ -45,6 +47,7 @@ gta_plot_map <- function(data = NULL,
   plot = ggplot() +
     geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white") +
     coord_fixed() + # Important to fix world map proportions
+    ggtitle(title) +
     labs(x="", y="") +
     scale_fill_gradient(low = colour.low, high = colour.high, breaks=colour.breaks, position="bottom") + # Set color gradient
     theme(axis.title.x=element_blank(),

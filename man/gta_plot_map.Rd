@@ -6,7 +6,7 @@
 \usage{
 gta_plot_map(data = NULL, countries = NULL, value = NULL,
   colour.low = blue[4], colour.high = blue[1],
-  colour.breaks = waiver(), colour.legend.title = NULL)
+  colour.breaks = waiver(), legend.title = NULL, title = NULL)
 }
 \arguments{
 \item{data}{Specify the dataframe with the relevant columns.}
@@ -21,7 +21,9 @@ gta_plot_map(data = NULL, countries = NULL, value = NULL,
 
 \item{colour.breaks}{Specify the breaks for the colour gradient. Default: ggplot automatic.}
 
-\item{colour.legend.title}{Specify a title for the colour legend. Default: No title.}
+\item{legend.title}{Specify a title for the colour legend. Default: No title.}
+
+\item{title}{Specify a title for the map plot. Default: No title.}
 }
 \description{
 This function facilitates map creation with ggplot.
