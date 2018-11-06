@@ -838,6 +838,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       setnames(cpc, "cpc", "affected.sector")
       master.temp=merge(master.temp, cpc, by="affected.product", all.x=T)
       master.cpc <- aggregate(affected.sector ~ new.id, master.temp, function(x) toString(unique(x)))
+      setnames(cpc,  "affected.product","hs")
+      setnames(cpc, "affected.sector","cpc")
 
       # Merge and remove new.id
       master <- merge(master, master.hs, by="new.id")
