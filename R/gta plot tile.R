@@ -35,35 +35,57 @@ gta_plot_tile <- function(data = NULL,
   library("ggplot2")
   library("lubridate")
 
-  # data = master.0
-  # value.x = "year(date.implemented)"
-  # value.y = "month(date.implemented)"
-  # values = "intervention.id"
-  # colour.low = gta_colour$blue[4]
-  # colour.high = gta_colour$blue[1]
-  # legend.title = NULL
-  # title = NULL
-  # x.axis.name = NULL
-  # y.axis.name = NULL
 
-  # load("data/master_plus.Rdata")
-
-  # master.0 <- aggregate(intervention.id~year(date.implemented)+month(date.implemented), master, function(x) length(unique(x)))
-
-  # Load map data
+  # Load colour palette
   gta_colour_palette()
 
-  setnames(data, paste0(value.x),"value.x")
-  setnames(data, paste0(value.y),"value.y")
-  setnames(data, paste0(values),"values")
-
+  data[,c("value.x","value.y","values")] <- data[,c(value.x, value.y, values)]
 
   plot = ggplot()+
-    geom_tile(data=data, aes(x=value.x, y=value.y, fill=values), color="#FFFFFF", size=0.5)+
-    scale_fill_gradient(low=colour.low, high = colour.high)+
-    gta_theme()
-
-  plot
+    geom_tile(data=data, aes(x=value.x, y=value.y, fill=values), color="#FFFFFF", size=0.2)+
+    scale_fill_gradient(low=colour.low, high = colour.high) +
+    scale_y_continuous(breaks = seq(min(data$value.y), max(data$value.y), 1), sec.axis = sec_axis(~.,breaks = seq(min(data$value.y), max(data$value.y), 1), name = y.axis.name))+
+    scale_x_continuous(breaks = seq(min(data$value.x), max(data$value.x), 1))+
+    ggtitle(title)+
+    labs(x=x.axis.name, y=y.axis.name)+
+    theme(line = element_line(colour = "#FFFFFF", size= 0.5, linetype = 1, lineend = "square"),
+          rect = element_rect(fill = "#FFFFFF", colour="#FFFFFF",size=0, linetype = 1),
+          text = element_text(family="", colour = "#333333", size=11),
+          title = element_text(family="", colour= "#333333", size=11),
+          axis.title.x = element_text(family="", colour = "#333333", size=11*0.8, margin = margin(t = 10, r = 0, b = 10, l = 0)),
+          axis.title.y.left = element_text(family="", colour = "#333333", size=11*0.8, margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          axis.title.y.right = element_text(family="", colour = "#333333", size=11*0.8, margin = margin(t = 0, r = 0, b = 0, l = 10)),
+          axis.text.x.bottom = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 5, r = 0, b = 0, l = 0), angle = 90),
+          axis.text.x.top = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 0, r = 0, b = 5, l = 0), angle = 90),
+          axis.text.y.left = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 0, r = 5, b = 0, l = 0), angle = 0),
+          axis.text.y.right = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 0, r = 0, b = 0, l = 5), angle = 0),
+          axis.ticks = element_line(colour=gta_colour$grey[1], size=0.2),
+          axis.ticks.length = unit(0.15, "cm"),
+          axis.line = element_line(colour= NULL, linetype = 1, size=0.2),
+          legend.background = element_rect(fill="#FFFFFF", colour = "#FFFFFF", size=0, linetype=1),
+          legend.position = "bottom",
+          legend.title = element_text(vjust=0.9, family="", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
+          legend.title.align = 0,
+          legend.text = element_text(family="", colour = "#333333", size = 11*0.8, margin = margin(b=5)),
+          legend.text.align = 0,
+          legend.key = element_rect(fill="#FFFFFF", colour = "#FFFFFF", size = , linetype = 1),
+          legend.key.size = unit(0.5, "cm"),
+          legend.box = "horizontal",
+          legend.box.just = "top",
+          legend.box.margin = margin(t = 5, r = 5, b = 5, l = 5),
+          legend.box.spacing = unit(0.2, "cm"),
+          panel.background = element_rect(fill="#f8f8f8", colour=gta_colour$grey[1], size=0.5, linetype=1),
+          panel.spacing = unit(0.5, "cm"),
+          panel.grid.major = element_line(colour = gta_colour$grey[3], linetype = 1, size = 0.2, lineend = "square"),
+          panel.grid.minor = element_blank(),
+          plot.background = element_rect(fill = NULL, colour="#FFFFFF",size=0, linetype = 1),
+          plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5),
+          plot.subtitle = element_text(family = "", colour = "#333333", size = 11*0.8, hjust=0.5, margin=margin(t=0, r=0, b=10, l=0)),
+          plot.caption = element_text(family = "", colour = "#333333", size = 11*0.6),
+          plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm"),
+          strip.background = element_rect(fill="#FFFFFF", colour=NULL, size=0.5, linetype=1),
+          strip.text = element_text(family="", colour = "#333333", size=11*0.8, hjust = 0.5),
+    )
 
   return(plot)
 }
