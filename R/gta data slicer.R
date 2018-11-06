@@ -505,13 +505,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     if(tolower(in.force.today)=="any"){
 
-
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Currently in force:", choice="Regardless"))
 
-    }
-
-    if(tolower(in.force.today)=="yes"){
+    } else if (tolower(in.force.today)=="yes"){
 
       master=subset(master, date.implemented<=Sys.Date() & (is.na(date.removed)==T|date.removed>=Sys.Date()))
 
