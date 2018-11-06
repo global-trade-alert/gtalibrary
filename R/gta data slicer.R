@@ -496,12 +496,20 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
   # in.force.today
-  if(in.force.today=="Any"){
+  if(is.null(in.force.today)){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Currently in force:", choice="Regardless"))
 
   } else {
+
+    if(tolower(in.force.today)=="any"){
+
+
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Currently in force:", choice="Regardless"))
+
+    }
 
     if(tolower(in.force.today)=="yes"){
 
