@@ -11,6 +11,7 @@
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
 #' @param affected.country Specify the affected countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
 #' @param keep.affected Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.
+#' @param keep.others Specify whether to keep the data for the other jurisdictions that happen to be affected alongside those you specified (T/F). Default is 'TRUE'.
 #' @param affected.jointly Specify whether included interventions shall affect all affected countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
 #' @param affected.also.nr Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
@@ -48,6 +49,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          keep.implementer = NULL,
                          affected.country = NULL,
                          keep.affected = NULL,
+                         keep.others=TRUE,
                          affected.jointly = FALSE,
                          affected.also.nr = NULL,
                          announcement.period = NULL,
@@ -266,6 +268,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   master=subset(master, intervention.id %in% intersect(intersect(ac.ids, joint.ids),also.ids))
 
+  if(keep.others==FALSE){
+    master=subset(master, a.un %in% affected)
+  }
 
   # announcement.period
   date.period=announcement.period

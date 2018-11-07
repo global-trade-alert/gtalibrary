@@ -7,8 +7,8 @@
 gta_data_slicer(data.path = "data/master_plus.Rdata",
   gta.evaluation = NULL, affected.flows = NULL,
   implementing.country = NULL, keep.implementer = NULL,
-  affected.country = NULL, keep.affected = NULL, target = NULL,
-  affected.also.nr = NULL, affected.jointly = FALSE,
+  affected.country = NULL, keep.affected = NULL, keep.others = TRUE,
+  affected.jointly = FALSE, affected.also.nr = NULL,
   announcement.period = NULL, implementation.period = NULL,
   revocation.period = NULL, keep.revocation.na = NULL,
   submission.period = NULL, in.force.today = "Any",
@@ -35,9 +35,11 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{keep.affected}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.}
 
-\item{affected.also.nr}{Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+\item{keep.others}{Specify whether to keep the data for the other jurisdictions that happen to be affected alongside those you specified (T/F). Default is 'TRUE'.}
 
 \item{affected.jointly}{Specify whether included interventions shall affect all affected countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
+
+\item{affected.also.nr}{Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
 
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
