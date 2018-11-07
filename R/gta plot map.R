@@ -35,6 +35,7 @@ gta_plot_map <- function(data = NULL,
   world <- gtalibrary::world.geo
 
   data[,c("UN","value")] <- data[,c(countries,value)]
+  data$UN <- gta_un_code_vector(data$UN)
 
   # merge data with map data
   world = merge(world, data[,c("UN","value")], by="UN", all.x=T)
