@@ -515,20 +515,17 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Currently in force:", choice="Yes"))
 
-    } else {
-      if(tolower(in.force.today)=='no'){
+    } else if(tolower(in.force.today)=='no'){
 
         master=subset(master, (date.implemented<Sys.Date() & is.na(date.removed)==F & date.removed<Sys.Date()) | is.na(date.implemented))
 
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Currently in force:", choice="No"))
 
-      }else{
+      } else{
         stop("Please specify in.force.today as either 'yes', 'no' or 'any'.")
       }
     }
-
-  }
 
   # intervention.type
   # keep.type
