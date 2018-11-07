@@ -254,7 +254,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   }
 
-  master=subset(master, intervention.id %in% intersect(ac.ids, joint.ids, also.ids))
+  master=subset(master, intervention.id %in% intersect(intersect(ac.ids, joint.ids),also.ids))
 
 
   # announcement.period
