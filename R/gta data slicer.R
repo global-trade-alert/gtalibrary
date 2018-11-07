@@ -48,9 +48,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          keep.implementer = NULL,
                          affected.country = NULL,
                          keep.affected = NULL,
-                         target = NULL,
-                         affected.also.nr = NULL,
                          affected.jointly = FALSE,
+                         affected.also.nr = NULL,
                          announcement.period = NULL,
                          implementation.period = NULL,
                          revocation.period = NULL,
@@ -217,14 +216,23 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         joint.ids=intersect(joint.ids, subset(master, a.un %in% aj)$intervention.id)
       }
 
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Affected jointly:", choice="Only jointly")
+
+
   } else {
     joint.ids=master$intervention.id
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Affected jointly:", choice="Jointly & individually")
   }
 
 
   # Additionally affected
   if(is.null(affected.also.nr)){
     also.ids=master$intervention.id
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Number of also affected jurisdictions:", choice="Any number")
 
   } else{
 
@@ -239,6 +247,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
 
     }
+
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Number of also affected jurisdictions:", choice=paste(affected.also.nrm " or fewer",sep=""))
+
 
   }
 
