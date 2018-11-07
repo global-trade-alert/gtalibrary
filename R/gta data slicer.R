@@ -76,6 +76,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          df.name="master.sliced",
                          pc.name="parameter.choice.slicer"
 ){
+
   library("httr")
   library("splitstackshape")
   library("lubridate")
@@ -309,7 +310,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       } else{
         # Check # of rows
-        if(nrow(master)==0) {
+        if(nrow(subset(master, ! a.un %in% affected))==0) {
           stop.print <- "Unfortunately no rows remaining while filtering for affected.also.nr"
           error.message <<- c(T, stop.print)
           stop(stop.print)
