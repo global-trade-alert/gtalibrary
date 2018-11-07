@@ -105,7 +105,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
     check=gta_parameter_check(tolower(gta.evaluation), c("red", "amber", "green"))
     if(check!="OK"){
-      stop(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
+      stop.print <- paste("Unknown GTA evaluation(s): ", check, ".", sep="")
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else {
       eval=tolower(gta.evaluation)
       master=subset(master, tolower(gta.evaluation) %in% eval)
@@ -119,8 +122,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for gta.evaluation")
-    stop("Unfortunately no rows remaining after filtering for gta.evaluation")
+    stop.print <- "Unfortunately no rows remaining after filtering for gta.evaluation"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -134,7 +138,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
     check=gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"))
     if(check!="OK"){
-      stop(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
+      stop.print <- paste("Unknown GTA evaluation(s): ", check, ".", sep="")
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else {
       flow=tolower(affected.flows)
       master=subset(master, tolower(affected.flow) %in% flow)
@@ -148,8 +155,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.flow")
-    stop("Unfortunately no rows remaining after filtering for affected.flow")
+    stop.print <- "Unfortunately no rows remaining after filtering for affected.flow"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
 
@@ -163,7 +172,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.implementer)){
-      stop("Please specify whether you want to focus on the specified implementing countries or exclude them (keep.implementer=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified implementing countries or exclude them (keep.implementer=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
 
       implementers=gta_un_code_vector(implementing.country, role="implementing")
@@ -186,9 +198,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for implementing.country")
-    stop("Unfortunately no rows remaining after filtering for implementing.country")
-  }
+    stop.print <- "Unfortunately no rows remaining after filtering for implementing.country"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+}
 
 
   # affected.country
@@ -206,7 +219,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.affected)){
-      stop("Please specify whether you want to focus on the specified affected countries or exclude them (keep.affected=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified affected countries or exclude them (keep.affected=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
 
       affected=gta_un_code_vector(affected.country, role="affected")
@@ -231,8 +247,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.country")
-    stop("Unfortunately no rows remaining after filtering for affected.country")
+    stop.print <- "Unfortunately no rows remaining after filtering for affected.country"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
   if (affected.jointly==T){
@@ -254,8 +272,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.jointly")
-    stop("Unfortunately no rows remaining after filtering for affected.jointly")
+    stop.print <- "Unfortunately no rows remaining after filtering for affected.jointly"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
 
@@ -314,8 +334,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.also.nr and keep.others")
-    stop("Unfortunately no rows remaining after filtering for affected.also.nr and keep.others")
+    stop.print <- "Unfortunately no rows remaining after filtering for affected.also.nr and keep.others"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
 
@@ -330,12 +352,16 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(length(date.period)!=2){
-      stop("Please specify the date pair (after.date, before.date) for the announcement period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
+      stop.print <- "Please specify the date pair (after.date, before.date) for the announcement period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
       dates=sum(as.numeric(is.na(date.period))==F)
 
       if(dates>0){
         if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
+          error.message <<- c(T, "At least one of the announcement dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
           stop("At least one of the announcement dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
         }
 
@@ -376,8 +402,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for announcement.period")
-    stop("Unfortunately no rows remaining after filtering for announcement.period")
+    stop.print <- "Unfortunately no rows remaining after filtering for announcement.period"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
 
@@ -393,7 +421,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
     if(length(date.period)!=2){
-      stop("Please specify the date pair (after.date, before.date) for the implementation period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
+      stop.print <- "Please specify the date pair (after.date, before.date) for the implementation period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
 
       dates=sum(as.numeric(is.na(date.period))==F)
@@ -440,8 +471,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for implementation.period")
-    stop("Unfortunately no rows remaining after filtering for implementation.period")
+    stop.print <- "Unfortunately no rows remaining after filtering for implementation.period"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -456,12 +488,16 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(length(date.period)!=2){
-      stop("Please specify the date pair (after.date, before.date) for the revocation period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
+      stop.print <- "Please specify the date pair (after.date, before.date) for the revocation period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
       dates=sum(as.numeric(is.na(date.period))==F)
 
       if(dates>0){
         if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
+          error.message <<- c(T, "At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
           stop("At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
         }
 
@@ -475,7 +511,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         if(dates==1){
 
           if(is.null(keep.revocation.na)){
-            stop("Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F).")
+            stop.print <- "Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F)."
+            error.message <<- c(T, stop.print)
+            stop(stop.print)
+
           } else{
 
             if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
@@ -510,8 +549,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for revocation.period")
-    stop("Unfortunately no rows remaining after filtering for revocation.period")
+    stop.print <- "Unfortunately no rows remaining after filtering for revocation.period"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
 
@@ -526,13 +567,18 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(length(date.period)!=2){
-      stop("Please specify the date pair (after.date, before.date) for the submission period. 'NA' is permissible, but has to be specified in case you only want one of the two.")
+      stop.print <- "Please specify the date pair (after.date, before.date) for the submission period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
       dates=sum(as.numeric(is.na(date.period))==F)
 
       if(dates>0){
         if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
-          stop("At least one of the submission dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+          stop.print <- "At least one of the submission dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'."
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
         }
 
         if(dates==2){
@@ -572,8 +618,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for submission.period")
-    stop("Unfortunately no rows remaining after filtering for submission.period")
+    stop.print <- "Unfortunately no rows remaining after filtering for submission.period"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -611,7 +658,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
 
   } else {
-    stop("Please specify in.force.today as either 'yes', 'no' or 'any'.")
+    stop.print <- "Please specify in.force.today as either 'yes', 'no' or 'any'."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -631,7 +680,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.type)){
-      stop("Please specify whether you want to focus on the specified intervention types or exclude them (keep.type=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified intervention types or exclude them (keep.type=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
     } else{
 
       int.mast.types <- gtalibrary::int.mast.types
@@ -663,8 +714,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for intervention.types")
-    stop("Unfortunately no rows remaining after filtering for intervention.types")
+    stop.print <- "Unfortunately no rows remaining after filtering for intervention.types"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -678,7 +730,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.mast)){
-      stop("Please specify whether you want to focus on the specified mast chapters or exclude them (keep.mast=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified mast chapters or exclude them (keep.mast=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
     } else{
 
@@ -690,7 +744,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(mast.letter), tolower(int.mast.types$mast.chapter.id))
 
       if(check!="OK"){
-        stop(paste("Unknown mast chapter(s): ", check, ".", sep=""))
+        stop.print <- paste("Unknown mast chapter(s): ", check, ".", sep="")
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
 
       } else {
 
@@ -716,8 +772,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for mast.chapters")
-    stop("Unfortunately no rows remaining after filtering for mast.chapters")
+    stop.print <- "Unfortunately no rows remaining after filtering for mast.chapters"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -732,7 +789,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.level)){
-      stop("Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
     } else{
 
@@ -767,8 +826,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for implementation.level")
-    stop("Unfortunately no rows remaining after filtering for implementation.level")
+    stop.print <- "Unfortunately no rows remaining after filtering for implementation.level"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -782,7 +842,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.firms)){
-      stop("Please specify whether you want to focus on the specified eligibe firms categories or exclude them (keep.level=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified eligibe firms categories or exclude them (keep.level=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
     } else{
 
@@ -791,7 +853,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       check=gta_parameter_check(tolower(eligible.firms), tolower(elig.firms$eligible.firms))
 
       if(check!="OK"){
-        stop(paste("Unknown eligible firms categorie(s): ", check, ".", sep=""))
+        stop.print <- paste("Unknown eligible firms categorie(s): ", check, ".", sep="")
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
 
       } else {
 
@@ -817,8 +881,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for eligible.firms")
-    stop("Unfortunately no rows remaining after filtering for eligible.firms")
+    stop.print <- "Unfortunately no rows remaining after filtering for eligible.firms"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -832,7 +897,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.cpc)){
-      stop("Please specify whether you want to focus on the specified CPC sectors or exclude them (keep.cpc=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified CPC sectors or exclude them (keep.cpc=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
 
       # CPC code check
@@ -910,8 +978,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for cpc.sectors")
-    stop("Unfortunately no rows remaining after filtering for cpc.sectors")
+    stop.print <- "Unfortunately no rows remaining after filtering for cpc.sectors"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
 
@@ -925,7 +995,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.hs)){
-      stop("Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
     } else{
 
       # HS code check
@@ -993,7 +1066,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if (is.na(as.Date(lag.adjustment, "%m-%d"))==T) {
-      stop("Please specifiy a valid lag date ('mm-dd').")
+      stop.print <- "Please specifiy a valid lag date ('mm-dd')."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
     } else {
 
@@ -1014,8 +1089,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for lag.adjustment")
-    stop("Unfortunately no rows remaining after filtering for lag.adjustment")
+    stop.print <- "Unfortunately no rows remaining after filtering for lag.adjustment"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+
   }
 
   ######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
@@ -1029,7 +1106,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   } else {
 
     if(is.null(keep.interventions)){
-      stop("Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.interventions=T/F).")
+      stop.print <- "Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.interventions=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
     } else{
 
@@ -1040,7 +1119,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         check=gta_parameter_check(intervention.ids, gta.interventions)
 
         if(check!="OK"){
-          stop(paste("Unknown intervention IDs: ", check, ". You may have removed them with another parameter choice.", sep=""))
+          stop.print <- paste("Unknown intervention IDs: ", check, ". You may have removed them with another parameter choice.", sep="")
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
 
         }
 
@@ -1066,8 +1147,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   # Check # of rows
   if(nrow(master)==0) {
-    error.message <<- c(T, "Unfortunately no rows remaining after filtering for intervention.ids")
-    stop("Unfortunately no rows remaining after filtering for intervention.ids")
+    stop.print <- "Unfortunately no rows remaining after filtering for intervention.ids"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
