@@ -270,6 +270,15 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   if(keep.others==FALSE){
     master=subset(master, a.un %in% affected)
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Keep data for other jurisdictions affected alongside those specified:",
+                                       choice="No"))
+
+
+  } else {
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Keep data for other jurisdictions affected alongside those specified:",
+                                       choice="Yes"))
   }
 
   # announcement.period
