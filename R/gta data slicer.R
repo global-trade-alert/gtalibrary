@@ -11,9 +11,8 @@
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
 #' @param affected.country Specify the affected countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
 #' @param keep.affected Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.
-#' @param target Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.
-#' @param additional.targets Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.
-#' @param targets.combined Specify whether interventions shall affect all targets combined ('TRUE') or combined as well as uniquely ('FALSE'). Default is 'TRUE'.
+#' @param affected.jointly Specify whether included interventions shall affect all affected countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
+#' @param affected.also.nr Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
@@ -50,8 +49,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          affected.country = NULL,
                          keep.affected = NULL,
                          target = NULL,
-                         additional.targets = NULL,
-                         targets.combined = TRUE,
+                         affected.also.nr = NULL,
+                         affected.jointly = FALSE,
                          announcement.period = NULL,
                          implementation.period = NULL,
                          revocation.period = NULL,
@@ -175,11 +174,15 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   }
   # affected.country
   # keep.affected
+  # affected jointly
+  # additional targets
+  # due to the interdependece of these filters, we will only generate vectors of intervention IDs before subetting the result at the very end of this section.
 
   if(is.null(affected.country)){
 
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Affected countries included:", choice="All"))
+    ac.ids=master$intervention.id
 
   } else {
 
@@ -190,13 +193,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       affected=gta_un_code_vector(affected.country, role="affected")
 
       if(keep.affected==T){
-        master=subset(master, a.un %in% affected)
+        ac.ids=subset(master, a.un %in% affected)$intervention.id
 
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Affected countries included:", choice=paste(affected.country, collapse = ", ")))
 
       } else {
-        master=subset(master, ! a.un %in% affected)
+        ac.ids=subset(master,!  a.un %in% affected)$intervention.id
 
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Affected countries included:", choice=paste("All except ", paste(affected.country, collapse = ", "), sep="")))
@@ -207,59 +210,40 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+  if (affected.jointly==T){
+    joint.ids=subset(master, a.un %in% affected)$intervention.id
 
-  # targeted countries
-  # additional targets
-  if(is.null(target)){
-
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Targeted countries:", choice="Any"))
-
-  } else {
-    target <- gta_un_code_vector(target, role="targeted")
-
-    # unique id to a.un combinations
-    all.id <- subset(as.data.frame(unique(master[,c("intervention.id","a.un")])), is.na(a.un)==F)
-
-    if (targets.combined==T){
-      # ids where all targets are affected
-      target.id <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == length(target))
-      # Subset all interventions and create frequency table and count sum of frequencies
-      target.id <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id$intervention.id))), sum)
-
-    } else if (targets.combined == F){
-      # ids where all targets, as well as single targets are affected
-      target.id.single <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == 1)
-      target.id.combined <- subset(aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, a.un %in% target))), sum), Freq == length(target))
-      # Subset all interventions and create frequency table and count sum of frequencies
-      target.id.single <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id.single$intervention.id))), sum)
-      target.id.combined <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id.combined$intervention.id))), sum)
-
-    } else {
-      stop("Please specify whether to combine targets or not. targets.combined = T/F")
-    }
-
-    # Filter for value of frequency
-    if(is.null(additional.targets)){
-      if (targets.combined==T){
-        master <- subset(master, intervention.id %in% target.id$intervention.id)
-
-      } else if (targets.combined==F){
-        target.id = rbind(target.id.combined, target.id.single)
-        master <- subset(master, intervention.id %in% target.id$intervention.id)
+      for(aj in affected){
+        joint.ids=intersect(joint.ids, subset(master, a.un %in% aj)$intervention.id)
       }
 
-    } else if (targets.combined == T) {master <- subset(master, intervention.id %in% subset(target.id, Freq==(length(target)+additional.targets))$intervention.id)
-    } else if (targets.combined == F) {master <- subset(master, intervention.id %in% subset(target.id.single, Freq==(1 + additional.targets))$intervention.id | intervention.id %in% subset(target.id.combined, Freq==(length(target)+additional.targets))$intervention.id)
+  } else {
+    joint.ids=master$intervention.id
+  }
+
+
+  # Additionally affected
+  if(is.null(affected.also.nr)){
+    also.ids=master$intervention.id
+
+  } else{
+
+
+    if(is.null(affected.country)){
+
+      nr.affected=aggregate(affected.jurisdiction ~intervention, master, function(x) length(unique(x)))
+      also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
+
+    } else {
+      nr.affected=aggregate(affected.jurisdiction ~intervention, subset(master, ! a.un %in% affected), function(x) length(unique(x)))
+      also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
 
     }
 
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Targeted countries:", choice=paste(paste(target, collapse = ", "), " and ", additional.targets, " additional, targets combined = ",targets.combined, sep="")))
-
-
-
   }
+
+  master=subset(master, intervention.id %in% intersect(ac.ids, joint.ids, also.ids))
+
 
   # announcement.period
   date.period=announcement.period
