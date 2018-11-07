@@ -43,39 +43,39 @@
 #' @author Global Trade Alert
 
 gta_data_slicer=function(data.path="data/master_plus.Rdata",
-                        gta.evaluation= NULL,
-                        affected.flows = NULL,
-                        implementing.country = NULL,
-                        keep.implementer = NULL,
-                        affected.country = NULL,
-                        keep.affected = NULL,
-                        target = NULL,
-                        additional.targets = NULL,
-                        targets.combined = TRUE,
-                        announcement.period = NULL,
-                        implementation.period = NULL,
-                        revocation.period = NULL,
-                        keep.revocation.na = NULL,
-                        submission.period = NULL,
-                        in.force.today = 'Any',
-                        intervention.types = NULL,
-                        keep.type = NULL,
-                        mast.chapters = NULL,
-                        keep.mast = NULL,
-                        implementation.level = NULL,
-                        keep.level = NULL,
-                        eligible.firms = NULL,
-                        keep.firms = NULL,
-                        cpc.sectors = NULL,
-                        keep.cpc = NULL,
-                        hs.codes = NULL,
-                        keep.hs = NULL,
-                        intervention.ids = NULL,
-                        keep.interventions = NULL,
-                        lag.adjustment=NULL,
-                        df.name="master.sliced",
-                        pc.name="parameter.choice.slicer"
-                        ){
+                         gta.evaluation= NULL,
+                         affected.flows = NULL,
+                         implementing.country = NULL,
+                         keep.implementer = NULL,
+                         affected.country = NULL,
+                         keep.affected = NULL,
+                         target = NULL,
+                         additional.targets = NULL,
+                         targets.combined = TRUE,
+                         announcement.period = NULL,
+                         implementation.period = NULL,
+                         revocation.period = NULL,
+                         keep.revocation.na = NULL,
+                         submission.period = NULL,
+                         in.force.today = 'Any',
+                         intervention.types = NULL,
+                         keep.type = NULL,
+                         mast.chapters = NULL,
+                         keep.mast = NULL,
+                         implementation.level = NULL,
+                         keep.level = NULL,
+                         eligible.firms = NULL,
+                         keep.firms = NULL,
+                         cpc.sectors = NULL,
+                         keep.cpc = NULL,
+                         hs.codes = NULL,
+                         keep.hs = NULL,
+                         intervention.ids = NULL,
+                         keep.interventions = NULL,
+                         lag.adjustment=NULL,
+                         df.name="master.sliced",
+                         pc.name="parameter.choice.slicer"
+){
   library("httr")
   library("splitstackshape")
   library("lubridate")
@@ -107,14 +107,14 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     if(check!="OK"){
       stop(paste("Unknown GTA evaluation(s): ", check, ".", sep=""))
     } else {
-        eval=tolower(gta.evaluation)
-        master=subset(master, tolower(gta.evaluation) %in% eval)
+      eval=tolower(gta.evaluation)
+      master=subset(master, tolower(gta.evaluation) %in% eval)
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="GTA evaluations included:", choice=paste(eval, collapse=", ")))
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="GTA evaluations included:", choice=paste(eval, collapse=", ")))
 
     }
-    rm(check, eval)
+
   }
 
 
@@ -137,7 +137,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                               data.frame(parameter="Affected flows included:", choice=paste(flow, collapse=", ")))
 
     }
-    rm(check, flow)
+
   }
 
 
@@ -170,7 +170,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       }
 
-      rm(check, implementers)
+
     }
   }
   # affected.country
@@ -203,7 +203,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       }
 
-      rm(check, affected)
+
     }
   }
 
@@ -235,7 +235,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       target.id.single <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id.single$intervention.id))), sum)
       target.id.combined <- aggregate(Freq~intervention.id, as.data.frame(table(subset(all.id, intervention.id %in% target.id.combined$intervention.id))), sum)
 
-      } else {
+    } else {
       stop("Please specify whether to combine targets or not. targets.combined = T/F")
     }
 
@@ -257,9 +257,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Targeted countries:", choice=paste(paste(target, collapse = ", "), " and ", additional.targets, " additional, targets combined = ",targets.combined, sep="")))
 
-    rm(all.id, target.id)
 
-    }
+
+  }
 
   # announcement.period
   date.period=announcement.period
@@ -521,16 +521,16 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     if(tolower(in.force.today)=='no'){
 
-        master=subset(master, (date.implemented<Sys.Date() & is.na(date.removed)==F & date.removed<Sys.Date()) | is.na(date.implemented))
+      master=subset(master, (date.implemented<Sys.Date() & is.na(date.removed)==F & date.removed<Sys.Date()) | is.na(date.implemented))
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Currently in force:", choice="No"))
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Currently in force:", choice="No"))
 
-      }
+    }
 
-    } else {
-        stop("Please specify in.force.today as either 'yes', 'no' or 'any'.")
-      }
+  } else {
+    stop("Please specify in.force.today as either 'yes', 'no' or 'any'.")
+  }
 
   # intervention.type
   # keep.type
@@ -551,24 +551,24 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       if(check!="OK"){
         stop(paste("Unknown intervention type(s): ", check, ".", sep=""))
 
+      } else {
+        if(keep.type==T){
+          master=subset(master, tolower(intervention.type) %in% tolower(intervention.types))
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Intervention types included:", choice=paste(intervention.types, collapse = ", ")))
+
         } else {
-          if(keep.type==T){
-            master=subset(master, tolower(intervention.type) %in% tolower(intervention.types))
+          master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.types))
 
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Intervention types included:", choice=paste(intervention.types, collapse = ", ")))
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Intervention types included:", choice=paste("All except ", paste(intervention.types, collapse = ", "), sep="")))
 
-          } else {
-            master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.types))
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Intervention types included:", choice=paste("All except ", paste(intervention.types, collapse = ", "), sep="")))
-
-          }
+        }
 
       }
 
-      rm(check, int.mast.types)
+
     }
   }
 
@@ -599,23 +599,23 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       } else {
 
-      if(keep.mast==T){
-        master=subset(master, tolower(mast.chapter) %in% tolower(mast.letter))
+        if(keep.mast==T){
+          master=subset(master, tolower(mast.chapter) %in% tolower(mast.letter))
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
 
-      } else {
-        master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
+        } else {
+          master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Mast chapters included:", choice=paste("All except ", paste(mast.letter, collapse = ", "), sep="")))
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Mast chapters included:", choice=paste("All except ", paste(mast.letter, collapse = ", "), sep="")))
+
+        }
 
       }
 
-      }
 
-      rm(check, int.mast.types, mast.letter)
     }
   }
 
@@ -660,7 +660,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       }
 
-      rm(check, imp.levels)
+
     }
   }
 
@@ -704,7 +704,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       }
 
-      rm(check, elig.firms)
+
     }
   }
 
@@ -781,18 +781,18 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         master <- merge(master, master.hs, by="new.id", all.x=T) # all.x=T is vital here since there may also be service sectors in cpc.sectors
         master$new.id <- NULL
 
-        rm(products, master.hs, master.temp)
+
 
 
 
       } else {
-      ## If the stated sectors only include services, then remove all HS codes that may also have been affected by the same intervention
+        ## If the stated sectors only include services, then remove all HS codes that may also have been affected by the same intervention
         master$affected.product=NA
       }
 
     }
 
-    rm(check, cpc.names, master.temp)
+
   }
 
 
@@ -819,18 +819,18 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       # Filter products
       if(keep.hs==T){
-          master.temp=subset(master.temp, affected.product %in% hs.codes)
+        master.temp=subset(master.temp, affected.product %in% hs.codes)
 
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="HS codes included:", choice=paste(hs.codes, collapse = ", ")))
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="HS codes included:", choice=paste(hs.codes, collapse = ", ")))
 
-        } else {
-          master.temp=subset(master.temp, ! affected.product %in% hs.codes)
+      } else {
+        master.temp=subset(master.temp, ! affected.product %in% hs.codes)
 
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="HS codes included:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="HS codes included:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
 
-        }
+      }
 
       # clear affected.product/affected.sector column
       master$affected.product <- NULL
@@ -855,7 +855,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     }
 
-      rm(check, hs.names, master.temp, master.cpc, master.hs)
+
   }
 
 
@@ -868,27 +868,27 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   } else {
 
-      if (is.na(as.Date(lag.adjustment, "%m-%d"))==T) {
-        stop("Please specifiy a valid lag date ('mm-dd').")
+    if (is.na(as.Date(lag.adjustment, "%m-%d"))==T) {
+      stop("Please specifiy a valid lag date ('mm-dd').")
 
-      } else {
+    } else {
 
-        # Remove interventions without implementation date
-        master<-subset(master, is.na(date.implemented)==F)
+      # Remove interventions without implementation date
+      master<-subset(master, is.na(date.implemented)==F)
 
-        # set lag date
-        master$date.lag=as.Date(paste(data.table::year(master$date.implemented),lag.adjustment, sep="-"),"%Y-%m-%d")
-        master=subset(master, date.published<=date.lag)
-        master$date.lag=NULL
+      # set lag date
+      master$date.lag=as.Date(paste(data.table::year(master$date.implemented),lag.adjustment, sep="-"),"%Y-%m-%d")
+      master=subset(master, date.published<=date.lag)
+      master$date.lag=NULL
 
-        parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Lag-adjustment date:", choice=paste(lag.adjustment)))
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Lag-adjustment date:", choice=paste(lag.adjustment)))
 
-        }
+    }
 
-      }
+  }
 
-######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
+  ######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
   # intervention.id
   # keep.intervention
   if(is.null(intervention.ids)){
@@ -930,7 +930,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
 
-      rm(check, gta.interventions)
+
     }
   }
 
