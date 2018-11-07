@@ -117,6 +117,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for gta.evaluation")
+    stop("Unfortunately no rows remaining after filtering for gta.evaluation")
+  }
+
 
   # affected.flows
 
@@ -138,6 +144,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     }
 
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.flow")
+    stop("Unfortunately no rows remaining after filtering for affected.flow")
   }
 
 
@@ -169,10 +181,16 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                                 data.frame(parameter="Implementing countries included:", choice=paste("All except ", paste(implementing.country, collapse = ", "), sep="")))
 
       }
-
-
     }
   }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for implementing.country")
+    stop("Unfortunately no rows remaining after filtering for implementing.country")
+  }
+
+
   # affected.country
   # keep.affected
   # affected jointly
@@ -211,6 +229,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.country")
+    stop("Unfortunately no rows remaining after filtering for affected.country")
+  }
+
   if (affected.jointly==T){
     joint.ids=subset(master, a.un %in% affected)$intervention.id
 
@@ -226,6 +250,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     joint.ids=master$intervention.id
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Affected jointly:", choice="Jointly & individually"))
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.jointly")
+    stop("Unfortunately no rows remaining after filtering for affected.jointly")
   }
 
 
@@ -281,6 +311,14 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                                        choice="Yes"))
   }
 
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for affected.also.nr and keep.others")
+    stop("Unfortunately no rows remaining after filtering for affected.also.nr and keep.others")
+  }
+
+
   # announcement.period
   date.period=announcement.period
 
@@ -334,6 +372,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     remove(date.period)
 
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for announcement.period")
+    stop("Unfortunately no rows remaining after filtering for announcement.period")
   }
 
 
@@ -392,6 +436,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     remove(date.period)
 
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for implementation.period")
+    stop("Unfortunately no rows remaining after filtering for implementation.period")
   }
 
 
@@ -458,6 +508,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for revocation.period")
+    stop("Unfortunately no rows remaining after filtering for revocation.period")
+  }
+
 
   # submission.period
   date.period=submission.period
@@ -514,6 +570,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for submission.period")
+    stop("Unfortunately no rows remaining after filtering for submission.period")
+  }
+
 
   # in.force.today
   if(is.null(in.force.today)){
@@ -550,6 +612,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   } else {
     stop("Please specify in.force.today as either 'yes', 'no' or 'any'.")
+  }
+
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for in.force.today")
+    stop("Unfortunately no rows remaining after filtering for in.force.today")
   }
 
   # intervention.type
@@ -590,6 +659,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
     }
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for intervention.types")
+    stop("Unfortunately no rows remaining after filtering for intervention.types")
   }
 
 
@@ -639,6 +714,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for mast.chapters")
+    stop("Unfortunately no rows remaining after filtering for mast.chapters")
+  }
+
 
 
   # implementation.level
@@ -684,6 +765,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for implementation.level")
+    stop("Unfortunately no rows remaining after filtering for implementation.level")
+  }
+
 
   # eligible.firms
   # keep.firms
@@ -726,6 +813,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
     }
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for eligible.firms")
+    stop("Unfortunately no rows remaining after filtering for eligible.firms")
   }
 
 
@@ -815,6 +908,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for cpc.sectors")
+    stop("Unfortunately no rows remaining after filtering for cpc.sectors")
+  }
+
 
   # hs.codes
   # keep.hs
@@ -878,6 +977,11 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for hs.codes")
+    stop("Unfortunately no rows remaining after filtering for hs.codes")
+  }
 
 
   # reporting lag adjustment
@@ -906,6 +1010,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     }
 
+  }
+
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for lag.adjustment")
+    stop("Unfortunately no rows remaining after filtering for lag.adjustment")
   }
 
   ######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
@@ -954,8 +1064,15 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
   }
 
+  # Check # of rows
+  if(nrow(master)==0) {
+    error.message <<- c(T, "Unfortunately no rows remaining after filtering for intervention.ids")
+    stop("Unfortunately no rows remaining after filtering for intervention.ids")
+  }
+
 
   ## Returning the result
+  error.message <<- FALSE
   eval(parse(text=paste(df.name, "<<-master", sep="")))
   eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
 }
