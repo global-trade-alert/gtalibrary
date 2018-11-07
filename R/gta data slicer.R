@@ -239,11 +239,11 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     if(is.null(affected.country)){
 
-      nr.affected=aggregate(affected.jurisdiction ~intervention, master, function(x) length(unique(x)))
+      nr.affected=aggregate(affected.jurisdiction ~intervention.id, master, function(x) length(unique(x)))
       also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
 
     } else {
-      nr.affected=aggregate(affected.jurisdiction ~intervention, subset(master, ! a.un %in% affected), function(x) length(unique(x)))
+      nr.affected=aggregate(affected.jurisdiction ~intervention.id, subset(master, ! a.un %in% affected), function(x) length(unique(x)))
       also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
 
     }
