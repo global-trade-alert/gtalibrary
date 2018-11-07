@@ -217,13 +217,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       }
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Affected jointly:", choice="Only jointly")
+                            data.frame(parameter="Affected jointly:", choice="Only jointly"))
 
 
   } else {
     joint.ids=master$intervention.id
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Affected jointly:", choice="Jointly & individually")
+                            data.frame(parameter="Affected jointly:", choice="Jointly & individually"))
   }
 
 
@@ -232,7 +232,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     also.ids=master$intervention.id
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Number of also affected jurisdictions:", choice="Any number")
+                            data.frame(parameter="Number of also affected jurisdictions:", choice="Any number"))
 
   } else{
 
@@ -249,7 +249,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     }
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Number of also affected jurisdictions:", choice=paste(affected.also.nrm " or fewer",sep=""))
+                            data.frame(parameter="Number of also affected jurisdictions:", choice=paste(affected.also.nr, " or fewer",sep="")))
 
 
   }
