@@ -290,7 +290,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
 
     if(is.null(affected.country)){
-
+      # Check # of rows
+      if(nrow(master)==0) {
+        stop.print <- "Unfortunately no rows remaining while filtering for affected.also.nr"
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
       nr.affected=aggregate(affected.jurisdiction ~intervention.id, master, function(x) length(unique(x)))
       also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
 
@@ -303,6 +308,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         also.ids=zero.ids
 
       } else{
+        # Check # of rows
+        if(nrow(master)==0) {
+          stop.print <- "Unfortunately no rows remaining while filtering for affected.also.nr"
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
+        }
         nr.affected=aggregate(affected.jurisdiction ~intervention.id, subset(master, ! a.un %in% affected), function(x) length(unique(x)))
         also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
         also.ids=c(zero.ids, also.ids)
@@ -337,7 +348,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     stop.print <- "Unfortunately no rows remaining after filtering for affected.also.nr and keep.others"
     error.message <<- c(T, stop.print)
     stop(stop.print)
-
   }
 
 
@@ -930,6 +940,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       # clear affected.sector column
       master$affected.sector <- NULL
 
+      # Check # of rows
+      if(nrow(master.temp)==0) {
+        stop.print <- "Unfortunately no rows remaining while filtering for cpc.sectors"
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
+
       # Collapse cpc codes by id
       master.temp <- aggregate( .~ new.id, master.temp, function(x) toString(x))
 
@@ -953,7 +970,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         # clear affected.product/affected.sector column
         master$affected.product <- NULL
 
-
+        # Check # of rows
+        if(nrow(master.temp)==0) {
+          stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
+        }
         # Collapse hs codes by id
         master.hs <- aggregate( .~ new.id, master.temp, function(x) toString(x))
 
@@ -1028,6 +1050,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       master$affected.product <- NULL
       master$affected.sector <- NULL
 
+      # Check # of rows
+      if(nrow(master.temp)==0) {
+        stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
       # Collapse hs codes by id
       master.hs <- aggregate( .~ new.id, master.temp, function(x) toString(x))
 
@@ -1036,6 +1064,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       cpc$affected.product <- cpc$hs
       cpc$affected.sector <- cpc$cpc
       master.temp=merge(master.temp, cpc, by="affected.product", all.x=T)
+
+      # Check # of rows
+      if(nrow(master.temp)==0) {
+        stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
       master.cpc <- aggregate(affected.sector ~ new.id, master.temp, function(x) toString(unique(x)))
       cpc$affected.product <- NULL
       cpc$affected.sector <- NULL
