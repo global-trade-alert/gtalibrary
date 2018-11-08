@@ -1196,8 +1196,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
 
   },
-  error = function(c) {
-    error.message <<- c(T, stop.print)
+  error = function(error.msg) {
+    if(exists(stop.print)){
+      error.message <<- c(T, stop.print)
+    } else {
+      error.message <<- c(T,error.msg)
+      }
     master.sliced<<- master[0,]
   })
 }
