@@ -1200,7 +1200,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
     if(exists(stop.print)){
       error.message <<- c(T, stop.print)
     } else {
-      error.message <<- c(T,error.msg)
+      error.message <<- c(T,error.msg$message)
       }
     master.sliced<<- master[0,]
   })
