@@ -58,9 +58,9 @@ gta_plot_map <- function(data = NULL,
           axis.ticks.y=element_blank(),
           panel.background = element_blank(),
           legend.position = "bottom",
-          plot.title = element_text(family = "Open Sans", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b=10)),
-          legend.title = element_text(vjust= 0.2, family="Open Sans", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
-          legend.text = element_text(family="Open Sans", colour = "#333333", size = 11*0.8)
+          plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b=10)),
+          legend.title = element_text(vjust= 0.2, family="", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
+          legend.text = element_text(family="", colour = "#333333", size = 11*0.8)
 
     ) +
     guides(fill=guide_legend(title=legend.title, label.position = "top"),
