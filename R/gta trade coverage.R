@@ -262,9 +262,10 @@ gta_trade_coverage <- function(
     print(paste("Calculating maximum coverage per importer-exporter-product combination across all instruments in year ",yr,".",sep=""))
     int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id)$intervention.id)
 
-    mt.temp=unique(subset(master.tuple, intervention.id %in% int.iahs)[,c("iahs","share")])
+    mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
     int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
     mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
+    mt.temp=unique(mt.temp[,c("iahs","share")])
     v.iahs=unique(mt.temp$iahs)
 
     if(length(v.iahs)>0){
@@ -302,9 +303,10 @@ gta_trade_coverage <- function(
       for(yr in c(year.start:year.end)){
         int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.type==inst)$intervention.id)$intervention.id)
 
-        mt.temp=unique(subset(master.tuple, intervention.id %in% int.iahs))[,c("iahs","share")]
+        mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
         int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
         mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
+        mt.temp=unique(mt.temp[,c("iahs","share")])
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
@@ -344,9 +346,10 @@ gta_trade_coverage <- function(
       for(yr in c(year.start:year.end)){
         int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & mast.chapter==inst)$intervention.id)$intervention.id)
 
-        mt.temp=unique(subset(master.tuple, intervention.id %in% int.iahs))[,c("iahs","share")]
+        mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
         int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
         mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
+        mt.temp=unique(mt.temp[,c("iahs","share")])
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
