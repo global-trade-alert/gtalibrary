@@ -10,10 +10,11 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
   affected.country = NULL, keep.affected = NULL, keep.others = TRUE,
   affected.jointly = FALSE, affected.also.nr = NULL,
   announcement.period = NULL, implementation.period = NULL,
-  revocation.period = NULL, keep.revocation.na = NULL,
-  submission.period = NULL, in.force.today = NULL,
-  intervention.types = NULL, keep.type = NULL, mast.chapters = NULL,
-  keep.mast = NULL, implementation.level = NULL, keep.level = NULL,
+  keep.implementation.na = NULL, revocation.period = NULL,
+  keep.revocation.na = NULL, submission.period = NULL,
+  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
+  mast.chapters = NULL, keep.mast = NULL,
+  implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.interventions = NULL,
@@ -44,6 +45,8 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
 \item{implementation.period}{Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.}
+
+\item{keep.implementation.na}{Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing implementation.date.}
 
 \item{revocation.period}{Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 

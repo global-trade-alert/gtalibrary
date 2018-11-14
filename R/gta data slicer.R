@@ -16,6 +16,7 @@
 #' @param affected.also.nr Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
+#' @param keep.implementation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing implementation.date.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param submission.period Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param keep.revocation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.
@@ -54,6 +55,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          affected.also.nr = NULL,
                          announcement.period = NULL,
                          implementation.period = NULL,
+                         keep.implementation.na = NULL,
                          revocation.period = NULL,
                          keep.revocation.na = NULL,
                          submission.period = NULL,
@@ -446,23 +448,41 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
               stop("At least one of the implementation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
             }
 
+            if(is.null(keep.implementation.na)){
+              stop.print <- "Please specify whether you want to keep interventions with missing implementation date or exclude them (keep.implementation.na=T/F)."
+              error.message <<- c(T, stop.print)
+              stop(stop.print)
+            }
+
             if(dates==2){
-              master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d") & date.implemented<=as.Date(date.period[2], "%Y-%m-%d"))
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Implementation period:", choice=paste(date.period[1]," - ",date.period[2], sep="")))
+
+              if(keep.implementation.na==T) {
+                master=subset(master, (date.implemented>=as.Date(date.period[1], "%Y-%m-%d") & date.implemented<=as.Date(date.period[2], "%Y-%m-%d")) | is.na(date.implemented)==T )
+                parameter.choices=rbind(parameter.choices,
+                                        data.frame(parameter="implementation period:", choice=paste(date.period[1]," - ",date.period[2],", as well as interventions without implementation date", sep="")))
+              }
+
+              if(keep.implementation.na==F) {
+                master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d") & date.implemented<=as.Date(date.period[2], "%Y-%m-%d"))
+                parameter.choices=rbind(parameter.choices,
+                                        data.frame(parameter="implementation period:", choice=paste(date.period[1]," - ",date.period[2]," and excluding interventions without implementation date", sep="")))
+
+              }
 
             }
 
             if(dates==1){
 
               if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
-                master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d"))
+                if(keep.implementation.na==T) {master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d") | is.na(date.implemented)==T)}
+                if(keep.implementation.na==F) {master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d"))}
                 parameter.choices=rbind(parameter.choices,
                                         data.frame(parameter="Implementation period:", choice=paste(date.period[1]," or more recent", sep="")))
               }
 
               if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-                master=subset(master, date.implemented<=as.Date(date.period[2], "%Y-%m-%d"))
+                if(keep.implementation.na==T){master=subset(master, date.implemented<=as.Date(date.period[2], "%Y-%m-%d") | is.na(date.implemented)==T)}
+                if(keep.implementation.na==F){master=subset(master, date.implemented<=as.Date(date.period[2], "%Y-%m-%d"))}
                 parameter.choices=rbind(parameter.choices,
                                         data.frame(parameter="Implementation period:", choice=paste(date.period[2]," or earlier", sep="")))
               }
@@ -517,7 +537,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
               stop.print <- "Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F)."
               error.message <<- c(T, stop.print)
               stop(stop.print)
-
             }
 
             if(dates==2){
