@@ -262,16 +262,19 @@ gta_trade_coverage <- function(
     print(paste("Calculating maximum coverage per importer-exporter-product combination across all instruments in year ",yr,".",sep=""))
     int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id)$intervention.id)
 
-    mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
+    mt.temp=unique(subset(master.tuple, intervention.id %in% int.iahs)[,c("iahs","share")])
     int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
+    mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
     v.iahs=unique(mt.temp$iahs)
 
     if(length(v.iahs)>0){
       duration.temp=data.frame(iahs=v.iahs,
                                year=yr, share=NA)
+      tuple=mtt.temp$iahs
+      shrs =mtt.temp$share
 
       for(i in 1:nrow(duration.temp)){
-        duration.temp$share[i]=max(subset(int.temp, year==duration.temp$year[i] & intervention.id %in% subset(mt.temp, iahs==duration.temp$iahs[i])$intervention.id)$share)
+        duration.temp$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
       }
 
       duration.max=rbind(duration.max,duration.temp)
@@ -294,16 +297,20 @@ gta_trade_coverage <- function(
       for(yr in c(year.start:year.end)){
         int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.type==inst)$intervention.id)$intervention.id)
 
-        mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
+        mt.temp=unique(subset(master.tuple, intervention.id %in% int.iahs))[,c("iahs","share")]
         int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
+        mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
           duration.temp=data.frame(iahs=v.iahs,
                                    year=yr, share=NA)
 
+          tuple=mtt.temp$iahs
+          shrs =mtt.temp$share
+
           for(i in 1:nrow(duration.temp)){
-            duration.temp$share[i]=max(subset(int.temp, year==duration.temp$year[i] & intervention.id %in% subset(mt.temp, iahs==duration.temp$iahs[i])$intervention.id)$share)
+            duration.temp$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
           }
 
           duration.temp$intervention.type=inst
@@ -328,16 +335,20 @@ gta_trade_coverage <- function(
       for(yr in c(year.start:year.end)){
         int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & mast.chapter==inst)$intervention.id)$intervention.id)
 
-        mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
+        mt.temp=unique(subset(master.tuple, intervention.id %in% int.iahs))[,c("iahs","share")]
         int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
+        mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
           duration.temp=data.frame(iahs=v.iahs,
                                    year=yr, share=NA)
 
+          tuple=mtt.temp$iahs
+          shrs =mtt.temp$share
+
           for(i in 1:nrow(duration.temp)){
-            duration.temp$share[i]=max(subset(int.temp, year==duration.temp$year[i] & intervention.id %in% subset(mt.temp, iahs==duration.temp$iahs[i])$intervention.id)$share)
+            duration.temp$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
           }
 
           duration.temp$mast.chapter=inst
