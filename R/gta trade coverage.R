@@ -14,7 +14,7 @@
 #' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.
 #' @param group.importers Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
-#' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
+#' @param keep.exporters Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
 #' @param group.exporters Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
