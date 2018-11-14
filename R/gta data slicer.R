@@ -1243,7 +1243,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
   },
   error = function(error.msg) {
-    if(exists(stop.print)){
+    if(exists("stop.print")){
       error.message <<- c(T, stop.print)
     } else {
       error.message <<- c(T,error.msg$message)
