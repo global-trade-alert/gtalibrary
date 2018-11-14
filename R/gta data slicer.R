@@ -513,38 +513,50 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
               stop("At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
             }
 
+            if(is.null(keep.revocation.na)){
+              stop.print <- "Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F)."
+              error.message <<- c(T, stop.print)
+              stop(stop.print)
+
+            }
+
             if(dates==2){
-              master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") & date.removed<=as.Date(date.period[2], "%Y-%m-%d"))
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Revocation period:", choice=paste(date.period[1]," - ",date.period[2], sep="")))
+
+              if(keep.revocation.na==T) {
+                master=subset(master, (date.removed>=as.Date(date.period[1], "%Y-%m-%d") & date.removed<=as.Date(date.period[2], "%Y-%m-%d")) | is.na(date.removed)==T )
+                parameter.choices=rbind(parameter.choices,
+                                        data.frame(parameter="Revocation period:", choice=paste(date.period[1]," - ",date.period[2],", as well as interventions without removal date", sep="")))
+              }
+
+              if(keep.revocation.na==F) {
+                master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") & date.removed<=as.Date(date.period[2], "%Y-%m-%d"))
+                parameter.choices=rbind(parameter.choices,
+                                        data.frame(parameter="Revocation period:", choice=paste(date.period[1]," - ",date.period[2]," and excluding interventions without removal date", sep="")))
+
+              }
 
             }
 
             if(dates==1){
 
-              if(is.null(keep.revocation.na)){
-                stop.print <- "Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F)."
-                error.message <<- c(T, stop.print)
-                stop(stop.print)
 
-              } else{
 
-                if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
+              if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
 
-                  if(keep.revocation.na==T) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") | is.na(date.removed)==T)}
-                  if(keep.revocation.na==F) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d"))}
-                  parameter.choices=rbind(parameter.choices,
-                                          data.frame(parameter="Revocation period:", choice=paste(date.period[1]," or more recent", sep="")))
-                }
-
-                if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-
-                  if(keep.revocation.na==T){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d") | is.na(date.removed)==T)}
-                  if(keep.revocation.na==F){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d"))}
-                  parameter.choices=rbind(parameter.choices,
-                                          data.frame(parameter="Revocation period:", choice=paste(date.period[2]," or earlier", sep="")))
-                }
+                if(keep.revocation.na==T) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") | is.na(date.removed)==T)}
+                if(keep.revocation.na==F) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d"))}
+                parameter.choices=rbind(parameter.choices,
+                                        data.frame(parameter="Revocation period:", choice=paste(date.period[1]," or more recent", sep="")))
               }
+
+              if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
+
+                if(keep.revocation.na==T){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d") | is.na(date.removed)==T)}
+                if(keep.revocation.na==F){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d"))}
+                parameter.choices=rbind(parameter.choices,
+                                        data.frame(parameter="Revocation period:", choice=paste(date.period[2]," or earlier", sep="")))
+              }
+
             }
 
           } else {
