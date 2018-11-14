@@ -112,7 +112,7 @@ gta_intervention_duration <- function(
   }
 
   duration=rbind(subset(duration, is.na(share)==F), intra.year)
-  duration=duration[,c("intervention.id","year","share")]
+  duration=unique(duration[,c("intervention.id","year","share")])
 
   eval(parse(text=paste(df.name, "<<-duration", sep="")))
   eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
