@@ -736,8 +736,18 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       # keep.mast
       if(is.null(mast.chapters)){
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Mast chapters included:", choice="All"))
+        if(is.null(intervention.types)){
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Mast chapters included:", choice="All"))
+        } else {
+
+          parameter.choices=rbind(parameter.choices,
+                                  data.frame(parameter="Mast chapters included:", choice="Those implied by intervention type choice."))
+
+        }
+
+
 
       } else {
 
@@ -765,12 +775,17 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
             if(keep.mast==T){
               master=subset(master, tolower(mast.chapter) %in% tolower(mast.letter))
 
+
+              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice=="All"]="As implied by MAST choice"
+              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"]=paste(parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"], " and those implied by MAST choice.", sep="")
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
 
             } else {
               master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
 
+              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice=="All"]="As implied by MAST choice"
+              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"]=paste(parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"], " and those implied by MAST choice.", sep="")
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Mast chapters included:", choice=paste("All except ", paste(mast.letter, collapse = ", "), sep="")))
 

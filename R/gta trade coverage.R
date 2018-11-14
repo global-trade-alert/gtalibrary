@@ -11,8 +11,10 @@
 #' @param gta.evaluation Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.
 #' @param affected.flows Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.
+#' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.
 #' @param group.importers Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
+#' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
 #' @param group.exporters Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
@@ -55,8 +57,10 @@ gta_trade_coverage <- function(
   gta.evaluation= NULL,
   affected.flows = NULL,
   importers = NULL,
+  keep.importers = NULL,
   group.importers = TRUE,
   exporters = NULL,
+  keep.exporters = NULL,
   group.exporters = TRUE,
   implementers = NULL,
   implementer.role = NULL,
@@ -136,10 +140,27 @@ gta_trade_coverage <- function(
   if(is.null(exporters)){
     exporting.country=gtalibrary::country.names$un_code
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice="All"))
+
   }else {
-    exporting.country=gta_un_code_vector(exporters, "exporting")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, collapse=", ")))
-  }
+
+    if(keep.exporters==T){
+        exporting.country=gta_un_code_vector(exporters, "exporting")
+        parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, collapse=", ")))
+      }else{
+        if(keep.exporters==F){
+
+          exporting.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(exporters, "exporting"))
+          parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste("All except ",paste(exporters, collapse=", "),sep="")))
+
+        } else {
+          stop.print <- "Please specify whether you want to focus on the specified exporters or exclude them (keep.exporters=T/F)."
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
+        }
+
+      }
+
+    }
 
   ms=master.sliced[0,]
 
@@ -156,10 +177,10 @@ gta_trade_coverage <- function(
   ##### Intervention durations
   ## relevant parameter: coverage.period
   if(is.null(coverage.period)){
-    year.start=2008
+    year.start=2009
     year.end=year(Sys.Date())
   } else {
-    if(length(coverage.period)!=2){stop("Please supply a coverage period vector with two entries e.g. c(2008, 2018)")}
+    if(length(coverage.period)!=2){stop("Please supply a coverage period vector with two entries e.g. c(2009, 2018)")}
     if((min(coverage.period)<2008)|(max(coverage.period)>year(Sys.Date())) ){stop(paste("Please only supply coverage period years between 2008 and ", year(Sys.Date()), sep=""))}
     if(is.numeric(coverage.period)==F){stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
 
@@ -195,8 +216,25 @@ gta_trade_coverage <- function(
     importing.country=gtalibrary::country.names$un_code
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice="All"))
   }else {
-    importing.country=gta_un_code_vector(importers, "importing")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, collapse=", ")))
+
+    if(keep.exporters==T){
+      importing.country=gta_un_code_vector(importers, "importing")
+      parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, collapse=", ")))
+
+    }else{
+      if(keep.exporters==F){
+
+        importing.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(importers, "importing"))
+        parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste("All except ",paste(importers, collapse=", "),sep="")))
+
+      } else {
+        stop.print <- "Please specify whether you want to focus on the specified importers or exclude them (keep.importers=T/F)."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
+
+    }
+
   }
 
 

@@ -8,19 +8,17 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   replica.path = "data/database replica/database replica - parts - base.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
   gta.evaluation = NULL, affected.flows = NULL, importers = NULL,
-  group.importers = TRUE, exporters = NULL, group.exporters = TRUE,
-  implementers = NULL, implementer.role = NULL, target = NULL,
-  additional.targets = NULL, targets.combined = TRUE,
-  announcement.period = NULL, implementation.period = NULL,
-  revocation.period = NULL, in.force.today = NULL,
-  intervention.types = NULL, keep.type = NULL, group.type = TRUE,
-  mast.chapters = NULL, keep.mast = NULL, group.mast = TRUE,
-  implementation.level = NULL, keep.level = NULL,
+  keep.importers = NULL, group.importers = TRUE, exporters = NULL,
+  keep.exporters = NULL, group.exporters = TRUE, implementers = NULL,
+  implementer.role = NULL, announcement.period = NULL,
+  implementation.period = NULL, revocation.period = NULL,
+  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
+  group.type = TRUE, mast.chapters = NULL, keep.mast = NULL,
+  group.mast = TRUE, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.interventions = NULL,
-  lag.adjustment = NULL, rdata = FALSE, output.path = NULL,
-  testmode = FALSE)
+  lag.adjustment = NULL, rdata = FALSE, output.path = NULL)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -37,6 +35,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{importers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.}
 
+\item{keep.importers}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.}
+
 \item{group.importers}{Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
 \item{exporters}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.}
@@ -46,12 +46,6 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
 
 \item{implementer.role}{Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').}
-
-\item{target}{Specify the countries targeted uniquely or together by interventions. Default is 'any'. Permissible values are country names or UN codes.}
-
-\item{additional.targets}{Specify the number of countries targeted additionally to the specified target country. Default is any. Provide value as integer.}
-
-\item{targets.combined}{Specify whether interventions shall affect all targets combined ('TRUE') or combined as well as uniquely ('FALSE'). Default is 'TRUE'.}
 
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
@@ -99,7 +93,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
 
-\item{testmode}{Can be set to TRUE or FALSE. If TRUE, sample will be minimized by 99 percent in order to speed up processing. Keep in mind that this will distort results significantly. Default: FALSE.}
+\item{keep.importers}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.}
 }
 \value{
 Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
