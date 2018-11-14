@@ -269,18 +269,25 @@ gta_trade_coverage <- function(
     v.iahs=unique(mt.temp$iahs)
 
     if(length(v.iahs)>0){
-      multiple.mention=subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1
-      multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+      multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
-      tuple=multiple.interventions$iahs
-      shrs =multiple.interventions$share
+      if(length(multiple.mention)>0){
 
-      duration.temp=data.frame(iahs=unique(tuple), share=NA)
-      for(i in 1:nrow(duration.temp)){
-        multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+        multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+
+        tuple=multiple.interventions$iahs
+        shrs =multiple.interventions$share
+
+        duration.temp=data.frame(iahs=unique(tuple), share=NA)
+        for(i in 1:nrow(duration.temp)){
+          multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+        }
+
+        duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
+      }else{
+        duration.temp=mt.temp
       }
 
-      duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
       duration.temp$year=yr
 
       duration.max=rbind(duration.max,duration.temp)
@@ -310,18 +317,24 @@ gta_trade_coverage <- function(
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
-          multiple.mention=subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1
-          multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+          multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
-          tuple=multiple.interventions$iahs
-          shrs =multiple.interventions$share
+          if(length(multiple.mention)>0){
 
-          duration.temp=data.frame(iahs=unique(tuple), share=NA)
-          for(i in 1:nrow(duration.temp)){
-            multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+            multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+
+            tuple=multiple.interventions$iahs
+            shrs =multiple.interventions$share
+
+            duration.temp=data.frame(iahs=unique(tuple), share=NA)
+            for(i in 1:nrow(duration.temp)){
+              multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+            }
+
+            duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
+          }else{
+            duration.temp=mt.temp
           }
-
-          duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
 
           duration.temp$year=yr
           duration.temp$intervention.type=inst
@@ -353,18 +366,24 @@ gta_trade_coverage <- function(
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
-          multiple.mention=subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1
-          multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+          multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
-          tuple=multiple.interventions$iahs
-          shrs =multiple.interventions$share
+          if(length(multiple.mention)>0){
 
-          duration.temp=data.frame(iahs=unique(tuple), share=NA)
-          for(i in 1:nrow(duration.temp)){
-            multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+            multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+
+            tuple=multiple.interventions$iahs
+            shrs =multiple.interventions$share
+
+            duration.temp=data.frame(iahs=unique(tuple), share=NA)
+            for(i in 1:nrow(duration.temp)){
+              multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+            }
+
+            duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
+          }else{
+            duration.temp=mt.temp
           }
-
-          duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
 
           duration.temp$year=yr
           duration.temp$mast.chapter=inst
