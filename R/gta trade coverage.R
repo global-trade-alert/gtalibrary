@@ -763,8 +763,8 @@ gta_trade_coverage <- function(
     write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
     print("Saving XLSX ... completed in working directory")
   } else {
-    write.xlsx(trade.coverage.estimates, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Estimates", row.names = F)
-    write.xlsx(parameter.choices, file=paste(output.path,"/GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
+    write.xlsx(trade.coverage.estimates, file=output.path, sheetName = "Estimates", row.names = F)
+    write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
     print("Saving XLSX ... completed in output path")
   }
 
