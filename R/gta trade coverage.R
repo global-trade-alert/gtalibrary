@@ -307,21 +307,37 @@ gta_trade_coverage <- function(
     v.iahs=unique(mt.temp$iahs)
 
     if(length(v.iahs)>0){
+      duration.temp=data.frame(iahs=character(),
+                               share=character())
       multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
       if(length(multiple.mention)>0){
+        duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
 
         multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
-
-        tuple=multiple.interventions$iahs
-        shrs =multiple.interventions$share
-
-        duration.temp=data.frame(iahs=unique(tuple), share=NA)
-        for(i in 1:nrow(duration.temp)){
-          multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+        full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+                                 share=1)
+        if(nrow(full.coverage)>0){
+          duration.temp=rbind(duration.temp, full.coverage)
         }
 
-        duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
+        multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+
+        if(nrow(multiple.interventions)>0){
+
+          tuple=multiple.interventions$iahs
+          shrs =multiple.interventions$share
+
+          dt=data.frame(iahs=unique(tuple), share=NA)
+          output = character(nrow(dt))
+          for(i in 1:nrow(dt)){
+            output[i]=max(shrs[tuple==dt$iahs[i]])
+          }
+          dt$share=output
+          rm(output)
+
+          duration.temp=rbind(duration.temp, dt)
+        }
       }else{
         duration.temp=mt.temp
       }
@@ -355,21 +371,37 @@ gta_trade_coverage <- function(
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
+          duration.temp=data.frame(iahs=character(),
+                                   share=character())
           multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
           if(length(multiple.mention)>0){
+            duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
 
             multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
-
-            tuple=multiple.interventions$iahs
-            shrs =multiple.interventions$share
-
-            duration.temp=data.frame(iahs=unique(tuple), share=NA)
-            for(i in 1:nrow(duration.temp)){
-              multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+            full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+                                     share=1)
+            if(nrow(full.coverage)>0){
+              duration.temp=rbind(duration.temp, full.coverage)
             }
 
-            duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
+            multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+
+            if(nrow(multiple.interventions)>0){
+
+              tuple=multiple.interventions$iahs
+              shrs =multiple.interventions$share
+
+              dt=data.frame(iahs=unique(tuple), share=NA)
+              output = character(nrow(dt))
+              for(i in 1:nrow(dt)){
+                output[i]=max(shrs[tuple==dt$iahs[i]])
+              }
+              dt$share=output
+              rm(output)
+
+              duration.temp=rbind(duration.temp, dt)
+            }
           }else{
             duration.temp=mt.temp
           }
@@ -404,21 +436,37 @@ gta_trade_coverage <- function(
         v.iahs=unique(mt.temp$iahs)
 
         if(length(v.iahs)>0){
+          duration.temp=data.frame(iahs=character(),
+                                   share=character())
           multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
           if(length(multiple.mention)>0){
+            duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
 
             multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
-
-            tuple=multiple.interventions$iahs
-            shrs =multiple.interventions$share
-
-            duration.temp=data.frame(iahs=unique(tuple), share=NA)
-            for(i in 1:nrow(duration.temp)){
-              multiple.interventions$share[i]=max(shrs[tuple==duration.temp$iahs[i]])
+            full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+                                     share=1)
+            if(nrow(full.coverage)>0){
+              duration.temp=rbind(duration.temp, full.coverage)
             }
 
-            duration.temp=rbind(subset(mt.temp, ! iahs %in% multiple.mention), multiple.interventions)
+            multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+
+            if(nrow(multiple.interventions)>0){
+
+              tuple=multiple.interventions$iahs
+              shrs =multiple.interventions$share
+
+              dt=data.frame(iahs=unique(tuple), share=NA)
+              output = character(nrow(dt))
+              for(i in 1:nrow(dt)){
+                output[i]=max(shrs[tuple==dt$iahs[i]])
+              }
+              dt$share=output
+              rm(output)
+
+              duration.temp=rbind(duration.temp, dt)
+            }
           }else{
             duration.temp=mt.temp
           }
