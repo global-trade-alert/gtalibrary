@@ -25,7 +25,7 @@ gta_intervention_duration <- function(
   current.year.todate=TRUE,
   df.name="intervention.duration",
   pc.name="parameter.choice.duration"
-  ) {
+) {
 
   ## initialising
   library(data.table)
@@ -39,7 +39,7 @@ gta_intervention_duration <- function(
 
     if(ncol(master)==3){
       names(master)=c("intervention.id", "date.implemented", "date.removed")
-     }else{
+    }else{
       names(master)=c("intervention.id", "date.implemented", "date.removed", names(master[,4:ncol(master)]))
     }
 
@@ -74,7 +74,7 @@ gta_intervention_duration <- function(
 
 
   # calculating intra-year duration
-  master=master[,c("intervention.id", "date.implemented", "date.removed")]
+  master=unique(master[,c("intervention.id", "date.implemented", "date.removed")])
   master=subset(master, year(date.implemented)<=year.end )
   master$date.removed[is.na(master$date.removed)]=as.Date(paste(year(Sys.Date())+1,"-01-01",sep=""), "%Y-%m-%d")
 
@@ -94,6 +94,7 @@ gta_intervention_duration <- function(
 
   # durations for cases that start/end within the given year
   intra.year=subset(duration, is.na(share))
+
   for(i in 1:nrow(intra.year)){
 
     if(intra.year$year[i]<year(Sys.Date())){

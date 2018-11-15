@@ -217,12 +217,12 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice="All"))
   }else {
 
-    if(keep.exporters==T){
+    if(keep.importers==T){
       importing.country=gta_un_code_vector(importers, "importing")
       parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, collapse=", ")))
 
     }else{
-      if(keep.exporters==F){
+      if(keep.importers==F){
 
         importing.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(importers, "importing"))
         parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste("All except ",paste(importers, collapse=", "),sep="")))
