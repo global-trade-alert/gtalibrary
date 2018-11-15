@@ -55,6 +55,14 @@ gta_plot_map <- function(data = NULL,
       }
     }
   }
+  if (length(range.split)>1) {
+    range.split <- range.split[2:length(range.split)]
+    if(length(legend.labels)>0) {
+      if(length(range.split)!=length(legend.labels)) {
+        stop("Please make sure that range.split and legend.labels have the same number of elements.")
+      }
+    }
+  }
 
 
   plot = ggplot() +
