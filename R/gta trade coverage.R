@@ -318,9 +318,10 @@ gta_trade_coverage <- function(
         duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
 
         multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
-        full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
-                                 share=1)
-        if(nrow(full.coverage)>0){
+
+        if(length(unique(multiple.interventions$iahs[multiple.interventions$share==1]))>0){
+          full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+                                   share=1)
           duration.temp=rbind(duration.temp, full.coverage)
         }
 
@@ -383,9 +384,10 @@ gta_trade_coverage <- function(
             duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
 
             multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
-            full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
-                                     share=1)
-            if(nrow(full.coverage)>0){
+
+            if(length(unique(multiple.interventions$iahs[multiple.interventions$share==1]))>0){
+              full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+                                       share=1)
               duration.temp=rbind(duration.temp, full.coverage)
             }
 
@@ -449,9 +451,10 @@ gta_trade_coverage <- function(
             duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
 
             multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
-            full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
-                                     share=1)
-            if(nrow(full.coverage)>0){
+
+            if(length(unique(multiple.interventions$iahs[multiple.interventions$share==1]))>0){
+              full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+                                       share=1)
               duration.temp=rbind(duration.temp, full.coverage)
             }
 
@@ -510,9 +513,35 @@ gta_trade_coverage <- function(
   duration.max$share=as.numeric(duration.max$share)
   master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
   master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
-  master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected")])
 
-  names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected")
+  if("mast.chapter" %in% names(master.coverage) & "intervention.type" %in% names(master.coverage)){
+    master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type")])
+    names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","intervention.type")
+
+  }else{
+
+    if("mast.chapter" %in% names(master.coverage)){
+
+      master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter")])
+      names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter")
+
+    } else {
+
+      if("intervention.type" %in% names(master.coverage)){
+
+        master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "intervention.type")])
+        names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected", "intervention.type")
+
+      } else {
+        master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected")])
+        names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected")
+      }
+
+    }
+
+  }
+
+
 
   print("Merging base values into working data frame ... complete")
 
@@ -692,10 +721,30 @@ gta_trade_coverage <- function(
   final.coverage$a.un=NULL
 
 
+
+  ## making it nice
+  if(sum(as.numeric(c("intervention.type","mast.chapter") %in% names(final.coverage)))==0){
+
+    final.coverage=reshape(final.coverage, idvar=c("importer","exporter"), timevar = "year", direction="wide")
+    # pretty column names
+    setnames(final.coverage, "importer", "Importing country")
+    setnames(final.coverage, "exporter", "Exporting country")
+    column.order=c("Importing country", "Exporting country")
+    for(yr in year.start:year.end){
+      names(final.coverage)[grepl(yr, names(final.coverage))==T]=paste("Trade coverage estimate for ",yr, sep="")
+      column.order=c(column.order, paste("Trade coverage estimate for ",yr, sep=""))
+    }
+
+    trade.coverage.estimates<<-final.coverage[,column.order]
+  }
+
   ## MAST chapter names, if necessary, else reshape with or without intervention types
   if("mast.chapter" %in% names(final.coverage)){
     mast.names=unique(gtalibrary::int.mast.types[,c("mast.chapter.id","mast.chapter.name")])
     names(mast.names)=c("mast.chapter", "mast.chapter.name")
+    mast.names$mast.chapter=as.character(mast.names$mast.chapter)
+    mast.names$mast.chapter.name=as.character(mast.names$mast.chapter.name)
+
 
     final.coverage=merge(final.coverage, mast.names, by="mast.chapter", all.x=T)
     final.coverage$mast.chapter.name[final.coverage$mast.chapter=="All included MAST chapters"]="All included MAST chapters"
@@ -737,24 +786,6 @@ gta_trade_coverage <- function(
 
     trade.coverage.estimates<<-final.coverage[,column.order]
   }
-
-  if(sum(as.numeric(c("intervention.type","mast.chapter") %in% names(final.coverage)))==0){
-
-    final.coverage=reshape(final.coverage, idvar=c("importer","exporter"), timevar = "year", direction="wide")
-    # pretty column names
-    setnames(final.coverage, "importer", "Importing country")
-    setnames(final.coverage, "exporter", "Exporting country")
-    column.order=c("Importing country", "Exporting country")
-    for(yr in year.start:year.end){
-      names(final.coverage)[grepl(yr, names(final.coverage))==T]=paste("Trade coverage estimate for ",yr, sep="")
-      column.order=c(column.order, paste("Trade coverage estimate for ",yr, sep=""))
-    }
-
-    trade.coverage.estimates<<-final.coverage[,column.order]
-  }
-
-
-
 
   print("Oooh that's pretty ...")
 
