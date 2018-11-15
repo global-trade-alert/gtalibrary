@@ -172,6 +172,7 @@ gta_trade_coverage <- function(
     ms=rbind(ms, subset(master.sliced, affected.flow=="outward" & i.un %in% exporting.country))
   }
   master.sliced=ms
+  master.sliced<<-master.sliced
   rm(ms)
 
   ##### Intervention durations
@@ -269,6 +270,7 @@ gta_trade_coverage <- function(
   # filter master.tuple
   print("Restricting set to stated importers/exporters ...")
   master.tuple=subset(master.tuple, i.un %in% importing.country)
+  master.tuple<<-master.tuple
   print("Restricting set to stated importers/exporters ... complete.")
 
   print("Restricting set to stated implementers and their roles ...")
@@ -285,6 +287,7 @@ gta_trade_coverage <- function(
     mt=rbind(mt, subset(master.tuple, a.un!=t.un & i.un!=t.un))
   }
   master.tuple=mt
+  master.tuple<<-master.tuple
   rm(mt)
   print("Restricting set to stated implementers and their roles ... complete.")
 
