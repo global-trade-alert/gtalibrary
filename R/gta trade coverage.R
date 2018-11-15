@@ -99,7 +99,7 @@ gta_trade_coverage <- function(
   ######## Feed data slicer
 
   ## Collecting parameter values
-  parameter.choices=data.frame(parameter=character(), choice=character())
+  parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
 
 
   print("Slicing GTA master data set ...")
@@ -456,7 +456,7 @@ gta_trade_coverage <- function(
   print("Merging base values into working data frame ...")
   master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
   master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
-  master.coverage=master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected")]
+  master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected")])
 
   names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected")
 

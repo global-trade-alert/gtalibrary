@@ -85,7 +85,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   library("data.table")
 
   ## Collecting parameter values
-  parameter.choices=data.frame(parameter=character(), choice=character())
+  parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
 
   ## data path
   if(data.path=="online"){
@@ -762,6 +762,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         stop(stop.print)
       }
 
+
+      parameter.choices$parameter=as.character(parameter.choices$parameter)
+      parameter.choices$choice=as.character(parameter.choices$choice)
 
       # mast.chapter
       # keep.mast

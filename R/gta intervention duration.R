@@ -29,7 +29,7 @@ gta_intervention_duration <- function(
 
   ## initialising
   library(data.table)
-  parameter.choices=data.frame(parameter=character(), choice=character())
+  parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
 
   ## data file
   if(is.data.frame){
