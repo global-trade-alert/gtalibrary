@@ -672,7 +672,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Currently in force:", choice="Regardless"))
-      }
+      } else {
 
       if(is.null(in.force.today)==F){
 
@@ -705,6 +705,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         error.message <<- c(T, stop.print)
         stop(stop.print)
       }
+
+    }
 
 
       # Check # of rows
