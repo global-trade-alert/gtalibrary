@@ -5,8 +5,9 @@
 \title{Create ggplot maps.}
 \usage{
 gta_plot_map(data = NULL, countries = NULL, value = NULL,
-  colour.low = blue[4], colour.high = blue[1],
-  colour.breaks = waiver(), legend.title = NULL, title = NULL)
+  colour.low = gta_colour$blue[4], colour.high = gta_colour$blue[1],
+  range.split = waiver(), legend.title = NULL,
+  legend.labels = waiver(), title = NULL)
 }
 \arguments{
 \item{data}{Specify the dataframe with the relevant columns.}
@@ -19,9 +20,11 @@ gta_plot_map(data = NULL, countries = NULL, value = NULL,
 
 \item{colour.high}{Specify a color from the gta colour palette for the high part of the gradient. Default: GTA light blue}
 
-\item{colour.breaks}{Specify the breaks for the colour gradient. Default: ggplot automatic.}
+\item{range.split}{Specify the number of parts the value range should be split to. Either as integer (range will be automatically divided and sequenced) or as sequence (e.g. seq(200,1000,200)). Default: ggplot automatic.}
 
 \item{legend.title}{Specify a title for the colour legend. Default: No title.}
+
+\item{legend.labels}{Specify the legend labels as list. Default: ggplot automatic.}
 
 \item{title}{Specify a title for the map plot. Default: No title.}
 }
