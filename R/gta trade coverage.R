@@ -365,7 +365,8 @@ gta_trade_coverage <- function(
 
     for(inst in unique(master.sliced$intervention.type)){
       for(yr in c(year.start:year.end)){
-        int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & intervention.type==inst)$intervention.id)$intervention.id)
+        int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id  &
+                                 intervention.id %in% subset(master.sliced, intervention.type==inst)$intervention.id)$intervention.id)
 
         mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
         int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
@@ -430,7 +431,8 @@ gta_trade_coverage <- function(
 
     for(inst in unique(master.sliced$mast.chapter)){
       for(yr in c(year.start:year.end)){
-        int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0 & mast.chapter==inst)$intervention.id)$intervention.id)
+        int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id &
+                                 intervention.id %in% subset(master.sliced, mast.chapter==inst)$intervention.id)$intervention.id)
 
         mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
         int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
