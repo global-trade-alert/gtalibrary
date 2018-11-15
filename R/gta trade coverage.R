@@ -308,7 +308,7 @@ gta_trade_coverage <- function(
 
     if(length(v.iahs)>0){
       duration.temp=data.frame(iahs=character(),
-                               share=character())
+                               share=numeric())
       multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
       if(length(multiple.mention)>0){
@@ -372,7 +372,7 @@ gta_trade_coverage <- function(
 
         if(length(v.iahs)>0){
           duration.temp=data.frame(iahs=character(),
-                                   share=character())
+                                   share=numeric())
           multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
           if(length(multiple.mention)>0){
@@ -437,7 +437,7 @@ gta_trade_coverage <- function(
 
         if(length(v.iahs)>0){
           duration.temp=data.frame(iahs=character(),
-                                   share=character())
+                                   share=numeric())
           multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
 
           if(length(multiple.mention)>0){
@@ -502,6 +502,7 @@ gta_trade_coverage <- function(
 
 
   print("Merging base values into working data frame ...")
+  duration.max$share=as.numeric(duration.max$share)
   master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
   master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
   master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected")])
