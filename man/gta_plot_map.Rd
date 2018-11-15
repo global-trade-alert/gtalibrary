@@ -5,6 +5,7 @@
 \title{Create ggplot maps.}
 \usage{
 gta_plot_map(data = NULL, countries = NULL, value = NULL,
+  marked.country = NULL, marked.colour = gta_colour$green[2],
   colour.low = gta_colour$blue[4], colour.high = gta_colour$blue[1],
   range.split = waiver(), legend.title = NULL,
   legend.labels = waiver(), title = NULL)
@@ -15,6 +16,10 @@ gta_plot_map(data = NULL, countries = NULL, value = NULL,
 \item{countries}{Specify the name of the column containing the countries.}
 
 \item{value}{Specify the name of the column containing the value for each country.}
+
+\item{marked.country}{Specify a single country which shall be coloured differenty.}
+
+\item{marked.colour}{Specify the colour the marked.country shall be coloured with. Default: gta_colour$green[2]}
 
 \item{colour.low}{Specifiy a color from the gta colour palette for the low part of the gradient. Default: GTA dark blue}
 

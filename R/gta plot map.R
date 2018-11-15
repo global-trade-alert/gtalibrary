@@ -7,6 +7,8 @@
 #' @param data Specify the dataframe with the relevant columns.
 #' @param countries Specify the name of the column containing the countries.
 #' @param value Specify the name of the column containing the value for each country.
+#' @param marked.country Specify a single country which shall be coloured differenty.
+#' @param marked.colour Specify the colour the marked.country shall be coloured with. Default: gta_colour$green[2]
 #' @param colour.low Specifiy a color from the gta colour palette for the low part of the gradient. Default: GTA dark blue
 #' @param colour.high Specify a color from the gta colour palette for the high part of the gradient. Default: GTA light blue
 #' @param range.split Specify the number of parts the value range should be split to. Either as integer (range will be automatically divided and sequenced) or as sequence (e.g. seq(200,1000,200)). Default: ggplot automatic.
@@ -21,6 +23,8 @@
 gta_plot_map <- function(data = NULL,
                          countries = NULL,
                          value = NULL,
+                         marked.country = NULL,
+                         marked.colour = gta_colour$green[2],
                          colour.low = gta_colour$blue[4],
                          colour.high = gta_colour$blue[1],
                          range.split = waiver(),
@@ -64,6 +68,7 @@ gta_plot_map <- function(data = NULL,
     }
   }
 
+  if (is.null(marked.country)){
 
   plot = ggplot() +
     geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white") +
@@ -89,6 +94,42 @@ gta_plot_map <- function(data = NULL,
            ymax=guide_legend(titel="size"))
 
   plot
+
+  }
+
+  if(is.null(marked.country)==F) {
+
+    marked.country <- gta_un_code_vector(marked.country)
+
+    plot = ggplot() +
+      geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white") +
+      geom_polygon(data=subset(world, UN == marked.country), aes(x=long, y=lat, group = group), fill=marked.colour, size = 0.2, colour = "white") +
+      coord_fixed() + # Important to fix world map proportions
+      ggtitle(title) +
+      labs(x="", y="") +
+      scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels) + # Set color gradient
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            panel.background = element_blank(),
+            legend.position = "bottom",
+            plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b=10)),
+            legend.title = element_text(vjust= 0.3, family="", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
+            legend.text = element_text(family="", colour = "#333333", size = 11*0.8, angle = 0, hjust=0, vjust=0, margin = margin(r=10)),
+            legend.text.align = 0
+
+      ) +
+      guides(fill=guide_legend(title=legend.title, label.position = "top"),
+             ymax=guide_legend(titel="size"))
+
+
+    plot
+
+
+  }
 
   return(plot)
 }
