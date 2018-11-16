@@ -323,9 +323,9 @@ gta_trade_coverage <- function(
           full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
                                    share=1)
           duration.temp=rbind(duration.temp, full.coverage)
-        }
+          multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
 
-        multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+        }
 
         if(nrow(multiple.interventions)>0){
 
@@ -389,9 +389,9 @@ gta_trade_coverage <- function(
               full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
                                        share=1)
               duration.temp=rbind(duration.temp, full.coverage)
-            }
 
-            multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+              multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+            }
 
             if(nrow(multiple.interventions)>0){
 
@@ -456,9 +456,9 @@ gta_trade_coverage <- function(
               full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
                                        share=1)
               duration.temp=rbind(duration.temp, full.coverage)
-            }
 
-            multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+              multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+            }
 
             if(nrow(multiple.interventions)>0){
 
