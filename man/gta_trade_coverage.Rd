@@ -41,6 +41,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{exporters}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.}
 
+\item{keep.exporters}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.}
+
 \item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
@@ -75,7 +77,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{keep.firms}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated firm subsets.}
 
-\item{cpc.sectors}{Provide a vector of CPC codes that you are interested in (version 2.1, any digit level).}
+\item{cpc.sectors}{Provide a vector of CPC codes that you are interested in (version 2.1, 3-digit level).}
 
 \item{keep.cpc}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.}
 
@@ -92,8 +94,6 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{rdata}{Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE}
 
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
-
-\item{keep.importers}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.}
 }
 \value{
 Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.

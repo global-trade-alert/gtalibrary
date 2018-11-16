@@ -8,6 +8,8 @@
 #' @param keep.importer Specify whether to focus on ('TRUE') or exclude ('FALSE') trade with the stated importing country.
 #' @param exporting.country Specify the exporting countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
 #' @param keep.exporter Specify whether to focus on ('TRUE') or exclude ('FALSE') trade with the stated exporting country.
+#' @param cpc.sectors Provide a vector of CPC codes that you are interested in (version 2.1, 3-digit level).
+#' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
 #' @param df.name Set the name of the generated result data frame. Default is trade.base.
@@ -25,8 +27,10 @@ gta_trade_value_bilateral <- function(
   keep.importer = NULL,
   exporting.country = NULL,
   keep.exporter = NULL,
+  cpc.sectors=NULL,
+  keep.cpc=TRUE,
   hs.codes = NULL,
-  keep.hs = NULL,
+  keep.hs = TRUE,
   df.name="trade.base.bilateral",
   pc.name="parameter.choice.trade.base"
 ) {
@@ -40,7 +44,7 @@ gta_trade_value_bilateral <- function(
   if(is.null(importing.country)){
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Importing countries included:", choice="All"))
+                            data.frame(parameter="Importing countries included in trade data:", choice="All"))
 
   } else {
 
@@ -54,13 +58,13 @@ gta_trade_value_bilateral <- function(
         trade.base=subset(trade.base, i.un %in% importers)
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Importing countries included:", choice=paste(importing.country, collapse = ", ")))
+                                data.frame(parameter="Importing countries included in trade data:", choice=paste(importing.country, collapse = ", ")))
 
       } else {
         trade.base=subset(trade.base, ! i.un %in% importers)
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Importing countries included:", choice=paste("All except ", paste(importing.country, collapse = ", "), sep="")))
+                                data.frame(parameter="Importing countries included in trade data:", choice=paste("All except ", paste(importing.country, collapse = ", "), sep="")))
 
       }
 
@@ -72,7 +76,7 @@ gta_trade_value_bilateral <- function(
   if(is.null(exporting.country)){
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Exporting countries included:", choice="All"))
+                            data.frame(parameter="Exporting countries included in trade data:", choice="All"))
 
   } else {
 
@@ -86,13 +90,13 @@ gta_trade_value_bilateral <- function(
         trade.base=subset(trade.base, a.un %in% exporters)
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Exporting countries included:", choice=paste(exporting.country, collapse = ", ")))
+                                data.frame(parameter="Exporting countries included in trade data:", choice=paste(exporting.country, collapse = ", ")))
 
       } else {
         trade.base=subset(trade.base, ! a.un %in% exporters)
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Exporting countries included:", choice=paste("All except ", paste(exporting.country, collapse = ", "), sep="")))
+                                data.frame(parameter="Exporting countries included in trade data:", choice=paste("All except ", paste(exporting.country, collapse = ", "), sep="")))
 
       }
 
@@ -100,11 +104,12 @@ gta_trade_value_bilateral <- function(
     }
   }
 
+
   ## hs codes
   if(is.null(hs.codes)){
 
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="HS codes included:", choice="All"))
+                            data.frame(parameter="HS codes included in trade data:", choice="All"))
 
   } else {
 
@@ -117,22 +122,76 @@ gta_trade_value_bilateral <- function(
 
       # Filter products
       if(keep.hs==T){
-        trade.base=subset(trade.base, hs6 %in% hs.codes)
-
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="HS codes included:", choice=paste(hs.codes, collapse = ", ")))
+                                data.frame(parameter="HS codes included in trade data:", choice=paste(hs.codes, collapse = ", ")))
 
       } else {
-        trade.base=subset(trade.base, ! hs6 %in% hs.codes)
-
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="HS codes included:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
+                                data.frame(parameter="HS codes included in trade data:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
 
       }
 
 
     }
 
+  }
+
+  ## cpc codes
+  if(is.null(cpc.sectors)){
+
+    if(is.null(hs.codes)){
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="CPC sectors included in trade data:", choice="All"))
+    } else {
+
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="CPC sectors included in trade data:", choice="Those implied by HS code choice."))
+    }
+
+  }else{
+
+    if(is.null(hs.codes)){
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="CPC sectors included in trade data:", choice=paste(sprintf("%03i",cpc.sectors), collapse = ", ")))
+
+      if(keep.cpc==T){
+        hs.codes=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
+      }else {
+        strs=gtalibrary::cpc.to.hs
+        hs.codes=strs$hs[! strs$cpc %in% cpc.sectors]
+        rm(strs)
+      }
+
+    } else {
+
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="CPC sectors included in trade data:", choice=paste("Those implied by HS code choice and CPC ",paste(sprintf("%03i",cpc.sectors), collapse = ", "),".",sep="")))
+
+
+      if(keep.cpc==T){
+        strs=gtalibrary::cpc.to.hs
+        hs.codes=unique(c(hs.codes, strs$hs[strs$cpc %in% cpc.sectors]))
+        rm(strs)
+
+      }else {
+        strs=gtalibrary::cpc.to.hs
+        hs.codes=unique(c(hs.codes, strs$hs[! strs$cpc %in% cpc.sectors]))
+        rm(strs)
+      }
+
+    }
+
+
+  }
+
+  # adjusting trade to hs/cpc codes
+
+  if(is.null(hs.codes)==F){
+    if(keep.hs==T){
+      trade.base=subset(trade.base, hs6 %in% hs.codes)
+    } else{
+      trade.base=subset(trade.base, ! hs6 %in% hs.codes)
+    }
   }
 
 

@@ -6,8 +6,8 @@
 \usage{
 gta_trade_value_bilateral(importing.country = NULL,
   keep.importer = NULL, exporting.country = NULL,
-  keep.exporter = NULL, hs.codes = NULL, keep.hs = NULL,
-  df.name = "trade.base.bilateral",
+  keep.exporter = NULL, cpc.sectors = NULL, keep.cpc = TRUE,
+  hs.codes = NULL, keep.hs = TRUE, df.name = "trade.base.bilateral",
   pc.name = "parameter.choice.trade.base")
 }
 \arguments{
@@ -18,6 +18,10 @@ gta_trade_value_bilateral(importing.country = NULL,
 \item{exporting.country}{Specify the exporting countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.}
 
 \item{keep.exporter}{Specify whether to focus on ('TRUE') or exclude ('FALSE') trade with the stated exporting country.}
+
+\item{cpc.sectors}{Provide a vector of CPC codes that you are interested in (version 2.1, 3-digit level).}
+
+\item{keep.cpc}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.}
 
 \item{hs.codes}{Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).}
 

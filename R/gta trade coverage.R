@@ -34,7 +34,7 @@
 #' @param keep.level Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementation levels.
 #' @param eligible.firms Concentrate the analysis on interventions that are targeted at certain subsets. Default is 'any'. Permissible values are 'all', 'firm-specific', 'SMEs', 'state-controlled','state trading enterprise' or combinations thereof.
 #' @param keep.firms Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated firm subsets.
-#' @param cpc.sectors Provide a vector of CPC codes that you are interested in (version 2.1, any digit level).
+#' @param cpc.sectors Provide a vector of CPC codes that you are interested in (version 2.1, 3-digit level).
 #' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
@@ -501,8 +501,10 @@ gta_trade_coverage <- function(
                             keep.importer = TRUE,
                             exporting.country = exporting.country,
                             keep.exporter = TRUE,
+                            cpc.sectors = cpc.sectors,
+                            keep.cpc = keep.cpc,
                             hs.codes = hs.codes,
-                            keep.hs = TRUE)
+                            keep.hs = keep.hs)
 
   trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
   # rm(parameter.choice.trade.base)
