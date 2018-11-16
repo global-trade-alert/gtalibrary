@@ -505,6 +505,7 @@ gta_trade_coverage <- function(
                             keep.cpc = keep.cpc,
                             hs.codes = hs.codes,
                             keep.hs = keep.hs)
+  parameter.choices=unique(rbind(parameter.choices, parameter.choice.trade.base))
 
   trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
   # rm(parameter.choice.trade.base)
