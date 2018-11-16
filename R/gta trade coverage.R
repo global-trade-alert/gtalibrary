@@ -541,10 +541,12 @@ gta_trade_coverage <- function(
 
   }
 
-
-
+  master.coverage=subset(master.coverage, is.na(trade.value.affected)==F)
   print("Merging base values into working data frame ... complete")
 
+  ### some housekeeping
+  rm(duration.max, int.temp)
+  if(exists("full.coverage")){rm(full.coverage)}
 
   #### aggregating to trade coverage table
   print("Calculating aggregate annual trade coverage ...")
@@ -553,117 +555,134 @@ gta_trade_coverage <- function(
 
 
   if(("mast.chapter" %in% names(master.coverage) | "intervention.type" %in% names(master.coverage))==F){
-  if(group.importers==T & group.exporters==T){
-    fc.temp=aggregate(trade.value.affected ~ year, master.coverage, sum)
-    fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
-    fc.temp$i.un=999
-    fc.temp$a.un=999
-    final.coverage=rbind(final.coverage, fc.temp)
-  }
 
-  if(group.importers==F & group.exporters==T){
-    fc.temp=aggregate(trade.value.affected ~ i.un + year, master.coverage, sum)
-    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-    fc.temp$trade.value=NULL
-    fc.temp$a.un=999
-    final.coverage=rbind(final.coverage, fc.temp)
-  }
+    total.trade=sum(trade.base.bilateral$trade.value)
 
-  if(group.importers==T & group.exporters==F){
-    fc.temp=aggregate(trade.value.affected ~ a.un + year, master.coverage, sum)
-    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-    fc.temp$trade.value=NULL
-    fc.temp$i.un=999
-    final.coverage=rbind(final.coverage, fc.temp)
-  }
+    for(yr in year.start:year.end){
 
-  if(group.importers==F & group.exporters==F){
-    fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, master.coverage, sum)
-    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-    fc.temp$trade.value=NULL
-    final.coverage=rbind(final.coverage, fc.temp)
-  }
+      # splitting the set to avoid memory overload
+      mc.yr=subset(master.coverage, year==yr)
+
+      if(group.importers==T & group.exporters==T){
+        fc.temp=aggregate(trade.value.affected ~ year, mc.yr, sum)
+        fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
+        fc.temp$i.un=999
+        fc.temp$a.un=999
+        final.coverage=rbind(final.coverage, fc.temp)
+      }
+
+      if(group.importers==F & group.exporters==T){
+        fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.yr, sum)
+        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+        fc.temp$trade.value=NULL
+        fc.temp$a.un=999
+        final.coverage=rbind(final.coverage, fc.temp)
+      }
+
+      if(group.importers==T & group.exporters==F){
+        fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.yr, sum)
+        fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+        fc.temp$trade.value=NULL
+        fc.temp$i.un=999
+        final.coverage=rbind(final.coverage, fc.temp)
+      }
+
+      if(group.importers==F & group.exporters==F){
+        fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.yr, sum)
+        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+        fc.temp$trade.value=NULL
+        final.coverage=rbind(final.coverage, fc.temp)
+      }
+    }
+
   } else {
 
-    if("mast.chapter" %in% names(master.coverage)){
 
-      mc.inst=subset(master.coverage, mast.chapter=="All included instruments")
-      if(group.importers==T & group.exporters==T){
-        fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
-        fc.temp$i.un=999
-        fc.temp$a.un=999
-        final.coverage=rbind(final.coverage, fc.temp)
+    # splitting the set to avoid memory overload
+    for(yr in year.start:year.end){
+
+      mc.yr=subset(master.coverage, year==yr)
+
+      if("mast.chapter" %in% names(mc.yr)){
+
+        mc.inst=subset(mc.yr, mast.chapter=="All included instruments")
+        if(group.importers==T & group.exporters==T){
+          fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
+          fc.temp$i.un=999
+          fc.temp$a.un=999
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+        if(group.importers==F & group.exporters==T){
+          fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+          fc.temp$a.un=999
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+        if(group.importers==T & group.exporters==F){
+          fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+          fc.temp$i.un=999
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+        if(group.importers==F & group.exporters==F){
+          fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+      } else {
+
+        mc.inst=subset(mc.yr, intervention.type=="All included instruments")
+        if(group.importers==T & group.exporters==T){
+          fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
+          fc.temp$i.un=999
+          fc.temp$a.un=999
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+        if(group.importers==F & group.exporters==T){
+          fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+          fc.temp$a.un=999
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+        if(group.importers==T & group.exporters==F){
+          fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+          fc.temp$i.un=999
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
+        if(group.importers==F & group.exporters==F){
+          fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+          final.coverage=rbind(final.coverage, fc.temp)
+        }
+
       }
-
-      if(group.importers==F & group.exporters==T){
-        fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
-        fc.temp$a.un=999
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
-      if(group.importers==T & group.exporters==F){
-        fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
-        fc.temp$i.un=999
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
-      if(group.importers==F & group.exporters==F){
-        fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
-    } else {
-
-      mc.inst=subset(master.coverage, intervention.type=="All included instruments")
-      if(group.importers==T & group.exporters==T){
-        fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
-        fc.temp$i.un=999
-        fc.temp$a.un=999
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
-      if(group.importers==F & group.exporters==T){
-        fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
-        fc.temp$a.un=999
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
-      if(group.importers==T & group.exporters==F){
-        fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
-        fc.temp$i.un=999
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
-      if(group.importers==F & group.exporters==F){
-        fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
-        final.coverage=rbind(final.coverage, fc.temp)
-      }
-
     }
-}
+  }
   print("Calculating aggregate annual trade coverage ... completed")
 
   ### by intervention type, if necessary
