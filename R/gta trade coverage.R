@@ -555,11 +555,10 @@ gta_trade_coverage <- function(
   print("Calculating aggregate annual trade coverage ...")
 
   final.coverage=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric())
-
+  total.trade=sum(trade.base.bilateral$trade.value)
 
   if(("mast.chapter" %in% names(master.coverage) | "intervention.type" %in% names(master.coverage))==F){
 
-    total.trade=sum(trade.base.bilateral$trade.value)
 
     for(yr in year.start:year.end){
 
