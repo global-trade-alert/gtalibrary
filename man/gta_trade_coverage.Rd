@@ -18,8 +18,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.interventions = NULL,
-  lag.adjustment = NULL, trade.statistic = "share",
-  trade.data = "base",
+  lag.adjustment = NULL, intra.year.duration = TRUE,
+  trade.statistic = "share", trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE, output.path = NULL)
 }
@@ -93,6 +93,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{keep.interventions}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
+
+\item{intra.year.duration}{Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.}
 
 \item{trade.statistic}{Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.}
 

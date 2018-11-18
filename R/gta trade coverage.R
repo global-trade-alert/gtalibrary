@@ -18,8 +18,6 @@
 #' @param group.exporters Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
-#' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
-#' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
@@ -41,9 +39,13 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
+#' @param intra.year.duration Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.
 #' @param trade.statistic Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.
 #' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),
+#' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
+#' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
+
 #' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -87,6 +89,7 @@ gta_trade_coverage <- function(
   intervention.ids = NULL,
   keep.interventions = NULL,
   lag.adjustment=NULL,
+  intra.year.duration=TRUE,
   trade.statistic="share",
   trade.data="base",
   trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
@@ -505,7 +508,15 @@ gta_trade_coverage <- function(
 
   if(!trade.data %in% c("base","before implementation","during implementation", "before announcement","during announcement", paste(2007:2017))){
     stop("Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, or 'before/during announcement/implementation'.")
+  } else{
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Underlying trade data:", choice=trade.data))
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Location of underlying trade data:", choice=trade.data.path))
+
   }
+
+
 
   gta_trade_value_bilateral(importing.country = importing.country,
                             keep.importer = TRUE,
@@ -520,7 +531,6 @@ gta_trade_coverage <- function(
   parameter.choices=unique(rbind(parameter.choices, parameter.choice.trade.base))
 
 
-  # rm(parameter.choice.trade.base)
   print("Importing trade base values ... completed.")
 
 
@@ -530,15 +540,26 @@ gta_trade_coverage <- function(
   if(trade.data %in% c("base", paste(2007:2017))){
     trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
     master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
-    master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
 
   } else {
-    trade.base.bilateral=subset(trade.base.bilateral, year %in% c(start.year:end.year))
+    trade.base.bilateral=subset(trade.base.bilateral, year %in% c(year.start:year.end))
     trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
 
     master.coverage=merge(duration.max, trade.base.bilateral, by=c("iahs","year"), all.x=T)
-    master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
   }
+
+
+  if(intra.year.duration){
+    master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Adjusted for intra-year duration:", choice="Yes"))
+  } else {
+    master.coverage$trade.value.affected=master.coverage$trade.value
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Adjusted for intra-year duration:", choice="No"))
+  }
+
+
 
 
 
