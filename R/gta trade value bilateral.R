@@ -55,6 +55,7 @@ gta_trade_value_bilateral <- function(
     if(trade.data %in% paste(2007:2017)){
       yr=as.numeric(trade.data)
       trade.base=subset(trade.annual, year==yr)
+      trade.base$year=NULL
       rm(trade.annual)
     } else {
       trade.base=trade.annual
