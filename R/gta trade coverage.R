@@ -113,6 +113,7 @@ gta_trade_coverage <- function(
                   affected.flows = affected.flows,
                   announcement.period = announcement.period,
                   implementation.period = implementation.period,
+                  keep.implementation.na=F,
                   revocation.period = revocation.period,
                   in.force.today = in.force.today,
                   intervention.types = intervention.types,
