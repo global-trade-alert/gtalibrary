@@ -12,6 +12,8 @@
 #' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.
+#' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata').
 #' @param df.name Set the name of the generated result data frame. Default is trade.base.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.trade.base.
 #'
@@ -31,6 +33,8 @@ gta_trade_value_bilateral <- function(
   keep.cpc=TRUE,
   hs.codes = NULL,
   keep.hs = TRUE,
+  trade.data="base",
+  trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
   df.name="trade.base.bilateral",
   pc.name="parameter.choice.trade.base"
 ) {
@@ -38,7 +42,31 @@ gta_trade_value_bilateral <- function(
   ## initialising
   library(data.table)
   parameter.choices=data.frame(parameter=character(), choice=character())
-  trade.base=gtalibrary::trade.base
+
+  if(!trade.data %in% c("base","before implementation","during implementation", "before announcement","during announcement", paste(2007:2017))){
+    stop("Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, or 'before/during announcement/implementation'.")
+  }
+
+  if(trade.data=="base"){
+    trade.base=gtalibrary::trade.base
+  } else{
+    load(trade.data.path)
+
+    if(trade.data %in% paste(2007:2017)){
+      yr=as.numeric(trade.data)
+      trade.base=subset(trade.annual, year==yr)
+      rm(trade.annual)
+    } else {
+      trade.base=trade.annual
+      rm(trade.annual)
+
+      if(grepl("before", trade.data, ignore.case = T)){
+        trade.base$year=trade.base$year+1
+      }
+
+    }
+  }
+
 
   ## importer
   if(is.null(importing.country)){

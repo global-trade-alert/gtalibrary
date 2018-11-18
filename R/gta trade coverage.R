@@ -41,7 +41,9 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
-#'
+#' @param trade.statistic Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.
+#' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),
 #' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -85,6 +87,9 @@ gta_trade_coverage <- function(
   intervention.ids = NULL,
   keep.interventions = NULL,
   lag.adjustment=NULL,
+  trade.statistic="share",
+  trade.data="base",
+  trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE,
   output.path = NULL) {
 
@@ -497,6 +502,10 @@ gta_trade_coverage <- function(
   ##### multiply in base values
   print("Importing trade base values ...")
 
+  if(!trade.data %in% c("base","before implementation","during implementation", "before announcement","during announcement", paste(2007:2017))){
+    stop("Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, or 'before/during announcement/implementation'.")
+  }
+
   gta_trade_value_bilateral(importing.country = importing.country,
                             keep.importer = TRUE,
                             exporting.country = exporting.country,
@@ -504,18 +513,34 @@ gta_trade_coverage <- function(
                             cpc.sectors = cpc.sectors,
                             keep.cpc = keep.cpc,
                             hs.codes = hs.codes,
-                            keep.hs = keep.hs)
+                            keep.hs = keep.hs,
+                            trade.data=trade.data,
+                            trade.data.path='data/support tables/Goods support table for gtalibrary.Rdata')
   parameter.choices=unique(rbind(parameter.choices, parameter.choice.trade.base))
 
-  trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
+
   # rm(parameter.choice.trade.base)
   print("Importing trade base values ... completed.")
 
 
   print("Merging base values into working data frame ...")
   duration.max$share=as.numeric(duration.max$share)
-  master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
-  master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
+
+  if(trade.data %in% c("base", paste(2007:2017))){
+    trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
+    master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
+    master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
+
+  } else {
+    trade.base.bilateral=subset(trade.base.bilateral, year %in% c(start.year:end.year))
+    trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
+
+    master.coverage=merge(duration.max, trade.base.bilateral, by=c("iahs","year"), all.x=T)
+    master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
+  }
+
+
+
 
   if("mast.chapter" %in% names(master.coverage) & "intervention.type" %in% names(master.coverage)){
     master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type")])
@@ -552,6 +577,13 @@ gta_trade_coverage <- function(
   if(exists("full.coverage")){rm(full.coverage)}
 
   #### aggregating to trade coverage table
+  if(grepl("share|value", trade.statistic, ignore.case = F)==F){
+    stop("Please re-specify the desired trade statistic as either trade share ('share') or absolute USD value ('value').")
+  } else{
+    if(grepl("share", trade.statistic, ignore.case = F)){share=T}else{share=F}
+  }
+
+
   print("Calculating aggregate annual trade coverage ...")
 
   final.coverage=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric())
@@ -567,35 +599,49 @@ gta_trade_coverage <- function(
 
       if(group.importers==T & group.exporters==T){
         fc.temp=aggregate(trade.value.affected ~ year, mc.yr, sum)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
         fc.temp$i.un=999
         fc.temp$a.un=999
+
+        if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
+
         final.coverage=rbind(final.coverage, fc.temp)
       }
 
       if(group.importers==F & group.exporters==T){
         fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.yr, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
+        if(share){
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+        }
+
         fc.temp$a.un=999
         final.coverage=rbind(final.coverage, fc.temp)
       }
 
       if(group.importers==T & group.exporters==F){
         fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.yr, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
+
+        if(share){
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+        }
+
         fc.temp$i.un=999
         final.coverage=rbind(final.coverage, fc.temp)
       }
 
       if(group.importers==F & group.exporters==F){
         fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.yr, sum)
-        fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-        fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-        fc.temp$trade.value=NULL
+
+
+        if(share){
+          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+          fc.temp$trade.value=NULL
+        }
+
         final.coverage=rbind(final.coverage, fc.temp)
       }
     }
@@ -613,7 +659,7 @@ gta_trade_coverage <- function(
         mc.inst=subset(mc.yr, mast.chapter=="All included instruments")
         if(group.importers==T & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
+          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
           fc.temp$i.un=999
           fc.temp$a.un=999
           final.coverage=rbind(final.coverage, fc.temp)
@@ -621,27 +667,40 @@ gta_trade_coverage <- function(
 
         if(group.importers==F & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$a.un=999
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
         if(group.importers==T & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$i.un=999
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
         if(group.importers==F & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
@@ -650,7 +709,7 @@ gta_trade_coverage <- function(
         mc.inst=subset(mc.yr, intervention.type=="All included instruments")
         if(group.importers==T & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
+          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
           fc.temp$i.un=999
           fc.temp$a.un=999
           final.coverage=rbind(final.coverage, fc.temp)
@@ -658,27 +717,42 @@ gta_trade_coverage <- function(
 
         if(group.importers==F & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$a.un=999
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
         if(group.importers==T & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$i.un=999
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
         if(group.importers==F & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           final.coverage=rbind(final.coverage, fc.temp)
         }
 
@@ -702,7 +776,7 @@ gta_trade_coverage <- function(
       } else {
         if(group.importers==T & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
+          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/trade.total}
           fc.temp$intervention.type=inst
           fc.temp$i.un=999
           fc.temp$a.un=999
@@ -711,9 +785,13 @@ gta_trade_coverage <- function(
 
         if(group.importers==F & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$intervention.type=inst
           fc.temp$a.un=999
           final.coverage=rbind(final.coverage, fc.temp)
@@ -721,9 +799,14 @@ gta_trade_coverage <- function(
 
         if(group.importers==T & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$intervention.type=inst
           fc.temp$i.un=999
           final.coverage=rbind(final.coverage, fc.temp)
@@ -731,9 +814,14 @@ gta_trade_coverage <- function(
 
         if(group.importers==F & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$intervention.type=inst
           final.coverage=rbind(final.coverage, fc.temp)
         }
@@ -758,9 +846,10 @@ gta_trade_coverage <- function(
         print(paste("Calculated aggregate annual trade coverage for ", inst, sep=""))
 
       } else {
+
         if(group.importers==T & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)
+          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/sum(trade.base.bilateral$trade.value)}
           fc.temp$mast.chapter=inst
           fc.temp$i.un=999
           fc.temp$a.un=999
@@ -769,9 +858,13 @@ gta_trade_coverage <- function(
 
         if(group.importers==F & group.exporters==T){
           fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, trade.base.bilateral, sum), by="i.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$mast.chapter=inst
           fc.temp$a.un=999
           final.coverage=rbind(final.coverage, fc.temp)
@@ -779,9 +872,14 @@ gta_trade_coverage <- function(
 
         if(group.importers==T & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, trade.base.bilateral, sum), by="a.un", all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$mast.chapter=inst
           fc.temp$i.un=999
           final.coverage=rbind(final.coverage, fc.temp)
@@ -789,9 +887,14 @@ gta_trade_coverage <- function(
 
         if(group.importers==F & group.exporters==F){
           fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
-          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-          fc.temp$trade.value=NULL
+
+
+          if(share){
+            fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, trade.base.bilateral, sum), by=c("i.un","a.un"), all.x=T)
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+            fc.temp$trade.value=NULL
+          }
+
           fc.temp$mast.chapter=inst
           final.coverage=rbind(final.coverage, fc.temp)
         }
@@ -906,7 +1009,7 @@ gta_trade_coverage <- function(
 
 
 
-  bilateral.trade<<-trade.base.bilateral
+  # bilateral.trade<<-trade.base.bilateral
   parameter.choices<<-parameter.choices
 
 

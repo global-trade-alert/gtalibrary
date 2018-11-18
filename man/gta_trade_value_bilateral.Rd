@@ -7,7 +7,9 @@
 gta_trade_value_bilateral(importing.country = NULL,
   keep.importer = NULL, exporting.country = NULL,
   keep.exporter = NULL, cpc.sectors = NULL, keep.cpc = TRUE,
-  hs.codes = NULL, keep.hs = TRUE, df.name = "trade.base.bilateral",
+  hs.codes = NULL, keep.hs = TRUE, trade.data = "base",
+  trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
+  df.name = "trade.base.bilateral",
   pc.name = "parameter.choice.trade.base")
 }
 \arguments{
@@ -26,6 +28,10 @@ gta_trade_value_bilateral(importing.country = NULL,
 \item{hs.codes}{Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).}
 
 \item{keep.hs}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.}
+
+\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.}
+
+\item{trade.data.path}{Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata').}
 
 \item{df.name}{Set the name of the generated result data frame. Default is trade.base.}
 

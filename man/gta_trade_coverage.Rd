@@ -18,7 +18,10 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.interventions = NULL,
-  lag.adjustment = NULL, rdata = FALSE, output.path = NULL)
+  lag.adjustment = NULL, trade.statistic = "share",
+  trade.data = "base",
+  trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
+  rdata = FALSE, output.path = NULL)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -90,6 +93,12 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{keep.interventions}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
+
+\item{trade.statistic}{Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.}
+
+\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.}
+
+\item{trade.data.path}{Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),}
 
 \item{rdata}{Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE}
 
