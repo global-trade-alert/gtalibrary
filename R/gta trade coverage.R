@@ -190,8 +190,15 @@ gta_trade_coverage <- function(
   names(interventions.by.exporter)=c("intervention.id", "exporter.un")
 
 
-  exporter.count=aggregate(exporter.un ~ intervention.id, subset(interventions.by.exporter,! exporter.un %in% exporting.country),  function(x) length(unique(x)))
-  names(exporter.count)=c("intervention.id", "nr.exporters.hit")
+  if(is.null(exporters)){
+    exporter.count=aggregate(exporter.un ~ intervention.id, interventions.by.exporter,  function(x) length(unique(x)))
+    names(exporter.count)=c("intervention.id", "nr.exporters.hit")
+
+  }else {
+    exporter.count=aggregate(exporter.un ~ intervention.id, subset(interventions.by.exporter,! exporter.un %in% exporting.country),  function(x) length(unique(x)))
+    names(exporter.count)=c("intervention.id", "nr.exporters.hit")
+
+  }
 
 
   if(is.null(nr.also.exporters)){
@@ -347,8 +354,15 @@ gta_trade_coverage <- function(
   names(interventions.by.importer)=c("intervention.id", "importer.un")
 
 
-  importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, ! i.un %in% importing.country), function(x) length(unique(x)))
-  names(importer.count)=c("intervention.id", "nr.importers.hit")
+  if(is.null(importers)){
+    importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, i.un %in% importing.country), function(x) length(unique(x)))
+    names(importer.count)=c("intervention.id", "nr.importers.hit")
+
+  }else{
+    importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, ! i.un %in% importing.country), function(x) length(unique(x)))
+    names(importer.count)=c("intervention.id", "nr.importers.hit")
+
+  }
 
 
   if(is.null(nr.also.importers)){
