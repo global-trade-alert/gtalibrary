@@ -629,8 +629,17 @@ gta_trade_coverage <- function(
   } else{
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Underlying trade data:", choice=trade.data))
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Location of underlying trade data:", choice=trade.data.path))
+
+    if(is.null(trade.data.path)){
+
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Location of underlying trade data:", choice='data/support tables/Goods support table for gtalibrary.Rdata'))
+
+    }else {
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Location of underlying trade data:", choice=trade.data.path))
+
+    }
 
   }
 
