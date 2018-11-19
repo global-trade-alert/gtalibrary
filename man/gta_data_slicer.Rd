@@ -6,7 +6,7 @@
 \usage{
 gta_data_slicer(data.path = "data/master_plus.Rdata",
   gta.evaluation = NULL, affected.flows = NULL,
-  implementing.country = NULL, keep.implementer = NULL,
+  implementing.country = NULL, keep.implementer = TRUE,
   affected.country = NULL, keep.affected = NULL, keep.others = TRUE,
   affected.jointly = FALSE, affected.also.nr = NULL,
   announcement.period = NULL, implementation.period = NULL,

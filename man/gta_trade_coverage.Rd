@@ -8,13 +8,18 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   replica.path = "data/database replica/database replica - parts - base.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
   gta.evaluation = NULL, affected.flows = NULL, importers = NULL,
-  keep.importers = NULL, group.importers = TRUE, exporters = NULL,
-  keep.exporters = NULL, group.exporters = TRUE, implementers = NULL,
-  implementer.role = NULL, announcement.period = NULL,
-  implementation.period = NULL, revocation.period = NULL,
-  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
-  group.type = TRUE, mast.chapters = NULL, keep.mast = NULL,
-  group.mast = TRUE, implementation.level = NULL, keep.level = NULL,
+  keep.importers = NULL, group.importers = TRUE,
+  nr.also.affected.importers = NULL,
+  jointly.affected.importers = FALSE, exporters = NULL,
+  keep.exporters = NULL, group.exporters = TRUE,
+  nr.also.affected.exporters = NULL,
+  jointly.affected.exporters = FALSE, implementers = NULL,
+  implementer.role = NULL, keep.implementer = TRUE,
+  announcement.period = NULL, implementation.period = NULL,
+  revocation.period = NULL, in.force.today = NULL,
+  intervention.types = NULL, keep.type = NULL, group.type = TRUE,
+  mast.chapters = NULL, keep.mast = NULL, group.mast = TRUE,
+  implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   intervention.ids = NULL, keep.interventions = NULL,
@@ -42,15 +47,25 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{group.importers}{Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
+\item{nr.also.affected.importers}{Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+
+\item{jointly.affected.importers}{Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
+
 \item{exporters}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.}
 
 \item{keep.exporters}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.}
 
 \item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
+\item{nr.also.affected.exporters}{Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+
+\item{jointly.affected.exporters}{Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
+
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
 
 \item{implementer.role}{Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').}
+
+\item{keep.implementer}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.}
 
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
