@@ -190,12 +190,12 @@ gta_trade_coverage <- function(
   names(interventions.by.exporter)=c("intervention.id", "exporter.un")
 
 
-  exporter.count=aggregate(exporter.un ~ intervention.id, interventions.by.exporter,  function(x) length(unique(x)))
+  exporter.count=aggregate(exporter.un ~ intervention.id, subset(interventions.by.exporter,! exporter.un %in% exporting.country),  function(x) length(unique(x)))
   names(exporter.count)=c("intervention.id", "nr.exporters.hit")
 
 
   if(is.null(nr.also.exporters)){
-    exporter.interventions=unique(exporter.count$intervention.id)
+    exporter.interventions=unique(interventions.by.exporter$intervention.id)
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Nr. of also affected exporters:", choice="Any"))
   }else{
@@ -352,7 +352,7 @@ gta_trade_coverage <- function(
 
 
   if(is.null(nr.also.importers)){
-    importer.interventions=unique(importer.count$intervention.id)
+    importer.interventions=unique(interventions.by.importer$intervention.id)
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Nr. of also affected importers:", choice="Any"))
   }else{
