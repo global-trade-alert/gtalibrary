@@ -193,8 +193,11 @@ gta_trade_coverage <- function(
   if(is.null(exporters)){
     exporter.count=aggregate(exporter.un ~ intervention.id, interventions.by.exporter,  function(x) length(unique(x)))
     names(exporter.count)=c("intervention.id", "nr.exporters.hit")
+    sole.exporter=numeric()
 
   }else {
+    sole.exporter=setdiff(unique(subset(interventions.by.exporter, exporter.un %in% exporting.country)$intervention.id),
+                          unique(subset(interventions.by.exporter, ! exporter.un %in% exporting.country)$intervention.id))
     exporter.count=aggregate(exporter.un ~ intervention.id, subset(interventions.by.exporter,! exporter.un %in% exporting.country),  function(x) length(unique(x)))
     names(exporter.count)=c("intervention.id", "nr.exporters.hit")
 
@@ -207,13 +210,11 @@ gta_trade_coverage <- function(
                             data.frame(parameter="Nr. of also affected exporters:", choice="Any"))
   }else{
 
-    sole.exporter=setdiff(unique(subset(interventions.by.exporter, exporter.un %in% exporting.country)$intervention.id),
-                          unique(subset(interventions.by.exporter, ! exporter.un %in% exporting.country)$intervention.id))
-
     exporter.interventions=c(sole.exporter,unique(subset(exporter.count, nr.exporters.hit<=nr.also.exporters)$intervention.id))
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Nr. of also affected exporters:", choice=paste(nr.also.exporters, " or less", sep="")))
   }
+
 
 
 
@@ -357,10 +358,14 @@ gta_trade_coverage <- function(
   if(is.null(importers)){
     importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, i.un %in% importing.country), function(x) length(unique(x)))
     names(importer.count)=c("intervention.id", "nr.importers.hit")
+    sole.importer=numeric()
 
   }else{
     importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, ! i.un %in% importing.country), function(x) length(unique(x)))
     names(importer.count)=c("intervention.id", "nr.importers.hit")
+
+    sole.importer=setdiff(unique(subset(master.tuple, i.un %in% importing.country)$intervention.id),
+                          unique(subset(master.tuple, ! i.un %in% importing.country)$intervention.id))
 
   }
 
@@ -370,9 +375,6 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Nr. of also affected importers:", choice="Any"))
   }else{
-    sole.importer=setdiff(unique(subset(master.tuple, i.un %in% importing.country)$intervention.id),
-                          unique(subset(master.tuple, ! i.un %in% importing.country)$intervention.id))
-
     importer.interventions=c(sole.importer,unique(subset(importer.count, nr.importers.hit<=nr.also.importers)$intervention.id))
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Nr. of also affected importers:", choice=paste(nr.also.importers, " or less", sep="")))
