@@ -119,6 +119,7 @@ gta_trade_coverage <- function(
   ## Collecting parameter values
   parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
 
+  tryCatch({
 
   print("Slicing GTA master data set ...")
   gta_data_slicer(data.path=data.path,
@@ -179,7 +180,8 @@ gta_trade_coverage <- function(
 
       }
 
-    }
+  }
+
 
   ## imposing the exporting countries incl. the relevant conditions.
 
@@ -232,7 +234,10 @@ gta_trade_coverage <- function(
         }
       }
 
-      if(length(exporter.interventions)==0){stop("There are no interventions that jointly affect all specified exporters.")}
+      if(length(exporter.interventions)==0){
+        stop.print <- "There are no interventions that jointly affect all specified exporters."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)}
 
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="Yes."))
@@ -263,12 +268,27 @@ gta_trade_coverage <- function(
     year.start=2009
     year.end=year(Sys.Date())
   } else {
-    if(length(coverage.period)!=2){stop("Please supply a coverage period vector with two entries e.g. c(2009, 2018)")}
-    if((min(coverage.period)<2008)|(max(coverage.period)>year(Sys.Date())) ){stop(paste("Please only supply coverage period years between 2008 and ", year(Sys.Date()), sep=""))}
-    if(is.numeric(coverage.period)==F){stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
+    if(length(coverage.period)!=2){
+      stop.print <- paste("Please only supply coverage period years between 2008 and ", year(Sys.Date()), sep="")
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
+    if((min(coverage.period)<2008)|(max(coverage.period)>year(Sys.Date())) ){
+      stop.print <- "Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
+    if(is.numeric(coverage.period)==F){
+      stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)"
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
 
-    if(coverage.period[1]%%1==0){year.start=coverage.period[1]}else{stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
-    if(coverage.period[2]%%1==0){year.end=coverage.period[2]}else{stop("Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)")}
+    if(coverage.period[1]%%1==0){year.start=coverage.period[1]}else{
+      stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)"
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
+    if(coverage.period[2]%%1==0){year.end=coverage.period[2]}else{
+      stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)"
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
   }
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Coverage period years:", choice=paste(year.start, " to ",year.end, sep="")))
 
@@ -344,7 +364,9 @@ gta_trade_coverage <- function(
 
     if(sum(as.numeric((implementer.role %in% c("any","importer","exporter", "3rd country"))==F))>0){
       role.error=paste("'",paste(implementer.role[(implementer.role %in% c("any","importer","exporter", "3rd country"))==F], collapse="; "),"'", sep="")
-      stop(paste("Unknown implementer role(s): ", role.error, ".", sep=""))
+      stop.print <- paste("Unknown implementer role(s): ", role.error, ".", sep="")
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
     }
   }
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, collapse=", ")))
@@ -396,7 +418,10 @@ gta_trade_coverage <- function(
         }
       }
 
-      if(length(importer.interventions)==0){stop("There are no interventions that jointly affect all specified importers.")}
+      if(length(importer.interventions)==0){
+        stop.print <- "There are no interventions that jointly affect all specified importers."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)}
 
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Only include interventions where all specified importers are affected:", choice="Yes."))
@@ -416,6 +441,13 @@ gta_trade_coverage <- function(
   master.tuple<<-master.tuple
   print("Restricting set to stated importers/exporters ... complete.")
 
+  # Check # of rows
+  if(nrow(master.tuple)==0) {
+    stop.print <- "Unfortunately no rows remaining after filtering for importers & exporters"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
   print("Restricting set to stated implementers and their roles ...")
   mt=data.frame(intervention.id=numeric(),i.un=numeric(), a.un=numeric(), t.un=numeric(), affected.product=numeric())
   if("importer" %in% implementer.role){
@@ -433,6 +465,13 @@ gta_trade_coverage <- function(
   master.tuple<<-master.tuple
   rm(mt)
   print("Restricting set to stated implementers and their roles ... complete.")
+
+  # Check # of rows
+  if(nrow(master.tuple)==0) {
+    stop.print <- "Unfortunately no rows remaining after filtering for implementers"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
 
 
   ## create max duration for all instruments and per import-export-product year
@@ -569,6 +608,13 @@ gta_trade_coverage <- function(
 
   }
 
+  # Check # of rows
+  if(nrow(duration.max)==0) {
+    stop.print <- "Unfortunately no rows remaining after filtering for intervention.types"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
 
   ## Add individual MAST chapters if called for.
   if(is.null(mast.chapters)==F & group.mast==F){
@@ -637,11 +683,20 @@ gta_trade_coverage <- function(
   }
   print("Identifying the maximum duration per year and importer-exporter-product tuple ... complete.")
 
+  # Check # of rows
+  if(nrow(duration.max)==0) {
+    stop.print <- "Unfortunately no rows remaining after filtering for mast.chapters"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
   ##### multiply in base values
   print("Importing trade base values ...")
 
   if(!trade.data %in% c("base","before implementation","during implementation", "before announcement","during announcement", paste(2007:2017))){
-    stop("Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, or 'before/during announcement/implementation'.")
+    stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, or 'before/during announcement/implementation'."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   } else{
     parameter.choices=rbind(parameter.choices,
                             data.frame(parameter="Underlying trade data:", choice=trade.data))
@@ -737,13 +792,22 @@ gta_trade_coverage <- function(
   master.coverage=subset(master.coverage, is.na(trade.value.affected)==F)
   print("Merging base values into working data frame ... complete")
 
+  # Check # of rows
+  if(nrow(master.coverage)==0) {
+    stop.print <- "Unfortunately no rows remaining after merging trade base values into working data frame"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
   ### some housekeeping
   rm(duration.max, int.temp)
   if(exists("full.coverage")){rm(full.coverage)}
 
   #### aggregating to trade coverage table
   if(grepl("share|value", trade.statistic, ignore.case = F)==F){
-    stop("Please re-specify the desired trade statistic as either trade share ('share') or absolute USD value ('value').")
+    stop.print <- "Please re-specify the desired trade statistic as either trade share ('share') or absolute USD value ('value')."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   } else{
     if(grepl("share", trade.statistic, ignore.case = F)){share=T}else{share=F}
   }
@@ -926,6 +990,13 @@ gta_trade_coverage <- function(
   }
   print("Calculating aggregate annual trade coverage ... completed")
 
+  # Check # of rows
+  if(nrow(final.coverage)==0) {
+    stop.print <- "Unfortunately no rows remaining after calculating aggregate annual trade coverage"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
   ### by intervention type, if necessary
   if(is.null(intervention.types)==F & group.type==F){
     final.coverage$intervention.type="All included instruments"
@@ -997,6 +1068,12 @@ gta_trade_coverage <- function(
     print("Calculating aggregate annual trade coverage per included intervention type ... concluded")
   }
 
+  # Check # of rows
+  if(nrow(final.coverage)==0) {
+    stop.print <- "Unfortunately no rows remaining after calculating aggregate annual trade coverage per intervention type"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
 
   ### by MAST chapter, if necessary
   if(is.null(mast.chapters)==F & group.mast==F){
@@ -1068,6 +1145,13 @@ gta_trade_coverage <- function(
       print(paste("Calculated aggregate annual trade coverage for ", inst, sep=""))
     }
     print("Calculating aggregate annual trade coverage per included MAST chapter ... concluded")
+  }
+
+  # Check # of rows
+  if(nrow(final.coverage)==0) {
+    stop.print <- "Unfortunately no rows remaining after calculating aggregate annual trade coverage per included MAST chapter"
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
   }
 
 
@@ -1177,6 +1261,14 @@ gta_trade_coverage <- function(
   # bilateral.trade<<-trade.base.bilateral
   parameter.choices<<-parameter.choices
 
+  },
 
+  error = function(error.msg) {
+    if(exists("stop.print")){
+      error.message <<- c(T, stop.print)
+    } else {
+      error.message <<- c(T,error.msg$message)
+    }
+  })
 
 }
