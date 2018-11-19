@@ -13,11 +13,16 @@
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.
 #' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.
 #' @param group.importers Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
+#' @param nr.also.importers Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.
+#' @param jointly.affected.importers Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
 #' @param keep.exporters Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
 #' @param group.exporters Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
+#' @param nr.also.exporters Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.
+#' @param jointly.affected.exporters Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
+#' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
@@ -63,11 +68,16 @@ gta_trade_coverage <- function(
   importers = NULL,
   keep.importers = NULL,
   group.importers = TRUE,
+  nr.also.importers=NULL,
+  jointly.affected.importers=FALSE,
   exporters = NULL,
   keep.exporters = NULL,
   group.exporters = TRUE,
+  nr.also.exporters=NULL,
+  jointly.affected.exporters=FALSE,
   implementers = NULL,
   implementer.role = NULL,
+  keep.implementer= TRUE,
   announcement.period = NULL,
   implementation.period = NULL,
   revocation.period = NULL,
@@ -171,14 +181,69 @@ gta_trade_coverage <- function(
 
     }
 
+  ## imposing the exporting countries incl. the relevant conditions.
+
+  interventions.by.exporter=unique(subset(master.sliced, affected.flow %in% c("inward","outward subsidy"))[,c("intervention.id","a.un")])
+  names(interventions.by.exporter)=c("intervention.id", "i.un")
+  interventions.by.exporter=rbind(interventions.by.exporter,
+                               unique(subset(master.sliced, ! affected.flow %in% c("inward","outward subsidy"))[,c("intervention.id","i.un")]))
+  names(interventions.by.exporter)=c("intervention.id", "exporter.un")
+
+
+  exporter.count=aggregate(exporter.un ~ intervention.id, interventions.by.exporter,  function(x) length(unique(x)))
+  names(exporter.count)=c("intervention.id", "nr.exporters.hit")
+
+
+  if(is.null(nr.also.exporters)){
+    exporter.interventions=unique(exporter.count$intervention.id)
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of also affected exporters:", choice="Any"))
+  }else{
+
+    sole.exporter=setdiff(unique(subset(interventions.by.exporter, exporter.un %in% exporting.country)$intervention.id),
+                          unique(subset(interventions.by.exporter, ! exporter.un %in% exporting.country)$intervention.id))
+
+    exporter.interventions=c(sole.exporter,unique(subset(exporter.count, nr.exporters.hit<=nr.also.exporters)$intervention.id))
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of also affected exporters:", choice=paste(nr.also.exporters, " or less", sep="")))
+  }
+
+
+
+  if(is.null(jointly.affected.exporters)){
+    exporter.interventions=exporter.interventions
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="No, just at least one of them."))
+  }else{
+    if(jointly.affected.exporters){
+      exporter.interventions=intersect(exporter.interventions, subset(interventions.by.exporter, exporter.un==exporting.country[1])$intervention.id)
+
+      if(length(exporting.country)>1){
+        for(k in 2:length(exporting.country)){
+          exporter.interventions=intersect(exporter.interventions, subset(interventions.by.exporter, exporter.un==exporting.country[k])$intervention.id)
+        }
+      }
+
+      if(length(exporter.interventions)==0){stop("There are no interventions that jointly affect all specified exporters.")}
+
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="Yes."))
+
+    }else{
+      exporter.interventions=exporter.interventions
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="No, just at least one of them."))
+    }
+  }
+
   ms=master.sliced[0,]
 
   if(nrow(subset(master.sliced, affected.flow %in% c("inward","outward subsidy")))>0){
-    ms=rbind(ms, subset(master.sliced, affected.flow %in% c("inward","outward subsidy") & a.un %in% exporting.country))
+    ms=rbind(ms, subset(master.sliced, affected.flow %in% c("inward","outward subsidy") & a.un %in% exporting.country & intervention.id %in% exporter.interventions))
   }
 
   if(nrow(subset(master.sliced, affected.flow=="outward"))>0){
-    ms=rbind(ms, subset(master.sliced, affected.flow=="outward" & i.un %in% exporting.country))
+    ms=rbind(ms, subset(master.sliced, affected.flow=="outward" & i.un %in% exporting.country & intervention.id %in% exporter.interventions))
   }
   master.sliced=ms
   master.sliced<<-master.sliced
@@ -249,13 +314,14 @@ gta_trade_coverage <- function(
 
 
   ### IMPLEMENTERS
-  if(is.null(implementers)){
-    implementing.country=gtalibrary::country.names$un_code
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice="All"))
-  }else {
+  if(keep.implementer){
     implementing.country=gta_un_code_vector(implementers, "implementing")
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste(implementers, collapse=", ")))
+  } else {
+    implementing.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(implementers, "implementing"))
+    parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste("all except ",paste(implementers, collapse=", "), sep="")))
   }
+
 
 
   ###### IMPLEMENTER ROLES
@@ -276,9 +342,61 @@ gta_trade_coverage <- function(
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, collapse=", ")))
 
 
+  ## adding the filters for nr.also.affected.importer and jointly.affected.importers
+  interventions.by.importer=unique(master.tuple[,c("intervention.id","i.un")])
+  names(interventions.by.importer)=c("intervention.id", "importer.un")
+
+
+  importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, ! i.un %in% importing.country), function(x) length(unique(x)))
+  names(importer.count)=c("intervention.id", "nr.importers.hit")
+
+
+  if(is.null(nr.also.importers)){
+    importer.interventions=unique(importer.count$intervention.id)
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of also affected importers:", choice="Any"))
+  }else{
+    sole.importer=setdiff(unique(subset(master.tuple, i.un %in% importing.country)$intervention.id),
+                          unique(subset(master.tuple, ! i.un %in% importing.country)$intervention.id))
+
+    importer.interventions=c(sole.importer,unique(subset(importer.count, nr.importers.hit<=nr.also.importers)$intervention.id))
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of also affected importers:", choice=paste(nr.also.importers, " or less", sep="")))
+  }
+
+
+
+  if(is.null(jointly.affected.importers)){
+    importer.interventions=importer.interventions
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Only include interventions where all specified importers are affected:", choice="No, just at least one of them."))
+  }else{
+    if(jointly.affected.importers){
+      importer.interventions=intersect(importer.interventions, subset(interventions.by.importer, importer.un==importing.country[1])$intervention.id)
+
+      if(length(importing.country)>1){
+        for(k in 2:length(importing.country)){
+          importer.interventions=intersect(importer.interventions, subset(interventions.by.importer, importer.un==importing.country[k])$intervention.id)
+        }
+      }
+
+      if(length(importer.interventions)==0){stop("There are no interventions that jointly affect all specified importers.")}
+
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Only include interventions where all specified importers are affected:", choice="Yes."))
+
+    }else{
+      importer.interventions=importer.interventions
+      parameter.choices=rbind(parameter.choices,
+                              data.frame(parameter="Only include interventions where all specified importers are affected:", choice="No, just at least one of them."))
+    }
+  }
+
+
+
   # filter master.tuple
   print("Restricting set to stated importers/exporters ...")
-  master.tuple=subset(master.tuple, i.un %in% importing.country)
+  master.tuple=subset(master.tuple, i.un %in% importing.country & intervention.id %in% importer.interventions)
   master.tuple<<-master.tuple
   print("Restricting set to stated importers/exporters ... complete.")
 
