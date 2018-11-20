@@ -147,6 +147,12 @@ gta_trade_coverage <- function(
                   lag.adjustment=lag.adjustment)
 
 
+  if(nrow(master.sliced)==0) {
+    stop.print <- "Initial filtering of the GTA dataset yielded no results fitting all specified parameters."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
   ##### Extracting Parameter Choices from data slicer
   parameter.choices <- rbind(parameter.choices, parameter.choice.slicer)
   # rm(parameter.choice.slicer)
@@ -262,6 +268,13 @@ gta_trade_coverage <- function(
   master.sliced<<-master.sliced
   rm(ms)
 
+  if(nrow(master.sliced)==0) {
+    stop.print <- "Filtering the data for the specified exporters yielded zero results."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
+
   ##### Intervention durations
   ## relevant parameter: coverage.period
   if(is.null(coverage.period)){
@@ -310,6 +323,13 @@ gta_trade_coverage <- function(
                         master.data.frame=TRUE)
   print("Building intervention-importer-exporter-product tuples ... complete.")
   # rm(parameter.tuple)
+
+  if(nrow(mater.tuple)==0) {
+    stop.print <- "There are no affected trading relationships for your parameters."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
+
 
   ## correct for user choice of implementers and roles
   ## relevant parameters: importers, exporters, implementers/roles.
@@ -441,12 +461,12 @@ gta_trade_coverage <- function(
   master.tuple<<-master.tuple
   print("Restricting set to stated importers/exporters ... complete.")
 
-  # Check # of rows
   if(nrow(master.tuple)==0) {
-    stop.print <- "Unfortunately no rows remaining after filtering for importers & exporters"
+    stop.print <- "Filtering the data for the specified importers yielded zero results."
     error.message <<- c(T, stop.print)
     stop(stop.print)
   }
+
 
   print("Restricting set to stated implementers and their roles ...")
   mt=data.frame(intervention.id=numeric(),i.un=numeric(), a.un=numeric(), t.un=numeric(), affected.product=numeric())
@@ -730,6 +750,11 @@ gta_trade_coverage <- function(
 
 
   print("Importing trade base values ... completed.")
+  if(nrow(trade.base.bilateral)==0) {
+    stop.print <- "No trade found for the selected specifications (GTA & trade data choice)."
+    error.message <<- c(T, stop.print)
+    stop(stop.print)
+  }
 
 
   print("Merging base values into working data frame ...")
