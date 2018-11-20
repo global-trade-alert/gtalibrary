@@ -471,16 +471,17 @@ gta_trade_coverage <- function(
   print("Restricting set to stated implementers and their roles ...")
   mt=data.frame(intervention.id=numeric(),i.un=numeric(), a.un=numeric(), t.un=numeric(), affected.product=numeric())
   if("importer" %in% implementer.role){
-    mt=rbind(mt, subset(master.tuple, i.un==t.un))
+    mt=rbind(mt, subset(master.tuple, i.un==t.un & t.un %in% implementing.country))
   }
 
   if("exporter" %in% implementer.role){
-    mt=rbind(mt, subset(master.tuple, a.un==t.un))
+    mt=rbind(mt, subset(master.tuple, a.un==t.un  & t.un %in% implementing.country))
   }
 
   if("3rd country" %in% implementer.role){
-    mt=rbind(mt, subset(master.tuple, a.un!=t.un & i.un!=t.un))
+    mt=rbind(mt, subset(master.tuple, a.un!=t.un & i.un!=t.un &  & t.un %in% implementing.country))
   }
+
   master.tuple=mt
   master.tuple<<-master.tuple
   rm(mt)
