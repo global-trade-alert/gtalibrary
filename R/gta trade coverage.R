@@ -479,7 +479,7 @@ gta_trade_coverage <- function(
   }
 
   if("3rd country" %in% implementer.role){
-    mt=rbind(mt, subset(master.tuple, a.un!=t.un & i.un!=t.un &  & t.un %in% implementing.country))
+    mt=rbind(mt, subset(master.tuple, a.un!=t.un & i.un!=t.un & t.un %in% implementing.country))
   }
 
   master.tuple=mt
