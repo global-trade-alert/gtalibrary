@@ -324,7 +324,7 @@ gta_trade_coverage <- function(
   print("Building intervention-importer-exporter-product tuples ... complete.")
   # rm(parameter.tuple)
 
-  if(nrow(mater.tuple)==0) {
+  if(nrow(master.tuple)==0) {
     stop.print <- "There are no affected trading relationships for your parameters."
     error.message <<- c(T, stop.print)
     stop(stop.print)
