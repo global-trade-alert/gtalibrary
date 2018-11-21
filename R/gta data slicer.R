@@ -305,7 +305,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
         } else {
           ## adding those where only the specified affected jurisdictions are affected
-          zero.ids=subset(master, ! a.un %in% affected)$intervention.id
+          zero.ids=unique(subset(master, ! a.un %in% affected & is.na(a.un)==F)$intervention.id)
           zero.ids=setdiff(ac.ids,zero.ids)
 
           if(affected.also.nr==0){
