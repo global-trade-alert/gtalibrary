@@ -1168,7 +1168,7 @@ gta_trade_coverage <- function(
         } else {
 
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/trade.total}
+          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
           fc.temp$intervention.type=inst
           fc.temp$i.un=999
           fc.temp$a.un=999
@@ -1306,7 +1306,9 @@ gta_trade_coverage <- function(
         } else {
 
           fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-          if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/trade.total}
+          if(share){
+            fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
+            }
           fc.temp$mast.chapter=inst
           fc.temp$i.un=999
           fc.temp$a.un=999
