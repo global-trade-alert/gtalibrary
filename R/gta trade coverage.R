@@ -147,6 +147,10 @@ gta_trade_coverage <- function(
                   lag.adjustment=lag.adjustment)
 
 
+  ## removing certain problemtic, wide-reaching cases until further investigation
+  out=c(20387, 20389, 16408, 16817, 15248, 20098, 56907)
+  master.sliced=subset(master.sliced, ! intervention.id %in% out)
+
   if(nrow(master.sliced)==0) {
     stop.print <- "Initial filtering of the GTA dataset yielded no results fitting all specified parameters."
     error.message <<- c(T, stop.print)
