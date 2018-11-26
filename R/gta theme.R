@@ -19,7 +19,7 @@
 #' @author Global Trade Alert
 
 
-gta_theme <- function(base.size=11,
+gta_theme <- function(base.size=14,
                       aspect.ratio = NULL,
                       font.colour = "#333333",
                       base.family = "",
