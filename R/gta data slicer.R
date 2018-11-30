@@ -867,14 +867,16 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
           } else {
 
+            implementation.level.choice <- implementation.level
+
             if(keep.level==T){
-              master=subset(master, tolower(implementation.level) %in% tolower(implementation.level))
+              master=subset(master, tolower(implementation.level) %in% tolower(implementation.level.choice))
 
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Implementation levels included:", choice=paste(implementation.level, collapse = ", ")))
 
             } else {
-              master=subset(master, ! tolower(implementation.level) %in% tolower(implementation.level))
+              master=subset(master, ! tolower(implementation.level) %in% tolower(implementation.level.choice))
 
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Implementation levels included:", choice=paste("All except ", paste(implementation.level, collapse = ", "), sep="")))
@@ -912,7 +914,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         } else{
 
           elig.firms <- gtalibrary::elig.firms
-
+          eligible.firms.choice <- eligible.firms
           check=gta_parameter_check(tolower(eligible.firms), tolower(elig.firms$eligible.firms))
 
           if(check!="OK"){
@@ -923,13 +925,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
           } else {
 
             if(keep.firms==T){
-              master=subset(master, tolower(eligible.firms) %in% tolower(eligible.firms))
+              master=subset(master, tolower(eligible.firms) %in% tolower(eligible.firms.choice))
 
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Eligible firms categories included:", choice=paste(eligible.firms, collapse = ", ")))
 
             } else {
-              master=subset(master, ! tolower(eligible.firms) %in% tolower(eligible.firms))
+              master=subset(master, ! tolower(eligible.firms) %in% tolower(eligible.firms.choice))
 
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Eligible firms categories included:", choice=paste("All except ", paste(eligible.firms, collapse = ", "), sep="")))
