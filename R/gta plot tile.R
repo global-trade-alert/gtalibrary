@@ -72,6 +72,7 @@ gta_plot_tile <- function(data = NULL,
     scale_x_continuous(breaks = unique(data$value.x.breaks), labels = unique(data$value.x.labels))+
     ggtitle(title)+
     labs(x=x.axis.name, y=y.axis.name)+
+    guides(fill = guide_legend(title=legend.title))+
     theme(line = element_line(colour = "#FFFFFF", size= 0.5, linetype = 1, lineend = "square"),
           rect = element_rect(fill = "#FFFFFF", colour="#FFFFFF",size=0, linetype = 1),
           text = element_text(family="", colour = "#333333", size=11),
