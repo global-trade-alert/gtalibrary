@@ -41,11 +41,35 @@ gta_plot_tile <- function(data = NULL,
 
   data[,c("value.x","value.y","values")] <- data[,c(value.x, value.y, values)]
 
+  data$value.x.labels = data$value.x
+  data$value.y.labels = data$value.y
+  data$value.x.breaks = data$value.x
+  data$value.y.breaks = data$value.y
+
+  if (is.numeric(data$value.x)==F) {
+    data$value.x.breaks = as.numeric(data$value.x.breaks)
+    i = 1
+    for (h in unique(as.numeric(data$value.x))) {
+      data$value.x.breaks[data$value.x.breaks==h] <-  i
+      i=i+1
+    }
+  }
+
+  if (is.numeric(data$value.y)==F) {
+    data$value.y.breaks = as.numeric(data$value.y.breaks)
+    i = 1
+    for (h in unique(as.numeric(data$value.y))) {
+      data$value.y.breaks[data$value.y.breaks==h] <-  i
+      i=i+1
+    }
+  }
+
+
   plot = ggplot()+
-    geom_tile(data=data, aes(x=value.x, y=value.y, fill=values), color="#FFFFFF", size=0.2)+
+    geom_tile(data=data, aes(x=value.x.breaks, y=value.y.breaks, fill=values), color="#FFFFFF", size=0.2)+
     scale_fill_gradient(low=colour.low, high = colour.high) +
-    scale_y_continuous(breaks = seq(min(data$value.y), max(data$value.y), 1), sec.axis = sec_axis(~.,breaks = seq(min(data$value.y), max(data$value.y), 1), name = y.axis.name))+
-    scale_x_continuous(breaks = seq(min(data$value.x), max(data$value.x), 1))+
+    scale_y_continuous(breaks = unique(data$value.y.breaks), labels = unique(data$value.y.labels), sec.axis = sec_axis(~.,breaks = unique(data$value.y.breaks), name = y.axis.name, labels = unique(data$value.y.labels)))+
+    scale_x_continuous(breaks = unique(data$value.x.breaks), labels = unique(data$value.x.labels))+
     ggtitle(title)+
     labs(x=x.axis.name, y=y.axis.name)+
     theme(line = element_line(colour = "#FFFFFF", size= 0.5, linetype = 1, lineend = "square"),
@@ -55,7 +79,7 @@ gta_plot_tile <- function(data = NULL,
           axis.title.x = element_text(family="", colour = "#333333", size=11*0.8, margin = margin(t = 10, r = 0, b = 10, l = 0)),
           axis.title.y.left = element_text(family="", colour = "#333333", size=11*0.8, margin = margin(t = 0, r = 10, b = 0, l = 0)),
           axis.title.y.right = element_text(family="", colour = "#333333", size=11*0.8, margin = margin(t = 0, r = 0, b = 0, l = 10)),
-          axis.text.x.bottom = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 5, r = 0, b = 0, l = 0), angle = 90),
+          axis.text.x.bottom = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 5, r = 0, b = 0, l = 0), angle = 45),
           axis.text.x.top = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 0, r = 0, b = 5, l = 0), angle = 90),
           axis.text.y.left = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 0, r = 5, b = 0, l = 0), angle = 0),
           axis.text.y.right = element_text(family = "", colour = "#333333", size=11*0.6, margin = margin(t = 0, r = 0, b = 0, l = 5), angle = 0),
