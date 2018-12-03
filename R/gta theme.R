@@ -5,6 +5,7 @@
 #' This function defines the gta theme for ggplot. Add it at the end of a ggplot object.
 #'
 #' @param x.bottom.angle Define the labels angle for the bottom x-axis as integer. Default: 0.
+#' @param x.bottom.align Define the alignment of the bottom x-axis labels as integer (0 to 1). Default: 0.5.
 #' @param x.top.angle Define the labels angle for the top x-axis as integer. If undefined, value will be taken from bottom x-axis.
 #' @param y.left.angle Define the labels angle for the left y-axis as integer. Default: 0.
 #' @param y.right.angle Define the labels angle for the right y-axis as integer. If undefined, value will be taken from left y-axis.
@@ -27,6 +28,7 @@ gta_theme <- function(base.size=14,
                       legend.title.align = 0.5,
                       x.bottom.angle = 0,
                       x.top.angle = x.bottom.angle,
+                      x.bottom.align = 0.5,
                       y.left.angle = 0,
                       y.right.angle = y.left.angle
                       ){
@@ -39,7 +41,7 @@ gta_theme <- function(base.size=14,
         axis.title.x = element_text(family=base.family, colour = font.colour, size=base.size*0.8, margin = margin(t = 10, r = 0, b = 10, l = 0)),
         axis.title.y.left = element_text(family=base.family, colour = font.colour, size=base.size*0.8, margin = margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.y.right = element_text(family=base.family, colour = font.colour, size=base.size*0.8, margin = margin(t = 0, r = 0, b = 0, l = 10)),
-        axis.text.x.bottom = element_text(family = base.family, colour = font.colour, size=base.size*0.6, margin = margin(t = 5, r = 0, b = 0, l = 0), angle = x.bottom.angle),
+        axis.text.x.bottom = element_text(family = base.family, colour = font.colour, size=base.size*0.6, margin = margin(t = 5, r = 0, b = 0, l = 0), angle = x.bottom.angle, hjust = x.bottom.align),
         axis.text.x.top = element_text(family = base.family, colour = font.colour, size=base.size*0.6, margin = margin(t = 0, r = 0, b = 5, l = 0), angle = x.top.angle),
         axis.text.y.left = element_text(family = base.family, colour = font.colour, size=base.size*0.6, margin = margin(t = 0, r = 5, b = 0, l = 0), angle = y.left.angle),
         axis.text.y.right = element_text(family = base.family, colour = font.colour, size=base.size*0.6, margin = margin(t = 0, r = 0, b = 0, l = 5), angle = y.right.angle),
