@@ -9,22 +9,21 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
   gta.evaluation = NULL, affected.flows = NULL, importers = NULL,
   keep.importers = NULL, group.importers = TRUE,
-  nr.also.affected.importers = NULL,
-  jointly.affected.importers = FALSE, exporters = NULL,
-  keep.exporters = NULL, group.exporters = TRUE,
-  nr.also.affected.exporters = NULL,
-  jointly.affected.exporters = FALSE, implementers = NULL,
-  implementer.role = NULL, keep.implementer = TRUE,
-  announcement.period = NULL, implementation.period = NULL,
-  revocation.period = NULL, in.force.today = NULL,
-  intervention.types = NULL, keep.type = NULL, group.type = TRUE,
-  mast.chapters = NULL, keep.mast = NULL, group.mast = TRUE,
-  implementation.level = NULL, keep.level = NULL,
+  nr.also.importers = NULL, jointly.affected.importers = FALSE,
+  exporters = NULL, keep.exporters = NULL, group.exporters = TRUE,
+  nr.also.exporters = NULL, jointly.affected.exporters = FALSE,
+  implementers = NULL, implementer.role = NULL,
+  keep.implementer = TRUE, announcement.period = NULL,
+  implementation.period = NULL, revocation.period = NULL,
+  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
+  group.type = TRUE, mast.chapters = NULL, keep.mast = NULL,
+  group.mast = TRUE, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-  intervention.ids = NULL, keep.interventions = NULL,
-  lag.adjustment = NULL, intra.year.duration = TRUE,
-  trade.statistic = "share", trade.data = "base",
+  hit.brackets = c(1, 99999), intervention.ids = NULL,
+  keep.interventions = NULL, lag.adjustment = NULL,
+  intra.year.duration = TRUE, trade.statistic = "share",
+  trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE, output.path = NULL)
 }
@@ -47,7 +46,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{group.importers}{Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
-\item{nr.also.affected.importers}{Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+\item{nr.also.importers}{Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
 
 \item{jointly.affected.importers}{Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
 
@@ -57,7 +56,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
-\item{nr.also.affected.exporters}{Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+\item{nr.also.exporters}{Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
 
 \item{jointly.affected.exporters}{Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
 
@@ -102,6 +101,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{hs.codes}{Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).}
 
 \item{keep.hs}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.}
+
+\item{hit.brackets}{Specify whether to calculate the trade shares by the number of interventions affecting a importer-exporter-product combination e.g. c(1,2,3,4,5,999999) for the brackets '1-2,3-4,5 or more'. Default is c(1,99999).}
 
 \item{intervention.ids}{Provide a vector of intervention IDs.}
 
