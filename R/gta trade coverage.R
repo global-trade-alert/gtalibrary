@@ -880,7 +880,7 @@ gta_trade_coverage <- function(
 
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Brackets for the number of interventions affecting an importer-exporter-product relationship:",
-                                         choice=gsub("9999+","or more",paste(paste(hit.frequency$min, hit.frequency$max, sep=" - "), collapse=", "))))
+                                         choice=gsub("- 9999+","or more",paste(paste(hit.frequency$min, hit.frequency$max, sep=" - "), collapse=", "))))
     }
 
     print("Creating hit count brackets ... complete")
@@ -1470,7 +1470,7 @@ gta_trade_coverage <- function(
         stop(stop.print)
       }
       ce=final.coverage
-      ce$hit.bracket=gsub("9999+","or more",paste(hit.frequency$min[brkt], hit.frequency$max[brkt], sep=" - "))
+      ce$hit.bracket=gsub("- 9999+","or more",paste(hit.frequency$min[brkt], hit.frequency$max[brkt], sep=" - "))
       coverage.estimate=rbind(coverage.estimate, ce)
     }
     final.coverage=coverage.estimate
