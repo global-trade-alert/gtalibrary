@@ -523,13 +523,13 @@ gta_trade_coverage <- function(
       int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
       mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
 
-      nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
-      names(nr.hits)=c("iahs","nr.of.hits")
-
-      mt.temp=unique(mt.temp[,c("iahs","share")])
       v.iahs=unique(mt.temp$iahs)
 
       if(length(v.iahs)>0){
+        nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
+        names(nr.hits)=c("iahs","nr.of.hits")
+        mt.temp=unique(mt.temp[,c("iahs","share")])
+
         duration.temp=data.frame(iahs=character(),
                                  share=numeric())
         multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
@@ -593,13 +593,13 @@ gta_trade_coverage <- function(
           int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
           mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
 
-          nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
-          names(nr.hits)=c("iahs","nr.of.hits")
-
-          mt.temp=unique(mt.temp[,c("iahs","share")])
           v.iahs=unique(mt.temp$iahs)
 
           if(length(v.iahs)>0){
+            nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
+            names(nr.hits)=c("iahs","nr.of.hits")
+            mt.temp=unique(mt.temp[,c("iahs","share")])
+
             duration.temp=data.frame(iahs=character(),
                                      share=numeric())
             multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
@@ -672,13 +672,13 @@ gta_trade_coverage <- function(
           int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
           mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
 
-          nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
-          names(nr.hits)=c("iahs","nr.of.hits")
-
-          mt.temp=unique(mt.temp[,c("iahs","share")])
           v.iahs=unique(mt.temp$iahs)
 
           if(length(v.iahs)>0){
+            nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
+            names(nr.hits)=c("iahs","nr.of.hits")
+            mt.temp=unique(mt.temp[,c("iahs","share")])
+
             duration.temp=data.frame(iahs=character(),
                                      share=numeric())
             multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
