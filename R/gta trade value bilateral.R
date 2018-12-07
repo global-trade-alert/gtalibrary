@@ -185,9 +185,11 @@ gta_trade_value_bilateral <- function(
 
       if(keep.cpc==T){
         hs.codes=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
+        keep.hs=keep.cpc
       }else {
         strs=gtalibrary::cpc.to.hs
-        hs.codes=strs$hs[! strs$cpc %in% cpc.sectors]
+        hs.codes=strs$hs[strs$cpc %in% cpc.sectors]
+        keep.hs=keep.cpc
         rm(strs)
       }
 
