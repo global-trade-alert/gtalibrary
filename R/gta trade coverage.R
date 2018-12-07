@@ -65,7 +65,7 @@ gta_trade_coverage <- function(
   coverage.period=NULL,
   current.year.todate=TRUE,
   gta.evaluation= NULL,
-  affected.flows = NULL,
+  affected.flows = c("inward", "outward subsidy"),
   importers = NULL,
   keep.importers = NULL,
   group.importers = TRUE,
