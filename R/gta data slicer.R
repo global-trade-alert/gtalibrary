@@ -1012,7 +1012,12 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
           ## Correcting the affected product column to only include HS codes belong to the cpc.sectors, if any.
           if(min(cpc.sectors)<500){
 
-            products=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
+            if(keep.cpc==T){
+              products=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
+            } else{
+              not.mentioned.cpc=unique(gtalibrary::cpc.to.hs$cpc)[! unique(gtalibrary::cpc.to.hs$cpc) %in% cpc.sectors]
+              products=gta_cpc_to_hs(not.mentioned.cpc)
+            }
 
             # Create new specific id and master.temp
             master$new.id <- seq(1,nrow(master))
