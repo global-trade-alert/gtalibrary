@@ -1594,8 +1594,11 @@ gta_trade_coverage <- function(
   error = function(error.msg) {
     if(exists("stop.print")){
       error.message <<- c(T, stop.print)
+      print(paste("[ERROR TRADE COVERAGE]: ",stop.print, sep=""))
     } else {
       error.message <<- c(T,error.msg$message)
+      print(paste("[ERROR TRADE COVERAGE]: ",error.msg$message, sep=""))
+
     }
   })
 
