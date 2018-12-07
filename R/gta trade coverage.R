@@ -570,9 +570,9 @@ gta_trade_coverage <- function(
 
         duration.temp=merge(duration.temp, nr.hits, by="iahs", all.x=T)
         duration.max=rbind(duration.max,duration.temp)
-        rm(duration.temp)
+        rm(duration.temp, nr.hits)
       }
-      rm(nr.hits)
+
       print(paste("Calculation of maximum coverage in year ",yr," is complete.",sep=""))
 
     }
@@ -642,9 +642,9 @@ gta_trade_coverage <- function(
             duration.max=rbind(duration.max,duration.temp)
           }
 
-          rm(duration.temp)
+          rm(duration.temp, nr.hits)
           print(paste("Calculating maximum coverage per importer-exporter-product combination for '", inst,"' in year ",yr,".",sep=""))
-          rm(nr.hits)
+
         }
       }
       print(paste("Calculating maximum coverage per importer-exporter-product combination for all instruments individually complete.",sep=""))
@@ -719,10 +719,10 @@ gta_trade_coverage <- function(
             duration.temp$mast.chapter=inst
             duration.temp=merge(duration.temp, nr.hits,by="iahs", all.x=T)
             duration.max=rbind(duration.max,duration.temp)
-          }
+            rm(nr.hits)
+            }
 
           rm(duration.temp)
-          rm(nr.hits)
           print(paste("Calculating maximum coverage per importer-exporter-product combination for MAST chapter '", inst,"' in year ",yr,".",sep=""))
 
         }
