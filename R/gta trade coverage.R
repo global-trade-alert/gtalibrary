@@ -789,45 +789,30 @@ gta_trade_coverage <- function(
 
     print("Merging base values into working data frame ...")
     duration.max$share=as.numeric(duration.max$share)
-    print("1")
 
     if(trade.data %in% c("base", paste(2007:2017))){
-      print("2")
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
-      print("3")
       master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
 
     } else {
-      print("4")
       trade.base.bilateral=subset(trade.base.bilateral, year %in% c(year.start:year.end))
-      print("5")
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
-      print("6")
       master.coverage=merge(duration.max, trade.base.bilateral, by=c("iahs","year"), all.x=T)
     }
 
 
     if(intra.year.duration){
-      print("7")
       master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
-      print("8")
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Adjusted for intra-year duration:", choice="Yes"))
     } else {
-      print("9")
       master.coverage$trade.value.affected=master.coverage$trade.value
-      print("10")
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Adjusted for intra-year duration:", choice="No"))
     }
 
 
-
-
-
-
     if("mast.chapter" %in% names(master.coverage) & "intervention.type" %in% names(master.coverage)){
-      print("11")
 
       mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), intervention.type=character(), nr.of.hits=numeric())
 
@@ -841,14 +826,9 @@ gta_trade_coverage <- function(
 
       master.coverage = mc.unique
 
-      # master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type","nr.of.hits")])
-      # print("12")
-      # names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","intervention.type","nr.of.hits")
-
     }else{
 
       if("mast.chapter" %in% names(master.coverage)){
-        print("13")
 
         mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), nr.of.hits=numeric())
 
@@ -862,15 +842,9 @@ gta_trade_coverage <- function(
 
         master.coverage = mc.unique
 
-        # master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter","nr.of.hits")])
-        # print("14")
-        # names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","nr.of.hits")
-
       } else {
 
         if("intervention.type" %in% names(master.coverage)){
-
-          print("15")
 
           mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), intervention.type=character(), nr.of.hits=numeric())
 
@@ -884,12 +858,8 @@ gta_trade_coverage <- function(
 
           master.coverage = mc.unique
 
-          # master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "intervention.type","nr.of.hits")])
-          # print("16")
-          # names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected", "intervention.type","nr.of.hits")
 
         } else {
-          print("17")
 
           mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), nr.of.hits=numeric())
 
@@ -903,17 +873,12 @@ gta_trade_coverage <- function(
 
           master.coverage = mc.unique
 
-          # master.coverage=unique(master.coverage[,c("i.un", "a.un", "hs6","year", "trade.value.affected","nr.of.hits")])
-          # print("18")
-          # names(master.coverage)=c("i.un", "a.un", "affected.product","year", "trade.value.affected","nr.of.hits")
         }
 
       }
 
     }
-    print("19")
     master.coverage=subset(master.coverage, is.na(trade.value.affected)==F)
-    print("20")
     print("Merging base values into working data frame ... complete")
 
     # Check # of rows
