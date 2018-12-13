@@ -816,15 +816,17 @@ gta_trade_coverage <- function(
 
       mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), intervention.type=character(), nr.of.hits=numeric())
 
-      for(type in unique(master.coverage$mast.chapter)){
-        mc.t = subset(master.coverage, mast.chapter==type)
+      mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+
+      for(y in 1:5){
+        mc.t = mc.split[[y]]
         mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type","nr.of.hits")])
         names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","intervention.type","nr.of.hits")
         mc.unique = rbind(mc.unique, mc.t)
         rm(mc.t)
       }
 
-      master.coverage = mc.unique
+      master.coverage = unique(mc.unique)
 
     }else{
 
@@ -832,15 +834,17 @@ gta_trade_coverage <- function(
 
         mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), nr.of.hits=numeric())
 
-        for(type in unique(master.coverage$mast.chapter)){
-          mc.t = subset(master.coverage, mast.chapter==type)
+        mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+
+        for(y in 1:5){
+          mc.t = mc.split[[y]]
           mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter","nr.of.hits")])
           names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","nr.of.hits")
           mc.unique = rbind(mc.unique, mc.t)
           rm(mc.t)
         }
 
-        master.coverage = mc.unique
+        master.coverage = unique(mc.unique)
 
       } else {
 
@@ -848,30 +852,35 @@ gta_trade_coverage <- function(
 
           mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), intervention.type=character(), nr.of.hits=numeric())
 
-          for(type in unique(master.coverage$intervention.type)){
-            mc.t = subset(master.coverage, intervention.type==type)
+          mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+
+          for(y in 1:5){
+            mc.t = mc.split[[y]]
             mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "intervention.type","nr.of.hits")])
             names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","intervention.type","nr.of.hits")
             mc.unique = rbind(mc.unique, mc.t)
             rm(mc.t)
           }
 
-          master.coverage = mc.unique
+          master.coverage = unique(mc.unique)
 
 
         } else {
 
           mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), nr.of.hits=numeric())
 
-          for(y in unique(master.coverage$year)){
-            mc.t = subset(master.coverage, year==y)
+
+          mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+
+          for(y in 1:5){
+            mc.t = mc.split[[y]]
             mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected","nr.of.hits")])
             names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","nr.of.hits")
             mc.unique = rbind(mc.unique, mc.t)
             rm(mc.t)
           }
 
-          master.coverage = mc.unique
+          master.coverage = unique(mc.unique)
 
         }
 
