@@ -62,7 +62,7 @@ gta_plot_tile <- function(data = NULL,
     data$value.y.breaks.temp <- data$value.y.breaks
     i = 1
     for (h in unique(as.numeric(data$value.y))) {
-      data$value.y.breaks[data$value.y.breaks==h] <-  i
+      data$value.y.breaks[data$value.y.breaks.temp==h] <-  i
       i=i+1
     }
     data$value.y.breaks.temp <- NULL
