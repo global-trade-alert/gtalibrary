@@ -48,20 +48,25 @@ gta_plot_tile <- function(data = NULL,
 
   if (is.numeric(data$value.x)==F) {
     data$value.x.breaks = as.numeric(data$value.x.breaks)
+    data$value.x.breaks.temp <- data$value.x.breaks
     i = 1
     for (h in unique(as.numeric(data$value.x))) {
-      data$value.x.breaks[data$value.x.breaks==h] <-  i
+      data$value.x.breaks[data$value.x.breaks.temp==h] <-  i
       i=i+1
     }
+    data$value.x.breaks.temp <- NULL
   }
 
   if (is.numeric(data$value.y)==F) {
     data$value.y.breaks = as.numeric(data$value.y.breaks)
+    data$value.y.breaks.temp <- data$value.y.breaks
     i = 1
     for (h in unique(as.numeric(data$value.y))) {
       data$value.y.breaks[data$value.y.breaks==h] <-  i
       i=i+1
     }
+    data$value.y.breaks.temp <- NULL
+
   }
 
 
