@@ -38,6 +38,8 @@
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
 #' @param df.name Set the name of the generated result data frame. Default is master.sliced.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.
+#' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
+#' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 
 #'
 #' @references www.globaltradealert.org
@@ -76,7 +78,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          keep.interventions = NULL,
                          lag.adjustment=NULL,
                          df.name="master.sliced",
-                         pc.name="parameter.choice.slicer"
+                         pc.name="parameter.choice.slicer",
+                         xlsx = FALSE,
+                         output.path = NULL
 ){
 
   library("httr")
@@ -1245,6 +1249,20 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         stop.print <- "Unfortunately no rows remaining after filtering for intervention.ids"
         error.message <<- c(T, stop.print)
         stop(stop.print)
+      }
+
+      ## writing to disk
+      if (xlsx==T) {
+        print("Saving XLSX ...")
+        if(is.null(output.path)){
+          write.xlsx(master, file=paste("GTA data slicer output ", Sys.Date(),".xlsx", sep=""), sheetName = "Interventions", row.names = F)
+          write.xlsx(parameter.choices, file=paste("GTA data slicer output ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
+          print("Saving XLSX ... completed in working directory")
+        } else {
+          write.xlsx(trade.coverage.estimates, file=output.path, sheetName = "Estimates", row.names = F)
+          write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
+          print("Saving XLSX ... completed in output path")
+        }
       }
 
 

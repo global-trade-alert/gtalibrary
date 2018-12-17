@@ -50,6 +50,7 @@
 #' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
+#' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
 #' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 
 #' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
@@ -106,6 +107,7 @@ gta_trade_coverage <- function(
   trade.data="base",
   trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE,
+  xlsx = FALSE,
   output.path = NULL) {
 
 
@@ -1612,20 +1614,18 @@ gta_trade_coverage <- function(
     print("Oooh that's pretty ...")
 
     ## writing to disk
-    print("Saving XLSX ...")
-    if(is.null(output.path)){
-      write.xlsx(trade.coverage.estimates, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Estimates", row.names = F)
-      write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
-      print("Saving XLSX ... completed in working directory")
-    } else {
-      write.xlsx(trade.coverage.estimates, file=output.path, sheetName = "Estimates", row.names = F)
-      write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
-      print("Saving XLSX ... completed in output path")
+    if (xlsx==T) {
+      print("Saving XLSX ...")
+      if(is.null(output.path)){
+        write.xlsx(trade.coverage.estimates, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Estimates", row.names = F)
+        write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
+        print("Saving XLSX ... completed in working directory")
+      } else {
+        write.xlsx(trade.coverage.estimates, file=output.path, sheetName = "Estimates", row.names = F)
+        write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
+        print("Saving XLSX ... completed in output path")
+      }
     }
-
-
-
-
 
 
   # bilateral.trade<<-trade.base.bilateral
