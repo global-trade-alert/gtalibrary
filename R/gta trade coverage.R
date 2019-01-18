@@ -363,11 +363,15 @@ gta_trade_coverage <- function(
     d.id$date.id=1:nrow(d.id)
 
     master.dates=merge(master.dates, d.id, by=c("date.implemented", "date.removed"), all.x=T)
-    m.d=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
-    gta_intervention_duration(data.path='m.d[,c("date.id", "date.implemented", "date.removed")]',
+
+    ms.parked=master.sliced ## sorry for the dirty trick
+
+    master.sliced=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
+    gta_intervention_duration(data.path='master.sliced[,c("date.id", "date.implemented", "date.removed")]',
                               is.data.frame=TRUE,
                               years=c(year.start,year.end),
                               current.year.todate=current.year.todate)
+    master.sliced=ms.parked
 
     data.table::setnames(intervention.duration, "intervention.id","date.id")
     master.dates=unique(master.dates[,c("intervention.id","affected.product","date.id")])
