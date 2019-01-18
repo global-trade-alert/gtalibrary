@@ -356,14 +356,16 @@ gta_trade_coverage <- function(
 
     rm(tl.end, tl.start,gta_affected_tariff_line)
 
-    ## calculate intervention durations
-    print("Calculating intervention durations ...")
     print("361")
     d.id=unique(master.dates[,c("date.implemented", "date.removed")])
     d.id$date.id=1:nrow(d.id)
     print("364")
     master.dates=merge(master.dates, d.id, by=c("date.implemented", "date.removed"), all.x=T)
     print("366")
+
+    ## calculate intervention durations
+    print("Calculating intervention durations ...")
+
     ms.parked=master.sliced ## sorry for the dirty trick
     print("368")
     master.sliced=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
