@@ -13,11 +13,13 @@
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.
 #' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.
 #' @param group.importers Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
+#' @param separate.importer.groups Specifiy whether to separately calculate groups in chosen importers ('TRUE') or not ('FALSE'). Default: FALSE.
 #' @param nr.also.importers Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.
 #' @param jointly.affected.importers Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
 #' @param keep.exporters Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
 #' @param group.exporters Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
+#' @param separate.exporter.groups Specifiy whether to separately calculate groups in chosen exporters ('TRUE') or not ('FALSE'). Default: FALSE.
 #' @param nr.also.exporters Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.
 #' @param jointly.affected.exporters Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
@@ -316,12 +318,59 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Coverage period years:", choice=paste(year.start, " to ",year.end, sep="")))
 
 
+    ## adding HS code-specific durations
+    keep.environment=ls()
+    load(replica.path)
+    rm(list = setdiff(ls(), c(keep.environment, "gta_affected_tariff_line")))
+
+
+    gta_affected_tariff_line$inception_date=as.Date(gta_affected_tariff_line$inception_date, "%Y-%m-%d")
+    gta_affected_tariff_line$removal_date=as.Date(gta_affected_tariff_line$removal_date, "%Y-%m-%d")
+    gta_affected_tariff_line=subset(gta_affected_tariff_line, (is.na(removal_date)==F)|(is.na(inception_date)==F))
+
+    master.dates=unique(master.sliced[,c("intervention.id","affected.product","date.implemented","date.removed")])
+    master.dates=unique(cSplit(master.dates, which(names(master.dates)=="affected.product"), direction="long", sep=","))
+
+    master.dates$id=paste(master.dates$intervention.id, master.dates$affected.product, sep="-")
+
+    tl.start=subset(gta_affected_tariff_line, is.na(inception_date)==F)[,c("intervention_id", "affected_products","inception_date")]
+    tl.start$id=paste(tl.start$intervention_id, tl.start$affected_products, sep="-")
+
+    tl.end=subset(gta_affected_tariff_line, is.na(removal_date)==F)[,c("intervention_id", "affected_products","removal_date")]
+    tl.end$id=paste(tl.end$intervention_id, tl.end$affected_products, sep="-")
+
+    master.start=subset(master.dates, id %in% tl.start$id)
+    master.start$date.implemented=NULL
+    master.start=merge(master.start, tl.start[,c("id","inception_date")], by="id", all.x=T)
+    data.table::setnames(master.start, "inception_date","date.implemented")
+
+    master.dates=rbind(subset(master.dates, ! id %in% tl.start$id), master.start)
+
+    master.end=subset(master.dates, id %in% tl.end$id)
+    master.end$date.removed=NULL
+    master.end=merge(master.end, tl.end[,c("id","removal_date")], by="id", all.x=T)
+    data.table::setnames(master.end, "removal_date","date.removed")
+
+    master.dates=rbind(subset(master.dates, ! id %in% tl.end$id), master.end)
+    master.dates$id=NULL
+
+    rm(tl.end, tl.start,gta_affected_tariff_line)
+
     ## calculate intervention durations
     print("Calculating intervention durations ...")
-    gta_intervention_duration(data.path='master.sliced[,c("intervention.id", "date.implemented", "date.removed")]',
+
+    d.id=unique(master.dates[,c("date.implemented", "date.removed")])
+    d.id$date.id=1:nrow(d.id)
+
+    master.dates=merge(master.dates, d.id, by=c("date.implemented", "date.removed"), all.x=T)
+    gta_intervention_duration(data.path='unique(master.dates[,c("date.id", "date.implemented", "date.removed")])',
                               is.data.frame=TRUE,
                               years=c(year.start,year.end),
                               current.year.todate=current.year.todate)
+
+    data.table::setnames(intervention.duration, "intervention.id","date.id")
+    master.dates=unique(master.dates[,c("intervention.id","affected.product","date.id")])
+
     # rm(parameter.choice.duration)
     print("Calculating intervention durations ... complete.")
 
@@ -330,7 +379,8 @@ gta_trade_coverage <- function(
 
     print("Building intervention-importer-exporter-product tuples ...")
     gta_imp_exp_hs_tuples(master.path='master.sliced',
-                          master.data.frame=TRUE)
+                          master.data.frame=TRUE,
+                          replica.path=replica.path)
     print("Building intervention-importer-exporter-product tuples ... complete.")
     # rm(parameter.tuple)
 
@@ -521,11 +571,15 @@ gta_trade_coverage <- function(
 
     for(yr in c(year.start:year.end)){
       print(paste("Calculating maximum coverage per importer-exporter-product combination across all instruments in year ",yr,".",sep=""))
-      int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id)$intervention.id)
+      int.iahs=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id)$intervention.id)
 
       mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
-      int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
-      mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
+
+      md.temp=subset(master.dates, intervention.id %in% int.iahs)
+      md.temp=merge(md.temp, subset(intervention.duration, year==yr & share>0)[,c("date.id","share")],by="date.id")
+
+      mt.temp=merge(mt.temp, md.temp[,c("intervention.id", "affected.product","share")], by=c("intervention.id","affected.product"))
+      rm(md.temp)
 
       v.iahs=unique(mt.temp$iahs)
 
@@ -590,12 +644,16 @@ gta_trade_coverage <- function(
 
       for(inst in unique(master.sliced$intervention.type)){
         for(yr in c(year.start:year.end)){
-          int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id  &
+          int.iahs=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id &
                                    intervention.id %in% subset(master.sliced, intervention.type==inst)$intervention.id)$intervention.id)
 
           mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
-          int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
-          mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
+
+          md.temp=subset(master.dates, intervention.id %in% int.iahs)
+          md.temp=merge(md.temp, subset(intervention.duration, year==yr & share>0)[,c("date.id","share")],by="date.id")
+
+          mt.temp=merge(mt.temp, md.temp[,c("intervention.id", "affected.product","share")], by=c("intervention.id","affected.product"))
+          rm(md.temp)
 
           v.iahs=unique(mt.temp$iahs)
 
@@ -669,12 +727,16 @@ gta_trade_coverage <- function(
 
       for(inst in unique(master.sliced$mast.chapter)){
         for(yr in c(year.start:year.end)){
-          int.iahs=unique(subset(master.tuple, intervention.id %in% subset(intervention.duration, year==yr & share>0)$intervention.id &
+          int.iahs=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id &
                                    intervention.id %in% subset(master.sliced, mast.chapter==inst)$intervention.id)$intervention.id)
 
           mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
-          int.temp=subset(intervention.duration, intervention.id %in% int.iahs)
-          mt.temp=merge(mt.temp, subset(int.temp, year==yr & share>0)[,c("intervention.id","share")], by="intervention.id")
+
+          md.temp=subset(master.dates, intervention.id %in% int.iahs)
+          md.temp=merge(md.temp, subset(intervention.duration, year==yr & share>0)[,c("date.id","share")],by="date.id")
+
+          mt.temp=merge(mt.temp, md.temp[,c("intervention.id", "affected.product","share")], by=c("intervention.id","affected.product"))
+          rm(md.temp)
 
           v.iahs=unique(mt.temp$iahs)
 
