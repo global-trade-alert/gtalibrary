@@ -1043,6 +1043,7 @@ gta_trade_coverage <- function(
       master.coverage=subset(base.coverage, nr.of.hits>=hit.frequency$min[brkt] & nr.of.hits<=hit.frequency$max[brkt])
       total.trade=sum(tbb.base$trade.value)
       tbb.yr = trade.base.bilateral
+      tbb.base.yr = tbb.base
 
       ### Aggregates across intervention types or MAST chapters
       for(yr in year.start:year.end){
@@ -1051,6 +1052,7 @@ gta_trade_coverage <- function(
         if ("year" %in% names(trade.base.bilateral)) {
           total.trade=sum(subset(tbb.base, year == yr)$trade.value)
           tbb.yr = subset(trade.base.bilateral, year == yr)
+          tbb.base.yr = subset(tbb.base, year == yr)
         }
 
         if(nrow(mc.yr)==0){
@@ -1166,7 +1168,7 @@ gta_trade_coverage <- function(
             if(group.importers==F & group.exporters==T){
               fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.yr, sum)
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.yr, sum), by="i.un", all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base, sum), by="i.un", all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -1179,7 +1181,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.yr, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.yr, sum), by="a.un", all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -1193,7 +1195,7 @@ gta_trade_coverage <- function(
 
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un","a.un"), all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -1415,7 +1417,7 @@ gta_trade_coverage <- function(
                   fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
 
                   if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.yr, sum), by="i.un", all.x=T)
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
                     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                     fc.temp$trade.value=NULL
                   }
@@ -1429,7 +1431,7 @@ gta_trade_coverage <- function(
 
 
                   if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.yr, sum), by="a.un", all.x=T)
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
                     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                     fc.temp$trade.value=NULL
                   }
@@ -1442,7 +1444,7 @@ gta_trade_coverage <- function(
                   fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
 
                   if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un","a.un"), all.x=T)
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
                     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                     fc.temp$trade.value=NULL
                   }
@@ -1663,7 +1665,7 @@ gta_trade_coverage <- function(
 
 
                   if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.yr, sum), by="i.un", all.x=T)
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
                     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                     fc.temp$trade.value=NULL
                   }
@@ -1677,7 +1679,7 @@ gta_trade_coverage <- function(
 
 
                   if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.yr, sum), by="a.un", all.x=T)
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
                     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                     fc.temp$trade.value=NULL
                   }
@@ -1691,7 +1693,7 @@ gta_trade_coverage <- function(
 
 
                   if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un","a.un"), all.x=T)
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
                     fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                     fc.temp$trade.value=NULL
                   }
@@ -1861,7 +1863,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.yr, sum), by="i.un", all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -1891,7 +1893,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.yr, sum), by="a.un", all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -1930,7 +1932,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un","a.un"), all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -2182,7 +2184,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.yr, sum), by="i.un", all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -2211,7 +2213,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.yr, sum), by="a.un", all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
@@ -2250,7 +2252,7 @@ gta_trade_coverage <- function(
               fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
 
               if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un","a.un"), all.x=T)
+                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
                 fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
                 fc.temp$trade.value=NULL
               }
