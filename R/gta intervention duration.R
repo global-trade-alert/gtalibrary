@@ -34,6 +34,7 @@ gta_intervention_duration <- function(
   ## data file
   if(is.data.frame){
     print("b")
+    print(paste0(names(master.sliced)))
     eval(parse(text=paste("master=", data.path, sep="")))
     print("c")
     if(ncol(master)<3){stop("Please supply a data frame with at least three columns (intervention ID, implementation and removal date).")}
