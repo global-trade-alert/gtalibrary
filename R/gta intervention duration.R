@@ -30,44 +30,60 @@ gta_intervention_duration <- function(
   ## initialising
   library(data.table)
   parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
-
+  print("a")
   ## data file
   if(is.data.frame){
+    print("b")
     eval(parse(text=paste("master=", data.path, sep="")))
-
+    print("c")
     if(ncol(master)<3){stop("Please supply a data frame with at least three columns (intervention ID, implementation and removal date).")}
-
+    print("d")
     if(ncol(master)==3){
+      print("e")
       names(master)=c("intervention.id", "date.implemented", "date.removed")
     }else{
+      print("f")
       names(master)=c("intervention.id", "date.implemented", "date.removed", names(master[,4:ncol(master)]))
     }
 
 
   }else{
+    print("g")
     if(data.path=="online"){
+      print("h")
       print("Downloading the latest copy of the GTA dataset.The file is deleted after loading the data into your environment.")
       download.file("https://www.dropbox.com/s/78kpe232p2b36ze/GTA%20full%20data%20export.Rdata?dl=1","GTA data.Rdata")
       load("GTA data.Rdata")
       unlink("GTA data.Rdata")
       parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice="Downloaded latest copy"))
+      print("i")
     } else{
       load(data.path)
+      print("j")
       parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Local copy from '",data.path,"'.", sep="")))
     }
   }
 
   ## check years
   if(is.null(years)){
+    print("k")
     year.start=2008
+    print("l")
     year.end=year(Sys.Date())
+    print("m")
   } else {
+    print("n")
     if(length(years)!=2){stop("Please supply a year vector with two entries e.g. c(2008, 2018)")}
+    print("o")
     if((min(years)<2008)|(max(years)>year(Sys.Date())) ){stop(paste("Please only supply years between 2008 and ", year(Sys.Date()), sep=""))}
+    print("p")
     if(is.numeric(years)==F){stop("Please supply a year vector with two integer entries e.g. c(2008, 2018)")}
+    print("q")
 
     if(years[1]%%1==0){year.start=years[1]}else{stop("Please supply a year vector with two integer entries e.g. c(2008, 2018)")}
+    print("r")
     if(years[2]%%1==0){year.end=years[2]}else{stop("Please supply a year vector with two integer entries e.g. c(2008, 2018)")}
+    print("s")
   }
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Enforcement years:", choice=paste(year.start, " to ",year.end, sep="")))
 
@@ -75,36 +91,51 @@ gta_intervention_duration <- function(
 
   # calculating intra-year duration
   master=unique(master[,c("intervention.id", "date.implemented", "date.removed")])
+  print("t")
   master=subset(master, year(date.implemented)<=year.end )
+  print("u")
   master$date.removed[is.na(master$date.removed)]=as.Date(paste(year(Sys.Date())+1,"-01-01",sep=""), "%Y-%m-%d")
+  print("v")
 
 
   yr.length=data.frame(year=c(year.start:year.end), days=365)
+  print("w")
   yr.length$days[yr.length$year %in% seq(2008,year.end,4)]=366
+  print("x")
 
   duration=data.frame(expand.grid(intervention.id=unique(master$intervention.id), year=c(year.start:year.end)), share=NA)
+  print("y")
   duration=merge(duration, master, by="intervention.id", all.x=T)
+  print("z")
 
   # duration is zero
   duration$share[year(duration$date.implemented)>duration$year]=0
+  print("aa")
   duration$share[year(duration$date.removed)<duration$year]=0
+  print("ab")
 
   # duration is one
   duration$share[year(duration$date.implemented)<duration$year & year(duration$date.removed)>duration$year]=1
+  print("ac")
 
   # durations for cases that start/end within the given year
   intra.year=subset(duration, is.na(share))
+  print("ad")
 
   for(i in 1:nrow(intra.year)){
+    print("ae")
 
     if(intra.year$year[i]<year(Sys.Date())){
+      print("af")
       intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
     }else{
 
       ## correcting current year duration (if required)
       if(current.year.todate){
+        print("ag")
         intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):Sys.Date())))/(as.numeric(Sys.Date()-as.Date(paste(year(Sys.Date()),"-01-01",sep="")))+1)
       } else{
+        print("ah")
         intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
       }
 
@@ -113,8 +144,11 @@ gta_intervention_duration <- function(
   }
 
   duration=rbind(subset(duration, is.na(share)==F), intra.year)
+  print("ai")
   duration=unique(duration[,c("intervention.id","year","share")])
 
   eval(parse(text=paste(df.name, "<<-duration", sep="")))
+  print("aj")
   eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
+  print("ak")
 }
