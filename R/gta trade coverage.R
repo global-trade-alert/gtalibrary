@@ -389,6 +389,7 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path,"'.", sep="")))
 
     print("Building intervention-importer-exporter-product tuples ...")
+    master.sliced <<- master.sliced
     gta_imp_exp_hs_tuples(master.path='master.sliced',
                           master.data.frame=TRUE,
                           replica.path=replica.path)
