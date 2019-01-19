@@ -371,6 +371,7 @@ gta_trade_coverage <- function(
     master.sliced=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
     print("370")
     print(paste0(names(master.sliced)))
+    master.sliced <<- master.sliced
     gta_intervention_duration(data.path='master.sliced[,c("date.id", "date.implemented", "date.removed")]',
                               is.data.frame=TRUE,
                               years=c(year.start,year.end),
