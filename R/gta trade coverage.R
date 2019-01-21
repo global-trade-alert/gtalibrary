@@ -363,18 +363,17 @@ gta_trade_coverage <- function(
     ## calculate intervention durations
     print("Calculating intervention durations ...")
 
-    ms.parked=master.sliced ## sorry for the dirty trick
-    master.sliced=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
-    print(paste0(names(master.sliced)))
-    master.sliced <<- master.sliced
-    gta_intervention_duration(data.path='master.sliced[,c("date.id", "date.implemented", "date.removed")]',
+    master.dates=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
+
+    master.dates <<- master.dates
+    gta_intervention_duration(data.path='master.dates[,c("date.id", "date.implemented", "date.removed")]',
                               is.data.frame=TRUE,
                               years=c(year.start,year.end),
                               current.year.todate=current.year.todate)
-    master.sliced=ms.parked
-    rm(ms.parked)
+
     data.table::setnames(intervention.duration, "intervention.id","date.id")
     master.dates=unique(master.dates[,c("intervention.id","affected.product","date.id")])
+
     # rm(parameter.choice.duration)
     print("Calculating intervention durations ... complete.")
 
