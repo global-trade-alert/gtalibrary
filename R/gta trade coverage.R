@@ -1037,6 +1037,8 @@ gta_trade_coverage <- function(
 
     base.coverage=master.coverage
     coverage.estimate=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric(), hit.bracket=character(), stringsAsFactors = F)
+    hit.frequency$min <- as.numeric(as.character(hit.frequency$min))
+    hit.frequency$max <- as.numeric(as.character(hit.frequency$max))
 
     for(brkt in 1:nrow(hit.frequency)){
       final.coverage=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric())
