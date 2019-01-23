@@ -644,7 +644,7 @@ gta_trade_coverage <- function(
 
 
     ## Add individual instervention.types, if called for.
-    if(is.null(intervention.types)==F & group.type==F){
+    if(group.type==F){
       duration.max$intervention.type="All included instruments"
 
       for(inst in unique(master.sliced$intervention.type)){
@@ -727,7 +727,7 @@ gta_trade_coverage <- function(
 
 
     ## Add individual MAST chapters if called for.
-    if(is.null(mast.chapters)==F & group.mast==F){
+    if(group.mast==F){
       duration.max$mast.chapter="All included instruments"
 
       for(inst in unique(master.sliced$mast.chapter)){
@@ -1818,7 +1818,7 @@ gta_trade_coverage <- function(
       }
 
       ### by intervention type, if necessary
-      if(is.null(intervention.types)==F & group.type==F){
+      if(group.type==F){
         final.coverage$intervention.type="All included instruments"
         print("Calculating aggregate annual trade coverage per included intervention type ...")
 
@@ -1958,6 +1958,7 @@ gta_trade_coverage <- function(
                     final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
                                                                     a.un=country.groups$code[country.groups$country.groups == e],
                                                                     year=unique(master.coverage$year),
+                                                                    intervention.type=inst,
                                                                     trade.value.affected=0))
                   }
                 }
@@ -2137,7 +2138,7 @@ gta_trade_coverage <- function(
       }
 
       ### by MAST chapter, if necessary
-      if(is.null(mast.chapters)==F & group.mast==F){
+      if(group.mast==F){
         final.coverage$mast.chapter="All included MAST chapters"
         print("Calculating aggregate annual trade coverage per included MAST chapter ...")
 
@@ -2278,6 +2279,7 @@ gta_trade_coverage <- function(
                     final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
                                                                     a.un=country.groups$code[country.groups$country.groups == e],
                                                                     year=unique(master.coverage$year),
+                                                                    mast.chapter=inst,
                                                                     trade.value.affected=0))
                   }
                 }
@@ -2294,7 +2296,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == i])
                     names(fc.temp)=c("year","i.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$mast.chapter=inst
                     fc.temp$a.un=999
 
                     final.coverage=rbind(final.coverage,
@@ -2305,7 +2307,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un))
                     names(fc.temp)=c("year","a.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$mast.chapter=inst
                     fc.temp$i.un=country.groups$code[country.groups$country.groups == i]
 
                     final.coverage=rbind(final.coverage,
@@ -2326,7 +2328,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == e])
                     names(fc.temp)=c("year","a.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$mast.chapter=inst
                     fc.temp$i.un=999
 
                     final.coverage=rbind(final.coverage,
@@ -2336,7 +2338,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un))
                     names(fc.temp)=c("year","i.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$mast.chapter=inst
                     fc.temp$a.un=country.groups$code[country.groups$country.groups == e]
 
                     final.coverage=rbind(final.coverage,
