@@ -1230,13 +1230,11 @@ gta_trade_coverage <- function(
       ### have to define the importer/exporter grouping.
       ### in implementer trade calculations, this ungrouping the implementers is the same as ungrouping the ex/importer
 
-      if(implementer.trade=="import" & group.implementers==F){
-        group.importers=F
+      if(is.null(implementer.trade)==F & group.implementers==F){
+        if(implementer.trade=="import"){group.importers=F}
+        if(implementer.trade=="export"){group.exporters=F}
       }
 
-      if(implementer.trade=="export" & group.implementers==F){
-        group.exporters=F
-      }
 
       for(yr in year.start:year.end){
 
