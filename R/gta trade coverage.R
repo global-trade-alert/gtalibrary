@@ -952,8 +952,6 @@ gta_trade_coverage <- function(
 
       # Add country groups and sum up their trade values
 
-      # tbb.base <- trade.base.bilateral // replaced with subset(trade.base.bilateral, i.un<10000 & a.un<10000)
-
       if (separate.importer.groups) {
         importer.country.groups = importers[importers %in% country.groups$country.groups]
         for (i in importer.country.groups){
@@ -1014,6 +1012,32 @@ gta_trade_coverage <- function(
         error.message <<- c(T, stop.print)
         stop(stop.print)
       }
+
+      ## group data importer groups, exporter groups and implementer groups
+      if (separate.importer.groups) {
+        importer.country.groups = importers[importers %in% country.groups$country.groups]
+        for (i in importer.country.groups){
+          trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[country.correspondence$name == i])
+          if ("year" %in% names(trade.base.bilateral)) {
+            trade.base.bilateral.temp <- aggregate(trade.value~a.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~a.un+hs6, trade.base.bilateral.temp, sum) }
+          trade.base.bilateral.temp$i.un = country.groups$code[country.groups$country.groups == i]
+          trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
+          rm(trade.base.bilateral.temp)
+        }
+      }
+
+      if (separate.exporter.groups) {
+        exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+        for (i in exporter.country.groups){
+          trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[country.correspondence$name == i])
+          if ("year" %in% names(trade.base.bilateral)) {
+            trade.base.bilateral.temp <- aggregate(trade.value~i.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~i.un+hs6, trade.base.bilateral.temp, sum) }
+          trade.base.bilateral.temp$a.un = country.groups$code[country.groups$country.groups == i]
+          trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
+          rm(trade.base.bilateral.temp)
+        }
+      }
+
 
       if (separate.implementer.groups) {
         implementer.country.groups = implementers[implementers %in% country.groups$country.groups]
