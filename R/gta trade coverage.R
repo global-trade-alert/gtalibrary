@@ -600,7 +600,7 @@ gta_trade_coverage <- function(
         if(nrow(i.outward)>0){
           i.outward$a.un=NULL
           i.outward=unique(i.outward)
-          i.outward$a.un=paste(unique(country.names$un_code), collapse=",")
+          i.outward$a.un=paste(exporting.country, collapse=",")
           i.outward=cSplit(i.outward, which(names(i.outward)=="a.un"), direction="long", sep=",")
           i.outward=subset(i.outward, i.un!=a.un)
         }
@@ -608,7 +608,7 @@ gta_trade_coverage <- function(
         if(nrow(i.os)>0){
           i.os$a.un=NULL
           i.os=unique(i.os)
-          i.os$a.un=paste(unique(country.names$un_code), collapse=",")
+          i.os$a.un=paste(exporting.country, collapse=",")
           i.os=cSplit(i.os, which(names(i.os)=="a.un"), direction="long", sep=",")
           i.os=subset(i.os, i.un!=a.un)
         }
@@ -629,7 +629,7 @@ gta_trade_coverage <- function(
         if(nrow(i.inward)>0){
           i.inward$i.un=NULL
           i.inward=unique(i.inward)
-          i.inward$i.un=paste(unique(country.names$un_code), collapse=",")
+          i.inward$i.un=paste(importing.country, collapse=",")
           i.inward=cSplit(i.inward, which(names(i.inward)=="i.un"), direction="long", sep=",")
           i.inward=subset(i.inward, i.un!=a.un)
         }
