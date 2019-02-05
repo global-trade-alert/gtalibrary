@@ -25,6 +25,9 @@
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
+#' @param group.implementers Specify whether to aggregate the statistics for all remaining implementers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
+#' @param separate.implementer.groups Specifiy whether to separately calculate groups in chosen implementers ('TRUE') or not ('FALSE'). Default: FALSE.
+#' @param implementer.trade Specify whether you want to receive import or export shares for the implementer. Default: As implied by selection in other fields.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
@@ -84,6 +87,9 @@ gta_trade_coverage <- function(
   implementers = NULL,
   implementer.role = NULL,
   keep.implementer= TRUE,
+  group.implementers=TRUE,
+  separate.implementer.groups=FALSE,
+  implementer.trade=NULL,
   announcement.period = NULL,
   implementation.period = NULL,
   revocation.period = NULL,
@@ -129,6 +135,7 @@ gta_trade_coverage <- function(
 
   tryCatch({
 
+    ### SECTION 1: Loading the GTA data and filtering it
     print("Slicing GTA master data set ...")
     gta_data_slicer(data.path=data.path,
                     gta.evaluation= gta.evaluation,
@@ -365,7 +372,7 @@ gta_trade_coverage <- function(
 
     ms.parked=master.sliced ## sorry for the dirty trick
     master.sliced=unique(master.dates[,c("date.id", "date.implemented", "date.removed")])
-    print(paste0(names(master.sliced)))
+
     master.sliced <<- master.sliced
     gta_intervention_duration(data.path='master.sliced[,c("date.id", "date.implemented", "date.removed")]',
                               is.data.frame=TRUE,
@@ -545,7 +552,7 @@ gta_trade_coverage <- function(
     }
 
     if("exporter" %in% implementer.role){
-      mt=rbind(mt, subset(master.tuple, a.un==t.un  & t.un %in% implementing.country))
+      mt=rbind(mt, subset(master.tuple, a.un==t.un & t.un %in% implementing.country))
     }
 
     if("3rd country" %in% implementer.role){
@@ -564,61 +571,141 @@ gta_trade_coverage <- function(
       stop(stop.print)
     }
 
-
-    ## create max duration for all instruments and per import-export-product year
+    ### SECTION X: Processing the data
+    ## create max duration for all instruments and per importer-exporter-product year
 
     print("Identifying the maximum duration per year and importer-exporter-product tuple ... (this will take a while)")
-    master.tuple$iahs=paste(master.tuple$i.un,master.tuple$a.un, master.tuple$affected.product, sep="-")
 
 
+    ### adjusting master tuple in case of implementer.trade calculation
 
-    duration.max=data.frame(iahs=character(), year=numeric(), share=numeric(), nr.of.hits=numeric())
+    if(is.null(implementer.trade)==F){
+      i.inward=subset(master.tuple, i.un==t.un)
+      i.outward=subset(master.tuple, a.un==t.un)
+      i.os=subset(master.tuple, i.un!=t.un & a.un!=t.un)
+
+      if(nrow(i.inward)==0){i.inward=master.tuple[0,]}
+      if(nrow(i.outward)==0){i.outward=master.tuple[0,]}
+      if(nrow(i.os)==0){i.os=master.tuple[0,]}
+
+      if(implementer.trade=="import"){
+        ## inward cases remain valid.
+
+        ## outward and OS:
+        ### importing country = implementer
+        i.outward$i.un=i.outward$t.un
+        i.os$i.un=i.os$t.un
+
+        ## exporting country = ALL
+        if(nrow(i.outward)>0){
+          i.outward$a.un=NULL
+          i.outward=unique(i.outward)
+          i.outward$a.un=paste(unique(country.names$un_code), collapse=",")
+          i.outward=cSplit(i.outward, which(names(i.outward)=="a.un"), direction="long", sep=",")
+          i.outward=subset(i.outward, i.un!=a.un)
+        }
+
+        if(nrow(i.os)>0){
+          i.os$a.un=NULL
+          i.os=unique(i.os)
+          i.os$a.un=paste(unique(country.names$un_code), collapse=",")
+          i.os=cSplit(i.os, which(names(i.os)=="a.un"), direction="long", sep=",")
+          i.os=subset(i.os, i.un!=a.un)
+        }
+
+      }
+
+      if(implementer.trade=="export"){
+
+        ## outward cases remain valid.
+
+        ## inward & outward subsidy cases:
+        ### exporter = implmementer
+        i.inward$a.un=i.inward$t.un
+        i.os$a.un=i.os$t.un
+        i.os=unique(i.os)
+
+        ### importing country = all for inward cases
+        if(nrow(i.inward)>0){
+          i.inward$i.un=NULL
+          i.inward=unique(i.inward)
+          i.inward$i.un=paste(unique(country.names$un_code), collapse=",")
+          i.inward=cSplit(i.inward, which(names(i.inward)=="i.un"), direction="long", sep=",")
+          i.inward=subset(i.inward, i.un!=a.un)
+        }
+
+        ### importing country remains valid for OS cases (=distorted market)
+
+      }
+
+      if(nrow(i.inward)==0){i.inward=master.tuple[0,]}
+      if(nrow(i.outward)==0){i.outward=master.tuple[0,]}
+      if(nrow(i.os)==0){i.os=master.tuple[0,]}
+
+      master.tuple=unique(rbind(i.inward, i.outward, i.os))
+
+
+    }
+
+
+    master.tuple$identifier=paste(master.tuple$i.un,master.tuple$a.un, master.tuple$affected.product, sep="-")
+
+    ## need to inlcude the identifier in the case of trade coverage calculation where group.implementer==F
+    ## all implementer trade calculations, group.implementer is the same as either group.exporters or group.importers for the code below (when generating the final coverage file).
+    if(is.null(implementer.trade)){
+      if(group.implementers==F){
+        master.tuple$identifier=paste(master.tuple$i.un,master.tuple$t.un,master.tuple$a.un, master.tuple$affected.product, sep="-")
+      }
+    }
+
+
+    duration.max=data.frame(identifier=character(), year=numeric(), share=numeric(), nr.of.hits=numeric())
 
     for(yr in c(year.start:year.end)){
       print(paste("Calculating maximum coverage per importer-exporter-product combination across all instruments in year ",yr,".",sep=""))
-      int.iahs=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id)$intervention.id)
+      interventions.in.force=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id)$intervention.id)
 
-      mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
+      mt.temp=subset(master.tuple, intervention.id %in% interventions.in.force)
 
-      md.temp=subset(master.dates, intervention.id %in% int.iahs)
+      md.temp=subset(master.dates, intervention.id %in% interventions.in.force)
       md.temp=merge(md.temp, subset(intervention.duration, year==yr & share>0)[,c("date.id","share")],by="date.id")
 
       mt.temp=merge(mt.temp, md.temp[,c("intervention.id", "affected.product","share")], by=c("intervention.id","affected.product"))
       rm(md.temp)
 
-      v.iahs=unique(mt.temp$iahs)
+      relevant.mt.ids=unique(mt.temp$identifier)
 
-      if(length(v.iahs)>0){
-        nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
-        names(nr.hits)=c("iahs","nr.of.hits")
-        mt.temp=unique(mt.temp[,c("iahs","share")])
+      if(length(relevant.mt.ids)>0){
+        nr.hits=as.data.frame(table(unique(mt.temp[,c("identifier","intervention.id")])$identifier))
+        names(nr.hits)=c("identifier","nr.of.hits")
+        mt.temp=unique(mt.temp[,c("identifier","share")])
 
-        duration.temp=data.frame(iahs=character(),
+        duration.temp=data.frame(identifier=character(),
                                  share=numeric())
-        multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
+        multiple.mention=as.character(subset(as.data.frame(table(mt.temp$identifier)), Freq>1)$Var1)
 
         if(length(multiple.mention)>0){
-          duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
+          duration.temp=subset(mt.temp, ! identifier %in% multiple.mention)
 
-          multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+          multiple.interventions=subset(mt.temp, identifier %in% multiple.mention)
 
-          if(length(unique(multiple.interventions$iahs[multiple.interventions$share==1]))>0){
-            full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+          if(length(unique(multiple.interventions$identifier[multiple.interventions$share==1]))>0){
+            full.coverage=data.frame(identifier=unique(multiple.interventions$identifier[multiple.interventions$share==1]),
                                      share=1)
             duration.temp=rbind(duration.temp, full.coverage)
-            multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+            multiple.interventions=subset(multiple.interventions, !identifier %in% full.coverage$identifier)
 
           }
 
           if(nrow(multiple.interventions)>0){
 
-            tuple=multiple.interventions$iahs
+            tuple=multiple.interventions$identifier
             shrs =multiple.interventions$share
 
-            dt=data.frame(iahs=unique(tuple), share=NA)
+            dt=data.frame(identifier=unique(tuple), share=NA)
             output = character(nrow(dt))
             for(i in 1:nrow(dt)){
-              output[i]=max(shrs[tuple==dt$iahs[i]])
+              output[i]=max(shrs[tuple==dt$identifier[i]])
             }
             dt$share=output
             rm(output)
@@ -631,7 +718,7 @@ gta_trade_coverage <- function(
 
         duration.temp$year=yr
 
-        duration.temp=merge(duration.temp, nr.hits, by="iahs", all.x=T)
+        duration.temp=merge(duration.temp, nr.hits, by="identifier", all.x=T)
         duration.max=rbind(duration.max,duration.temp)
         rm(duration.temp, nr.hits)
       }
@@ -649,50 +736,50 @@ gta_trade_coverage <- function(
 
       for(inst in unique(master.sliced$intervention.type)){
         for(yr in c(year.start:year.end)){
-          int.iahs=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id &
-                                   intervention.id %in% subset(master.sliced, intervention.type==inst)$intervention.id)$intervention.id)
+          interventions.in.force=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id &
+                                                 intervention.id %in% subset(master.sliced, intervention.type==inst)$intervention.id)$intervention.id)
 
-          mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
+          mt.temp=subset(master.tuple, intervention.id %in% interventions.in.force)
 
-          md.temp=subset(master.dates, intervention.id %in% int.iahs)
+          md.temp=subset(master.dates, intervention.id %in% interventions.in.force)
           md.temp=merge(md.temp, subset(intervention.duration, year==yr & share>0)[,c("date.id","share")],by="date.id")
 
           mt.temp=merge(mt.temp, md.temp[,c("intervention.id", "affected.product","share")], by=c("intervention.id","affected.product"))
           rm(md.temp)
 
-          v.iahs=unique(mt.temp$iahs)
+          relevant.mt.ids=unique(mt.temp$identifier)
 
-          if(length(v.iahs)>0){
-            nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
-            names(nr.hits)=c("iahs","nr.of.hits")
-            mt.temp=unique(mt.temp[,c("iahs","share")])
+          if(length(relevant.mt.ids)>0){
+            nr.hits=as.data.frame(table(unique(mt.temp[,c("identifier","intervention.id")])$identifier))
+            names(nr.hits)=c("identifier","nr.of.hits")
+            mt.temp=unique(mt.temp[,c("identifier","share")])
 
-            duration.temp=data.frame(iahs=character(),
+            duration.temp=data.frame(identifier=character(),
                                      share=numeric())
-            multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
+            multiple.mention=as.character(subset(as.data.frame(table(mt.temp$identifier)), Freq>1)$Var1)
 
             if(length(multiple.mention)>0){
-              duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
+              duration.temp=subset(mt.temp, ! identifier %in% multiple.mention)
 
-              multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+              multiple.interventions=subset(mt.temp, identifier %in% multiple.mention)
 
-              if(length(unique(multiple.interventions$iahs[multiple.interventions$share==1]))>0){
-                full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+              if(length(unique(multiple.interventions$identifier[multiple.interventions$share==1]))>0){
+                full.coverage=data.frame(identifier=unique(multiple.interventions$identifier[multiple.interventions$share==1]),
                                          share=1)
                 duration.temp=rbind(duration.temp, full.coverage)
 
-                multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+                multiple.interventions=subset(multiple.interventions, !identifier %in% full.coverage$identifier)
               }
 
               if(nrow(multiple.interventions)>0){
 
-                tuple=multiple.interventions$iahs
+                tuple=multiple.interventions$identifier
                 shrs =multiple.interventions$share
 
-                dt=data.frame(iahs=unique(tuple), share=NA)
+                dt=data.frame(identifier=unique(tuple), share=NA)
                 output = character(nrow(dt))
                 for(i in 1:nrow(dt)){
-                  output[i]=max(shrs[tuple==dt$iahs[i]])
+                  output[i]=max(shrs[tuple==dt$identifier[i]])
                 }
                 dt$share=output
                 rm(output)
@@ -705,7 +792,7 @@ gta_trade_coverage <- function(
 
             duration.temp$year=yr
             duration.temp$intervention.type=inst
-            duration.temp=merge(duration.temp, nr.hits, by="iahs", all.x=T)
+            duration.temp=merge(duration.temp, nr.hits, by="identifier", all.x=T)
             duration.max=rbind(duration.max,duration.temp)
           }
 
@@ -732,50 +819,50 @@ gta_trade_coverage <- function(
 
       for(inst in unique(master.sliced$mast.chapter)){
         for(yr in c(year.start:year.end)){
-          int.iahs=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id &
-                                   intervention.id %in% subset(master.sliced, mast.chapter==inst)$intervention.id)$intervention.id)
+          interventions.in.force=unique(subset(master.tuple, intervention.id %in% subset(master.dates, date.id %in% unique(subset(intervention.duration, year==yr & share>0)$date.id))$intervention.id &
+                                                 intervention.id %in% subset(master.sliced, mast.chapter==inst)$intervention.id)$intervention.id)
 
-          mt.temp=subset(master.tuple, intervention.id %in% int.iahs)
+          mt.temp=subset(master.tuple, intervention.id %in% interventions.in.force)
 
-          md.temp=subset(master.dates, intervention.id %in% int.iahs)
+          md.temp=subset(master.dates, intervention.id %in% interventions.in.force)
           md.temp=merge(md.temp, subset(intervention.duration, year==yr & share>0)[,c("date.id","share")],by="date.id")
 
           mt.temp=merge(mt.temp, md.temp[,c("intervention.id", "affected.product","share")], by=c("intervention.id","affected.product"))
           rm(md.temp)
 
-          v.iahs=unique(mt.temp$iahs)
+          relevant.mt.ids=unique(mt.temp$identifier)
 
-          if(length(v.iahs)>0){
-            nr.hits=as.data.frame(table(unique(mt.temp[,c("iahs","intervention.id")])$iahs))
-            names(nr.hits)=c("iahs","nr.of.hits")
-            mt.temp=unique(mt.temp[,c("iahs","share")])
+          if(length(relevant.mt.ids)>0){
+            nr.hits=as.data.frame(table(unique(mt.temp[,c("identifier","intervention.id")])$identifier))
+            names(nr.hits)=c("identifier","nr.of.hits")
+            mt.temp=unique(mt.temp[,c("identifier","share")])
 
-            duration.temp=data.frame(iahs=character(),
+            duration.temp=data.frame(identifier=character(),
                                      share=numeric())
-            multiple.mention=as.character(subset(as.data.frame(table(mt.temp$iahs)), Freq>1)$Var1)
+            multiple.mention=as.character(subset(as.data.frame(table(mt.temp$identifier)), Freq>1)$Var1)
 
             if(length(multiple.mention)>0){
-              duration.temp=subset(mt.temp, ! iahs %in% multiple.mention)
+              duration.temp=subset(mt.temp, ! identifier %in% multiple.mention)
 
-              multiple.interventions=subset(mt.temp, iahs %in% multiple.mention)
+              multiple.interventions=subset(mt.temp, identifier %in% multiple.mention)
 
-              if(length(unique(multiple.interventions$iahs[multiple.interventions$share==1]))>0){
-                full.coverage=data.frame(iahs=unique(multiple.interventions$iahs[multiple.interventions$share==1]),
+              if(length(unique(multiple.interventions$identifier[multiple.interventions$share==1]))>0){
+                full.coverage=data.frame(identifier=unique(multiple.interventions$identifier[multiple.interventions$share==1]),
                                          share=1)
                 duration.temp=rbind(duration.temp, full.coverage)
 
-                multiple.interventions=subset(multiple.interventions, !iahs %in% full.coverage$iahs)
+                multiple.interventions=subset(multiple.interventions, !identifier %in% full.coverage$identifier)
               }
 
               if(nrow(multiple.interventions)>0){
 
-                tuple=multiple.interventions$iahs
+                tuple=multiple.interventions$identifier
                 shrs =multiple.interventions$share
 
-                dt=data.frame(iahs=unique(tuple), share=NA)
+                dt=data.frame(identifier=unique(tuple), share=NA)
                 output = character(nrow(dt))
                 for(i in 1:nrow(dt)){
-                  output[i]=max(shrs[tuple==dt$iahs[i]])
+                  output[i]=max(shrs[tuple==dt$identifier[i]])
                 }
                 dt$share=output
                 rm(output)
@@ -788,7 +875,7 @@ gta_trade_coverage <- function(
 
             duration.temp$year=yr
             duration.temp$mast.chapter=inst
-            duration.temp=merge(duration.temp, nr.hits,by="iahs", all.x=T)
+            duration.temp=merge(duration.temp, nr.hits,by="identifier", all.x=T)
             duration.max=rbind(duration.max,duration.temp)
             rm(nr.hits)
           }
@@ -802,6 +889,9 @@ gta_trade_coverage <- function(
       print(paste("Calculating maximum coverage per importer-exporter-product combination for all MAST chapters individually complete.",sep=""))
 
     }
+
+    duration.max$share=as.numeric(duration.max$share)
+
     print("Identifying the maximum duration per year and importer-exporter-product tuple ... complete.")
 
     # Check # of rows
@@ -815,7 +905,7 @@ gta_trade_coverage <- function(
     print("Importing trade base values ...")
 
     if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2007:2017))){
-      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, 'prior year' or 'current year'."
+      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2017, 'prior year' or 'current year')."
       error.message <<- c(T, stop.print)
       stop(stop.print)
     } else{
@@ -837,32 +927,32 @@ gta_trade_coverage <- function(
 
 
 
-    gta_trade_value_bilateral(importing.country = importing.country,
-                              keep.importer = TRUE,
-                              exporting.country = exporting.country,
-                              keep.exporter = TRUE,
-                              cpc.sectors = cpc.sectors,
-                              keep.cpc = keep.cpc,
-                              hs.codes = hs.codes,
-                              keep.hs = keep.hs,
-                              trade.data=trade.data,
-                              trade.data.path='data/support tables/Goods support table for gtalibrary.Rdata')
-    parameter.choices=unique(rbind(parameter.choices, parameter.choice.trade.base))
+    ## Importing relevant trade data
+
+    if(is.null(implementer.trade)){
+      gta_trade_value_bilateral(importing.country = importing.country,
+                                keep.importer = TRUE,
+                                exporting.country = exporting.country,
+                                keep.exporter = TRUE,
+                                cpc.sectors = cpc.sectors,
+                                keep.cpc = keep.cpc,
+                                hs.codes = hs.codes,
+                                keep.hs = keep.hs,
+                                trade.data=trade.data,
+                                trade.data.path='data/support tables/Goods support table for gtalibrary.Rdata')
+      parameter.choices=unique(rbind(parameter.choices, parameter.choice.trade.base))
 
 
-    print("Importing trade base values ... completed.")
-    if(nrow(trade.base.bilateral)==0) {
-      stop.print <- "No trade found for the selected specifications (GTA & trade data choice)."
-      error.message <<- c(T, stop.print)
-      stop(stop.print)
-    }
+      print("Importing trade base values ... completed.")
+      if(nrow(trade.base.bilateral)==0) {
+        stop.print <- "No trade found for the selected specifications (GTA & trade data choice)."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
 
-    # Add country groups and sum up their trade values
+      # Add country groups and sum up their trade values
 
-    tbb.base <- trade.base.bilateral
-
-    if (separate.importer.groups | separate.exporter.groups) {
-
+      # tbb.base <- trade.base.bilateral // replaced with subset(trade.base.bilateral, i.un<10000 & a.un<10000)
 
       if (separate.importer.groups) {
         importer.country.groups = importers[importers %in% country.groups$country.groups]
@@ -887,13 +977,95 @@ gta_trade_coverage <- function(
           rm(trade.base.bilateral.temp)
         }
       }
+    } else {
+
+      if(implementer.trade=="import"){
+
+        implementer.imports=unique(master.tuple$t.un)
+        implementer.exports=exporting.country
+
+      } else{
+        if(implementer.trade=="export"){
+
+          implementer.imports=importing.country
+          implementer.exports=unique(master.tuple$t.un)
+
+        } else {
+          stop.print <- "Please specify proper implementer trade choice choice ('import' or 'export')."
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
+        }
+      }
+
+      gta_trade_value_bilateral(importing.country = implementer.imports,
+                                keep.importer = TRUE,
+                                exporting.country = implementer.exports,
+                                keep.exporter = TRUE,
+                                cpc.sectors = cpc.sectors,
+                                keep.cpc = keep.cpc,
+                                hs.codes = hs.codes,
+                                keep.hs = keep.hs,
+                                trade.data=trade.data,
+                                trade.data.path='data/support tables/Goods support table for gtalibrary.Rdata')
+      parameter.choices=unique(rbind(parameter.choices, parameter.choice.trade.base))
+
+      if(nrow(trade.base.bilateral)==0) {
+        stop.print <- "No trade found for the selected implementer specifications."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+      }
+
+      if (separate.implementer.groups) {
+        implementer.country.groups = implementers[implementers %in% country.groups$country.groups]
+
+        if(implementer.trade=="import"){
+
+          for (i in implementer.country.groups){
+            trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[country.correspondence$name == i])
+            if ("year" %in% names(trade.base.bilateral)) {
+              trade.base.bilateral.temp <- aggregate(trade.value~a.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~a.un+hs6, trade.base.bilateral.temp, sum) }
+            trade.base.bilateral.temp$i.un = country.groups$code[country.groups$country.groups == i]
+            trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
+            rm(trade.base.bilateral.temp)
+          }
+
+        }
+
+        if(implementer.trade=="export"){
+
+          for (i in implementer.country.groups){
+            trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[country.correspondence$name == i])
+
+            if ("year" %in% names(trade.base.bilateral)) {
+              trade.base.bilateral.temp <- aggregate(trade.value~i.un+year+hs6, trade.base.bilateral.temp, sum)
+            } else {
+              trade.base.bilateral.temp <- aggregate(trade.value~i.un+hs6, trade.base.bilateral.temp, sum)
+            }
+
+            trade.base.bilateral.temp$a.un = country.groups$code[country.groups$country.groups == i]
+            trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
+            rm(trade.base.bilateral.temp)
+          }
+
+        }
+      }
+
+      rm(parameter.choice.trade.base,implementer.imports, implementer.exports)
+
 
     }
 
 
-
     print("Merging base values into working data frame ...")
-    duration.max$share=as.numeric(duration.max$share)
+
+    duration.max$iahs=duration.max$identifier
+
+    if(is.null(implementer.trade)){
+      if(group.implementers==F){
+        duration.max$iahs=gsub("(^\\d+)-(\\d+)-(\\d+)-(\\d+$)","\\1-\\3\\-\\4",duration.max$identifier)
+      }
+    }
+
 
     if(trade.data %in% c("base", paste(2007:2017))){
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
@@ -993,7 +1165,10 @@ gta_trade_coverage <- function(
 
     }
     master.coverage=subset(master.coverage, is.na(trade.value.affected)==F)
+
+
     print("Merging base values into working data frame ... complete")
+
 
     # Check # of rows
     if(nrow(master.coverage)==0) {
@@ -1003,7 +1178,7 @@ gta_trade_coverage <- function(
     }
 
     ### some housekeeping
-    rm(duration.max, int.temp)
+    rm(duration.max)
     if(exists("full.coverage")){rm(full.coverage)}
 
     #### aggregating to trade coverage table
@@ -1036,6 +1211,7 @@ gta_trade_coverage <- function(
     print("Calculating aggregate annual trade coverage ...")
 
     base.coverage=master.coverage
+
     coverage.estimate=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric(), hit.bracket=character(), stringsAsFactors = F)
     hit.frequency$min <- as.numeric(as.character(hit.frequency$min))
     hit.frequency$max <- as.numeric(as.character(hit.frequency$max))
@@ -1043,18 +1219,49 @@ gta_trade_coverage <- function(
     for(brkt in 1:nrow(hit.frequency)){
       final.coverage=data.frame(i.un=numeric(), a.un=numeric(), year=numeric(), trade.value.affected=numeric())
       master.coverage=subset(base.coverage, nr.of.hits>=hit.frequency$min[brkt] & nr.of.hits<=hit.frequency$max[brkt])
-      total.trade=sum(tbb.base$trade.value)
+      total.trade=sum(subset(trade.base.bilateral, i.un<10000 & a.un<10000)$trade.value)
       tbb.yr = trade.base.bilateral
-      tbb.base.yr = tbb.base
+      tbb.base.yr = subset(trade.base.bilateral, i.un<10000 & a.un<10000)
+
 
       ### Aggregates across intervention types or MAST chapters
+
+
+      ### have to define the importer/exporter grouping.
+      ### in implementer trade calculations, this ungrouping the implementers is the same as ungrouping the ex/importer
+
+      if(implementer.trade=="import" & group.implementers==F){
+        group.importers=F
+      }
+
+      if(implementer.trade=="export" & group.implementers==F){
+        group.exporters=F
+      }
+
       for(yr in year.start:year.end){
+
+        ## subsetting the master.coverage DF to account for MAST/intervention types, if present.
         mc.yr=subset(master.coverage, year==yr)
 
+        if("mast.chapter" %in% names(mc.yr)){
+
+          ## MAST chapters
+          mc.yr=subset(mc.yr, mast.chapter=="All included instruments")
+
+        } else {
+
+          if("intervention.type" %in% names(mc.yr)){
+            ## intervention types
+            mc.yr=subset(mc.yr, intervention.type=="All included instruments")
+          }
+
+        }
+
+
         if ("year" %in% names(trade.base.bilateral)) {
-          total.trade=sum(subset(tbb.base, year == yr)$trade.value)
+          total.trade=sum(subset(subset(trade.base.bilateral, i.un<10000 & a.un<10000), year == yr)$trade.value)
           tbb.yr = subset(trade.base.bilateral, year == yr)
-          tbb.base.yr = subset(tbb.base, year == yr)
+          tbb.base.yr = subset(subset(trade.base.bilateral, i.un<10000 & a.un<10000), year == yr)
         }
 
         if(nrow(mc.yr)==0){
@@ -1154,655 +1361,149 @@ gta_trade_coverage <- function(
 
         } else {
 
-          if(length(intersect(c("mast.chapter","intervention.type"),names(master.coverage)))==0){
+          if(group.importers==T & group.exporters==T){
+            fc.temp=aggregate(trade.value.affected ~ year, mc.yr, sum)
+            fc.temp$i.un=999
+            fc.temp$a.un=999
 
-            ## if nrow(mc.yr)>0
-            if(group.importers==T & group.exporters==T){
-              fc.temp=aggregate(trade.value.affected ~ year, mc.yr, sum)
-              fc.temp$i.un=999
-              fc.temp$a.un=999
+            if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
 
-              if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
+            final.coverage=rbind(final.coverage, fc.temp)
+          }
 
-              final.coverage=rbind(final.coverage, fc.temp)
+          if(group.importers==F & group.exporters==T){
+            fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.yr, sum)
+            if(share){
+              fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(trade.base.bilateral, i.un<10000 & a.un<10000), sum), by="i.un", all.x=T)
+              fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+              fc.temp$trade.value=NULL
             }
 
-            if(group.importers==F & group.exporters==T){
-              fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.yr, sum)
-              if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base, sum), by="i.un", all.x=T)
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                fc.temp$trade.value=NULL
-              }
+            fc.temp$a.un=999
+            final.coverage=rbind(final.coverage, fc.temp)
+          }
 
-              fc.temp$a.un=999
-              final.coverage=rbind(final.coverage, fc.temp)
+          if(group.importers==T & group.exporters==F){
+            fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.yr, sum)
+
+            if(share){
+              fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
+              fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+              fc.temp$trade.value=NULL
             }
 
-            if(group.importers==T & group.exporters==F){
-              fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.yr, sum)
+            fc.temp$i.un=999
+            final.coverage=rbind(final.coverage, fc.temp)
+          }
 
-              if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                fc.temp$trade.value=NULL
-              }
+          if(group.importers==F & group.exporters==F){
+            fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.yr, sum)
 
-              fc.temp$i.un=999
-              final.coverage=rbind(final.coverage, fc.temp)
+
+            if(share){
+              fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
+              fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+              fc.temp$trade.value=NULL
             }
 
-            if(group.importers==F & group.exporters==F){
-              fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.yr, sum)
+            final.coverage=rbind(final.coverage, fc.temp)
+          }
 
+          if(separate.importer.groups | separate.exporter.groups){
 
-              if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                fc.temp$trade.value=NULL
-              }
+            fc.temp.groups = final.coverage[0,]
 
-              final.coverage=rbind(final.coverage, fc.temp)
-            }
+            if(separate.importer.groups==T & separate.exporter.groups==T){
 
-            if(separate.importer.groups | separate.exporter.groups){
+              importer.country.groups = importers[importers %in% country.groups$country.groups]
+              exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
 
-              fc.temp.groups = final.coverage[0,]
-
-              if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                for (i in importer.country.groups) {
-                  for (e in exporter.country.groups){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  }
-                }
-              }
-
-              if(separate.importer.groups==T) {
-
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                for (i in importer.country.groups){
-
-                  if(group.exporters==T){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-
-                    fc.temp$a.un = 999
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  } else {
-
-                    fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  }
-                }
-              }
-
-              if(separate.exporter.groups==T) {
-
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
+              for (i in importer.country.groups) {
                 for (e in exporter.country.groups){
+                  fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
+                  fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+                  fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
 
-                  if(group.importers==T){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-
-                    fc.temp$i.un = 999
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  } else {
-
-                    fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
+                  if(share){
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
+                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+                    fc.temp$trade.value=NULL
                   }
+
+                  fc.temp.groups = rbind(fc.temp.groups, fc.temp)
                 }
-
               }
+            }
 
-              final.coverage = rbind(final.coverage, fc.temp.groups)
-              rm(fc.temp.groups)
+            if(separate.importer.groups==T) {
+
+              importer.country.groups = importers[importers %in% country.groups$country.groups]
+
+              for (i in importer.country.groups){
+
+                if(group.exporters==T){
+                  fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
+                  fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+
+                  if(share){
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
+                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+                    fc.temp$trade.value=NULL
+                  }
+
+                  fc.temp$a.un = 999
+                  fc.temp.groups = rbind(fc.temp.groups, fc.temp)
+                } else {
+
+                  fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
+                  fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+
+                  if(share){
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
+                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+                    fc.temp$trade.value=NULL
+                  }
+                  fc.temp.groups = rbind(fc.temp.groups, fc.temp)
+                }
+              }
+            }
+
+            if(separate.exporter.groups==T) {
+
+              exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+
+              for (e in exporter.country.groups){
+
+                if(group.importers==T){
+                  fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
+                  fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+
+                  if(share){
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
+                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+                    fc.temp$trade.value=NULL
+                  }
+
+                  fc.temp$i.un = 999
+                  fc.temp.groups = rbind(fc.temp.groups, fc.temp)
+                } else {
+
+                  fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
+                  fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+
+                  if(share){
+                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
+                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
+                    fc.temp$trade.value=NULL
+                  }
+                  fc.temp.groups = rbind(fc.temp.groups, fc.temp)
+                }
+              }
 
             }
 
-          } else {
-
-            ## mast.chapters
-            if("mast.chapter" %in% names(mc.yr)){
-              ## MAST chapters
-              mc.inst=subset(mc.yr, mast.chapter=="All included instruments")
-
-              if(nrow(mc.inst)==0){
-
-                if(group.importers==T & group.exporters==T){
-                  final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                  a.un=999,
-                                                                  year=yr,
-                                                                  trade.value.affected=0))
-                }
-
-                if(group.importers==F & group.exporters==T){
-
-                  final.coverage=rbind(final.coverage, data.frame(i.un=unique(master.coverage$i.un),
-                                                                  a.un=999,
-                                                                  year=yr,
-                                                                  trade.value.affected=0))
-                }
-
-                if(group.importers==T & group.exporters==F){
-                  final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                  a.un=unique(master.coverage$a.un),
-                                                                  year=yr,
-                                                                  trade.value.affected=0))
-                }
-
-                if(group.importers==F & group.exporters==F){
-                  fc.temp=expand.grid(unique(master.coverage$i.un), unique(master.coverage$a.un))
-                  names(fc.temp)=c("i.un","a.un")
-                  fc.temp$year=yr
-                  fc.temp$trade.value.affected=0
-
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(separate.importer.groups | separate.exporter.groups){
-
-                  if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups) {
-                      for (e in exporter.country.groups){
-                        final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                        a.un=country.groups$code[country.groups$country.groups == e],
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      }
-                    }
-                  }
-
-                  if(separate.importer.groups==T) {
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups){
-
-                      if(group.exporters==T){
-                        final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                        a.un=999,
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      } else {
-
-                        final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                        a.un=unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un),
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      }
-                    }
-                  }
-
-                  if(separate.exporter.groups==T) {
-
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (e in exporter.country.groups){
-
-                      if(group.importers==T){
-                        final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                        a.un=country.groups$code[country.groups$country.groups == e],
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      } else {
-
-                        final.coverage=rbind(final.coverage, data.frame(i.un=unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un),
-                                                                        a.un=country.groups$code[country.groups$country.groups == e],
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      }
-                    }
-                  }
-                }
-
-
-
-              } else{
-
-                if(group.importers==T & group.exporters==T){
-                  fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-                  if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
-                  fc.temp$i.un=999
-                  fc.temp$a.un=999
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(group.importers==F & group.exporters==T){
-                  fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-
-                  if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
-                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                    fc.temp$trade.value=NULL
-                  }
-
-                  fc.temp$a.un=999
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(group.importers==T & group.exporters==F){
-                  fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-
-
-                  if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
-                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                    fc.temp$trade.value=NULL
-                  }
-
-                  fc.temp$i.un=999
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(group.importers==F & group.exporters==F){
-                  fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-
-                  if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
-                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                    fc.temp$trade.value=NULL
-                  }
-
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(separate.importer.groups | separate.exporter.groups){
-
-                  fc.temp.groups = final.coverage[0,]
-
-                  if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups) {
-                      for (e in exporter.country.groups){
-                        fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                        fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-                        fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      }
-                    }
-                  }
-
-                  if(separate.importer.groups==T) {
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups){
-
-                      if(group.exporters==T){
-                        fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                        fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-
-                        fc.temp$a.un = 999
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      } else {
-
-                        fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                        fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      }
-                    }
-                  }
-
-                  if(separate.exporter.groups==T) {
-
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (e in exporter.country.groups){
-
-                      if(group.importers==T){
-                        fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                        fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-
-                        fc.temp$i.un = 999
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      } else {
-
-                        fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                        fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      }
-                    }
-
-                  }
-
-                  final.coverage = rbind(final.coverage, fc.temp.groups)
-                  rm(fc.temp.groups)
-
-                }
-
-              }
-            } else {
-              ## intervention types
-
-              mc.inst=subset(mc.yr, intervention.type=="All included instruments")
-
-              if(nrow(mc.inst)==0){
-
-                if(group.importers==T & group.exporters==T){
-                  final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                  a.un=999,
-                                                                  year=yr,
-                                                                  trade.value.affected=0))
-                }
-
-                if(group.importers==F & group.exporters==T){
-
-                  final.coverage=rbind(final.coverage, data.frame(i.un=unique(master.coverage$i.un),
-                                                                  a.un=999,
-                                                                  year=yr,
-                                                                  trade.value.affected=0))
-                }
-
-                if(group.importers==T & group.exporters==F){
-                  final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                  a.un=unique(master.coverage$a.un),
-                                                                  year=yr,
-                                                                  trade.value.affected=0))
-                }
-
-                if(group.importers==F & group.exporters==F){
-                  fc.temp=expand.grid(unique(master.coverage$i.un), unique(master.coverage$a.un))
-                  names(fc.temp)=c("i.un","a.un")
-                  fc.temp$year=yr
-                  fc.temp$trade.value.affected=0
-
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-
-                if(separate.importer.groups | separate.exporter.groups){
-
-                  if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups) {
-                      for (e in exporter.country.groups){
-                        final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                        a.un=country.groups$code[country.groups$country.groups == e],
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      }
-                    }
-                  }
-
-                  if(separate.importer.groups==T) {
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups){
-
-                      if(group.exporters==T){
-                        final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                        a.un=999,
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      } else {
-
-                        final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                        a.un=unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un),
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      }
-                    }
-                  }
-
-                  if(separate.exporter.groups==T) {
-
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (e in exporter.country.groups){
-
-                      if(group.importers==T){
-                        final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                        a.un=country.groups$code[country.groups$country.groups == e],
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      } else {
-
-                        final.coverage=rbind(final.coverage, data.frame(i.un=unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un),
-                                                                        a.un=country.groups$code[country.groups$country.groups == e],
-                                                                        year=yr,
-                                                                        trade.value.affected=0))
-                      }
-                    }
-                  }
-                }
-
-
-              } else{
-
-                if(group.importers==T & group.exporters==T){
-                  fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-                  if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
-                  fc.temp$i.un=999
-                  fc.temp$a.un=999
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(group.importers==F & group.exporters==T){
-                  fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-
-
-                  if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
-                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                    fc.temp$trade.value=NULL
-                  }
-
-                  fc.temp$a.un=999
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(group.importers==T & group.exporters==F){
-                  fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-
-
-                  if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
-                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                    fc.temp$trade.value=NULL
-                  }
-
-                  fc.temp$i.un=999
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(group.importers==F & group.exporters==F){
-                  fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-
-
-                  if(share){
-                    fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
-                    fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                    fc.temp$trade.value=NULL
-                  }
-
-                  final.coverage=rbind(final.coverage, fc.temp)
-                }
-
-                if(separate.importer.groups | separate.exporter.groups){
-
-                  fc.temp.groups = final.coverage[0,]
-
-                  if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups) {
-                      for (e in exporter.country.groups){
-                        fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                        fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-                        fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      }
-                    }
-                  }
-
-                  if(separate.importer.groups==T) {
-
-                    importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                    for (i in importer.country.groups){
-
-                      if(group.exporters==T){
-                        fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                        fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-
-                        fc.temp$a.un = 999
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      } else {
-
-                        fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                        fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      }
-                    }
-                  }
-
-                  if(separate.exporter.groups==T) {
-
-                    exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                    for (e in exporter.country.groups){
-
-                      if(group.importers==T){
-                        fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                        fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-
-                        fc.temp$i.un = 999
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      } else {
-
-                        fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                        fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                        if(share){
-                          fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                          fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                          fc.temp$trade.value=NULL
-                        }
-                        fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                      }
-                    }
-
-                  }
-
-                  final.coverage = rbind(final.coverage, fc.temp.groups)
-                  rm(fc.temp.groups)
-
-                }
-
-              }
-
-            }
+            final.coverage = rbind(final.coverage, fc.temp.groups)
+            rm(fc.temp.groups)
 
           }
 
@@ -1817,13 +1518,35 @@ gta_trade_coverage <- function(
         stop(stop.print)
       }
 
-      ### by intervention type, if necessary
-      if(group.type==F){
-        final.coverage$intervention.type="All included instruments"
-        print("Calculating aggregate annual trade coverage per included intervention type ...")
+      ### by intervention type or MAST chapter, if necessary
+      if(group.type==F | group.mast==F){
 
-        for(inst in unique(master.sliced$intervention.type)){
-          mc.inst=subset(master.coverage, intervention.type==inst)
+        ## decide over what classification to loop.
+        ## I ignore the case where both MAST & intervention types are ungrouped, for now.
+        if(group.mast==F){
+          ungroup.mast=T
+        } else {
+          ungroup.mast=F
+        }
+
+        if(ungroup.mast){
+          final.coverage$instrument="All included MAST chapters"
+          print("Calculating aggregate annual trade coverage per included MAST chapter ...")
+          master.coverage$instrument=master.coverage$mast.chapter
+          unique(master.sliced$mast.chapter)
+
+        } else {
+          final.coverage$instrument="All included instruments"
+          print("Calculating aggregate annual trade coverage per included intervention type ...")
+          master.coverage$instrument=master.coverage$intervention.type
+          loop.instruments=unique(master.sliced$intervention.type)
+
+        }
+
+
+
+        for(inst in loop.instruments){
+          mc.inst=subset(master.coverage, instrument==inst)
 
           if(group.importers==T & group.exporters==T){
 
@@ -1831,7 +1554,7 @@ gta_trade_coverage <- function(
               final.coverage=rbind(final.coverage,
                                    data.frame(year=unique(master.coverage$year),
                                               trade.value.affected=0,
-                                              intervention.type=inst,
+                                              instrument=inst,
                                               i.un=999,
                                               a.un=999))
 
@@ -1840,7 +1563,7 @@ gta_trade_coverage <- function(
 
               fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
               if(share){fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade}
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
               fc.temp$i.un=999
               fc.temp$a.un=999
               final.coverage=rbind(final.coverage, fc.temp)
@@ -1854,7 +1577,7 @@ gta_trade_coverage <- function(
               fc.temp=expand.grid(unique(master.coverage$year), unique(master.coverage$i.un))
               names(fc.temp)=c("year","i.un")
               fc.temp$trade.value.affected=0
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
               fc.temp$a.un=999
 
               final.coverage=rbind(final.coverage,
@@ -1870,7 +1593,7 @@ gta_trade_coverage <- function(
                 fc.temp$trade.value=NULL
               }
 
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
               fc.temp$a.un=999
               final.coverage=rbind(final.coverage, fc.temp)
             }
@@ -1882,7 +1605,7 @@ gta_trade_coverage <- function(
               fc.temp=expand.grid(unique(master.coverage$year), unique(master.coverage$a.un))
               names(fc.temp)=c("year","a.un")
               fc.temp$trade.value.affected=0
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
               fc.temp$i.un=999
 
               final.coverage=rbind(final.coverage,
@@ -1900,7 +1623,7 @@ gta_trade_coverage <- function(
                 fc.temp$trade.value=NULL
               }
 
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
               fc.temp$i.un=999
               final.coverage=rbind(final.coverage, fc.temp)
             }
@@ -1924,7 +1647,7 @@ gta_trade_coverage <- function(
               }
 
               fc.temp$trade.value.affected=0
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
 
               final.coverage=rbind(final.coverage,
                                    fc.temp)
@@ -1939,7 +1662,7 @@ gta_trade_coverage <- function(
                 fc.temp$trade.value=NULL
               }
 
-              fc.temp$intervention.type=inst
+              fc.temp$instrument=inst
               final.coverage=rbind(final.coverage, fc.temp)
             }
           }
@@ -1958,7 +1681,7 @@ gta_trade_coverage <- function(
                     final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
                                                                     a.un=country.groups$code[country.groups$country.groups == e],
                                                                     year=unique(master.coverage$year),
-                                                                    intervention.type=inst,
+                                                                    instrument=inst,
                                                                     trade.value.affected=0))
                   }
                 }
@@ -1975,7 +1698,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == i])
                     names(fc.temp)=c("year","i.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$instrument=inst
                     fc.temp$a.un=999
 
                     final.coverage=rbind(final.coverage,
@@ -1986,7 +1709,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un))
                     names(fc.temp)=c("year","a.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$instrument=inst
                     fc.temp$i.un=country.groups$code[country.groups$country.groups == i]
 
                     final.coverage=rbind(final.coverage,
@@ -2007,7 +1730,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == e])
                     names(fc.temp)=c("year","a.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$instrument=inst
                     fc.temp$i.un=999
 
                     final.coverage=rbind(final.coverage,
@@ -2017,7 +1740,7 @@ gta_trade_coverage <- function(
                     fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un))
                     names(fc.temp)=c("year","i.un")
                     fc.temp$trade.value.affected=0
-                    fc.temp$intervention.type=inst
+                    fc.temp$instrument=inst
                     fc.temp$a.un=country.groups$code[country.groups$country.groups == e]
 
                     final.coverage=rbind(final.coverage,
@@ -2119,7 +1842,7 @@ gta_trade_coverage <- function(
 
               }
 
-              fc.temp.groups$intervention.type=inst
+              fc.temp.groups$instrument=inst
               final.coverage = rbind(final.coverage, fc.temp.groups)
               rm(fc.temp.groups)
             }
@@ -2127,337 +1850,23 @@ gta_trade_coverage <- function(
 
           print(paste("Calculated aggregate annual trade coverage for ", inst, sep=""))
         }
+
+        if(ungroup.mast){
+          setnames(final.coverage, "instrument","mast.chapter")
+        }else {
+          setnames(final.coverage, "instrument","intervention.type")
+        }
+        master.coverage$instrument=NULL
         print("Calculating aggregate annual trade coverage per included intervention type ... concluded")
       }
 
       # Check # of rows
       if(nrow(final.coverage)==0) {
-        stop.print <- "Unfortunately no rows remaining after calculating aggregate annual trade coverage per intervention type"
+        stop.print <- "Unfortunately no rows remaining after calculating aggregate annual trade coverage per intervention type/MAST chapter."
         error.message <<- c(T, stop.print)
         stop(stop.print)
       }
 
-      ### by MAST chapter, if necessary
-      if(group.mast==F){
-        final.coverage$mast.chapter="All included MAST chapters"
-        print("Calculating aggregate annual trade coverage per included MAST chapter ...")
-
-        for(inst in unique(master.sliced$mast.chapter)){
-          mc.inst=subset(master.coverage, mast.chapter==inst)
-
-          if(group.importers==T & group.exporters==T){
-
-            if(nrow(mc.inst)==0){
-              final.coverage=rbind(final.coverage,
-                                   data.frame(year=unique(master.coverage$year),
-                                              trade.value.affected=0,
-                                              mast.chapter=inst,
-                                              i.un=999,
-                                              a.un=999))
-
-
-            } else {
-
-              fc.temp=aggregate(trade.value.affected ~ year, mc.inst, sum)
-              if(share){
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/total.trade
-              }
-              fc.temp$mast.chapter=inst
-              fc.temp$i.un=999
-              fc.temp$a.un=999
-              final.coverage=rbind(final.coverage, fc.temp)
-            }
-          }
-
-          if(group.importers==F & group.exporters==T){
-
-
-            if(nrow(mc.inst)==0){
-              fc.temp=expand.grid(unique(master.coverage$year), unique(master.coverage$i.un))
-              names(fc.temp)=c("year","i.un")
-              fc.temp$trade.value.affected=0
-              fc.temp$mast.chapter=inst
-              fc.temp$a.un=999
-
-              final.coverage=rbind(final.coverage,
-                                   fc.temp)
-
-
-            } else {
-              fc.temp=aggregate(trade.value.affected ~ i.un + year, mc.inst, sum)
-
-              if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, tbb.base.yr, sum), by="i.un", all.x=T)
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                fc.temp$trade.value=NULL
-              }
-
-              fc.temp$mast.chapter=inst
-              fc.temp$a.un=999
-              final.coverage=rbind(final.coverage, fc.temp)
-            }
-          }
-
-          if(group.importers==T & group.exporters==F){
-
-            if(nrow(mc.inst)==0){
-              fc.temp=expand.grid(unique(master.coverage$year), unique(master.coverage$a.un))
-              names(fc.temp)=c("year","a.un")
-              fc.temp$trade.value.affected=0
-              fc.temp$mast.chapter=inst
-              fc.temp$i.un=999
-
-              final.coverage=rbind(final.coverage,
-                                   fc.temp)
-
-
-
-            } else {
-              fc.temp=aggregate(trade.value.affected ~ a.un + year, mc.inst, sum)
-
-              if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, tbb.base.yr, sum), by="a.un", all.x=T)
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                fc.temp$trade.value=NULL
-              }
-
-              fc.temp$mast.chapter=inst
-              fc.temp$i.un=999
-              final.coverage=rbind(final.coverage, fc.temp)
-            }
-          }
-
-          if(group.importers==F & group.exporters==F){
-
-
-            if(nrow(mc.inst)==0){
-              fc.temp=data.frame(i.un=numeric(),
-                                 a.un=numeric(),
-                                 year=numeric())
-
-              for(yy in unique(master.coverage$year)){
-                ft=expand.grid(unique(master.coverage$i.un), unique(master.coverage$a.un))
-                names(ft)=c("i.un", "a.un")
-                ft$year=yy
-
-                fc.temp=rbind(fc.temp,ft)
-                rm(ft)
-              }
-
-              fc.temp$trade.value.affected=0
-              fc.temp$mast.chapter=inst
-
-              final.coverage=rbind(final.coverage,
-                                   fc.temp)
-
-            }  else{
-
-              fc.temp=aggregate(trade.value.affected ~ i.un + a.un + year, mc.inst, sum)
-
-              if(share){
-                fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.base.yr, sum), by=c("i.un","a.un"), all.x=T)
-                fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                fc.temp$trade.value=NULL
-              }
-
-              fc.temp$mast.chapter=inst
-              final.coverage=rbind(final.coverage, fc.temp)
-            }
-          }
-
-          if(separate.importer.groups | separate.exporter.groups){
-
-            if(nrow(mc.inst)==0){
-
-              if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                for (i in importer.country.groups) {
-                  for (e in exporter.country.groups){
-                    final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                    a.un=country.groups$code[country.groups$country.groups == e],
-                                                                    year=unique(master.coverage$year),
-                                                                    mast.chapter=inst,
-                                                                    trade.value.affected=0))
-                  }
-                }
-              }
-
-              if(separate.importer.groups==T) {
-
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                for (i in importer.country.groups){
-
-                  if(group.exporters==T){
-
-                    fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == i])
-                    names(fc.temp)=c("year","i.un")
-                    fc.temp$trade.value.affected=0
-                    fc.temp$mast.chapter=inst
-                    fc.temp$a.un=999
-
-                    final.coverage=rbind(final.coverage,
-                                         fc.temp)
-
-                  } else {
-
-                    fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un))
-                    names(fc.temp)=c("year","a.un")
-                    fc.temp$trade.value.affected=0
-                    fc.temp$mast.chapter=inst
-                    fc.temp$i.un=country.groups$code[country.groups$country.groups == i]
-
-                    final.coverage=rbind(final.coverage,
-                                         fc.temp)
-
-                  }
-                }
-              }
-
-              if(separate.exporter.groups==T) {
-
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                for (e in exporter.country.groups){
-
-                  if(group.importers==T){
-
-                    fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == e])
-                    names(fc.temp)=c("year","a.un")
-                    fc.temp$trade.value.affected=0
-                    fc.temp$mast.chapter=inst
-                    fc.temp$i.un=999
-
-                    final.coverage=rbind(final.coverage,
-                                         fc.temp)
-                  } else {
-
-                    fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un))
-                    names(fc.temp)=c("year","i.un")
-                    fc.temp$trade.value.affected=0
-                    fc.temp$mast.chapter=inst
-                    fc.temp$a.un=country.groups$code[country.groups$country.groups == e]
-
-                    final.coverage=rbind(final.coverage,
-                                         fc.temp)
-
-                  }
-                }
-              }
-
-            } else {
-
-              fc.temp.groups = final.coverage[0,]
-
-              if(separate.importer.groups==T & separate.exporter.groups==T){
-
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                for (i in importer.country.groups) {
-                  for (e in exporter.country.groups){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  }
-                }
-              }
-
-              if(separate.importer.groups==T) {
-
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-
-                for (i in importer.country.groups){
-
-                  if(group.exporters==T){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-
-                    fc.temp$a.un = 999
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  } else {
-
-                    fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  }
-                }
-              }
-
-              if(separate.exporter.groups==T) {
-
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
-
-                for (e in exporter.country.groups){
-
-                  if(group.importers==T){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-
-                    fc.temp$i.un = 999
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  } else {
-
-                    fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
-
-                    if(share){
-                      fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
-                      fc.temp$trade.value.affected=fc.temp$trade.value.affected/fc.temp$trade.value
-                      fc.temp$trade.value=NULL
-                    }
-                    fc.temp.groups = rbind(fc.temp.groups, fc.temp)
-                  }
-                }
-
-              }
-
-              fc.temp.groups$mast.chapter=inst
-              final.coverage = rbind(final.coverage, fc.temp.groups)
-              rm(fc.temp.groups)
-
-            }
-          }
-
-          print(paste("Calculated aggregate annual trade coverage for ", inst, sep=""))
-        }
-        print("Calculating aggregate annual trade coverage per included MAST chapter ... concluded")
-      }
-
-      # Check # of rows
-      if(nrow(final.coverage)==0) {
-        stop.print <- "Unfortunately no rows remaining after calculating aggregate annual trade coverage per included MAST chapter"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
       ce=final.coverage
       ce$hit.bracket=gsub("- 9999+","or more",paste(hit.frequency$min[brkt], hit.frequency$max[brkt], sep=" - "))
       coverage.estimate=rbind(coverage.estimate, ce)
