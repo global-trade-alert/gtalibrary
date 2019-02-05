@@ -1531,7 +1531,7 @@ gta_trade_coverage <- function(
           final.coverage$instrument="All included MAST chapters"
           print("Calculating aggregate annual trade coverage per included MAST chapter ...")
           master.coverage$instrument=master.coverage$mast.chapter
-          unique(master.sliced$mast.chapter)
+          loop.instruments=unique(master.sliced$mast.chapter)
 
         } else {
           final.coverage$instrument="All included instruments"
