@@ -190,22 +190,30 @@ gta_hs_code_finder=function(products,
           remDr$go(paste("https://www.zauba.com/USA-htscodes/", paste(gsub(" ","+", prd), sep="-"),sep=""))
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
-          zauba.hs=unique(substr(unlist(str_extract_all(xpathSApply(html, "//table/descendant::td/descendant::a", xmlValue), "\\d+")),1,6))
-          zauba.hs=zauba.hs[nchar(zauba.hs)>=4]
+          zauba.path="//table/descendant::td/descendant::a"
 
-          if(length(zauba.hs)>0){
+          if(length(xpathSApply(html, zauba.path, xmlValue))>0){
 
-            find.hs=rbind(find.hs,
-                          data.frame(product.name=prd,
-                                     hs.code=zauba.hs,
-                                     source="Zauba",
-                                     stringsAsFactors = F)
-            )
 
+            zauba.hs=unique(substr(unlist(str_extract_all(xpathSApply(html, zauba.path, xmlValue), "\\d+")),1,6))
+            zauba.hs=zauba.hs[nchar(zauba.hs)>=4]
+
+            if(length(zauba.hs)>0){
+
+              find.hs=rbind(find.hs,
+                            data.frame(product.name=prd,
+                                       hs.code=zauba.hs,
+                                       source="Zauba",
+                                       stringsAsFactors = F)
+              )
+
+
+            }
+            rm(zauba.hs)
 
           }
-          rm(zauba.hs, html)
 
+          rm(html)
         }
 
         if("e.to.china" %in% tolower(sources)){
@@ -215,24 +223,31 @@ gta_hs_code_finder=function(products,
           remDr$go(paste("http://hs.e-to-china.com/ks-", paste(gsub(" ","+", prd), sep="+"),"-d_3-t_1.html",sep=""))
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
+          etc.path="//a[@class='hs_tree']"
 
-          etc.hs=unique(substr(xpathSApply(html, "//a[@class='hs_tree']", xmlGetAttr, "name"), 1,6))
-          etc.hs=etc.hs[nchar(etc.hs)>=4]
+          if(length(xpathSApply(html, etc.path, xmlGetAttr, "name"))>0){
 
-          if(length(etc.hs)>0){
+            etc.hs=unique(substr(xpathSApply(html, etc.path, xmlGetAttr, "name"), 1,6))
+            etc.hs=etc.hs[nchar(etc.hs)>=4]
 
-            find.hs=rbind(find.hs,
-                          data.frame(product.name=prd,
-                                     hs.code=etc.hs,
-                                     source="E-to-China",
-                                     stringsAsFactors = F)
-            )
+            if(length(etc.hs)>0){
 
+              find.hs=rbind(find.hs,
+                            data.frame(product.name=prd,
+                                       hs.code=etc.hs,
+                                       source="E-to-China",
+                                       stringsAsFactors = F)
+              )
+
+
+            }
+
+            rm(etc.hs)
 
           }
 
-          rm(etc.hs, html)
 
+          rm(html)
 
         }
 
@@ -244,22 +259,30 @@ gta_hs_code_finder=function(products,
           remDr$go(paste("https://hsbianma.com/Search?keywords=",gsub(" ","%20",prd),"&filterFailureCode=true", sep=""))
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
-          bianma.hs=unique(substr(unlist(str_extract_all(xpathSApply(html, "//table[@class='result']//descendant::tr/td[1]/a", xmlValue),"\\d+")),1,6))
-          bianma.hs=bianma.hs[nchar(bianma.hs)>=4]
+          bianma.path="//table[@class='result']//descendant::tr/td[1]/a"
 
-          if(length(bianma.hs)>0){
+          if(length(xpathSApply(html, bianma.path, xmlValue))>0){
 
-            find.hs=rbind(find.hs,
-                          data.frame(product.name=prd,
-                                     hs.code=bianma.hs,
-                                     source="HSbianma",
-                                     stringsAsFactors = F)
-            )
+            bianma.hs=unique(substr(unlist(str_extract_all(xpathSApply(html, bianma.path, xmlValue),"\\d+")),1,6))
+            bianma.hs=bianma.hs[nchar(bianma.hs)>=4]
 
+            if(length(bianma.hs)>0){
+
+              find.hs=rbind(find.hs,
+                            data.frame(product.name=prd,
+                                       hs.code=bianma.hs,
+                                       source="HSbianma",
+                                       stringsAsFactors = F)
+              )
+
+
+            }
+
+            rm(bianma.hs)
 
           }
+          rm(html)
 
-          rm(bianma.hs, html)
 
         }
 
