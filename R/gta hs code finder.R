@@ -5,7 +5,7 @@
 #' This function looks for HS codes using various search engines.
 #'
 #' @param products A vector of product names (in characters).
-#' @param source Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google,  hsbianma, eximguru). Default is 'all'.
+#' @param source Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google, hsbianma, eximguru, cybex). Default is 'all'.
 
 #' @return A data frame including the product names, HS codes and sources plus a vector of search terms that resulted in error messages.
 #' @references www.globaltradealert.org
@@ -36,7 +36,7 @@ gta_hs_code_finder=function(products,
     tryCatch({
 
 
-      if("hs.descriptions" %in% sources){
+      if("hs.descriptions" %in% tolower(sources)){
         print("Checking HS code descriptions ...")
 
         simple.hs=hs.names$HS12code[grepl(prd, hs.names$hs.name)]
@@ -61,10 +61,10 @@ gta_hs_code_finder=function(products,
       }
 
 
-      if(sum(as.numeric(c("eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma","eximguru", "cybex") %in% sources))>0){
+      if(sum(as.numeric(c("eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma","eximguru", "cybex") %in% tolower(sources)))>0){
 
 
-        if("eurostat" %in% sources){
+        if("eurostat" %in% tolower(sources)){
 
           print("Checking Eurostat ...")
 
@@ -92,7 +92,7 @@ gta_hs_code_finder=function(products,
         }
 
 
-        if("eximguru" %in% sources){
+        if("eximguru" %in% tolower(sources)){
 
           print("Checking Eximguru ...")
 
@@ -132,7 +132,7 @@ gta_hs_code_finder=function(products,
 
         }
 
-        if("eu.customs" %in% sources){
+        if("eu.customs" %in% tolower(sources)){
 
           print("Checking EU customs ...")
 
@@ -155,7 +155,7 @@ gta_hs_code_finder=function(products,
           }
         }
 
-        if("google" %in% sources){
+        if("google" %in% tolower(sources)){
 
           print("Checking Google ...")
 
@@ -183,7 +183,7 @@ gta_hs_code_finder=function(products,
 
 
 
-        if("zauba" %in% sources){
+        if("zauba" %in% tolower(sources)){
 
           print("Checking Zauba ...")
 
@@ -208,7 +208,7 @@ gta_hs_code_finder=function(products,
 
         }
 
-        if("e.to.china" %in% sources){
+        if("e.to.china" %in% tolower(sources)){
 
           print("Checking E-to-China ...")
 
@@ -237,7 +237,7 @@ gta_hs_code_finder=function(products,
         }
 
 
-        if("hsbianma" %in% sources){
+        if("hsbianma" %in% tolower(sources)){
 
           print("Checking HSbianma ...")
 
@@ -264,7 +264,7 @@ gta_hs_code_finder=function(products,
         }
 
 
-        if("cybex" %in% sources){
+        if("cybex" %in% tolower(sources)){
 
           print("Checking Cybex ...")
 
