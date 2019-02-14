@@ -4,7 +4,8 @@
 \alias{gta_plot_wrapper}
 \title{Define plot settings for ggplot.}
 \usage{
-gta_plot_wrapper(plot.title = NULL, plot.subtitle = NULL,
+gta_plot_wrapper(data = NULL, value.x = NULL, value.y = NULL,
+  group = NULL, plot.title = NULL, plot.subtitle = NULL,
   x.data.type = "continuous", x.bottom.name = NULL,
   x.bottom.breaks = waiver(), x.bottom.limits = c(NA, NA),
   x.bottom.labels = waiver(), x.bottom.expand = c(0.05, 0.05),
@@ -16,9 +17,9 @@ gta_plot_wrapper(plot.title = NULL, plot.subtitle = NULL,
   y.right.enable = T, y.right.transform = 1,
   y.right.name = y.left.name, y.right.breaks = y.left.breaks,
   y.right.limits = y.left.limits, y.right.labels = y.left.labels,
-  colour.palette = qualitative, colour.labels = waiver(),
+  colour.palette = gta_colour$qualitative, colour.labels = waiver(),
   colour.legend.title = waiver(), colour.legend.col = 1,
-  fill.palette = qualitative, fill.labels = waiver(),
+  fill.palette = gta_colour$qualitative, fill.labels = waiver(),
   fill.legend.title = waiver(), fill.legend.col = 1, flip.plot = F,
   facet.var = NULL, facet.ncol = 1, facet.nrow = 1)
 }

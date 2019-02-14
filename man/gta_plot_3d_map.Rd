@@ -6,8 +6,9 @@
 \usage{
 gta_plot_3d_map(data = NULL, countries = NULL, value.x = NULL,
   value.y = NULL, value.x.breaks = 4, value.y.breaks = 4,
-  x.high.y.low = blue[1], x.high.y.high = blue[4],
-  x.low.y.high = red[4], x.low.y.low = red[1], x.axis.title = NULL,
+  x.high.y.low = gta_colour$blue[1],
+  x.high.y.high = gta_colour$blue[4], x.low.y.high = gta_colour$red[4],
+  x.low.y.low = gta_colour$red[1], x.axis.title = NULL,
   y.axis.title = NULL, x.axis.labels = NULL, y.axis.labels = NULL,
   legend.title = NULL, save.eps = FALSE, save.png = FALSE,
   save.path = "/", save.name = "3D-Map")

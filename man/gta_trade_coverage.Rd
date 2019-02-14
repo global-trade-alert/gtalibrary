@@ -7,13 +7,16 @@
 gta_trade_coverage(data.path = "data/master_plus.Rdata",
   replica.path = "data/database replica/database replica - parts - base.Rdata",
   coverage.period = NULL, current.year.todate = TRUE,
-  gta.evaluation = NULL, affected.flows = NULL, importers = NULL,
-  keep.importers = NULL, group.importers = TRUE,
+  gta.evaluation = NULL, affected.flows = c("inward",
+  "outward subsidy"), importers = NULL, keep.importers = NULL,
+  group.importers = TRUE, separate.importer.groups = FALSE,
   nr.also.importers = NULL, jointly.affected.importers = FALSE,
   exporters = NULL, keep.exporters = NULL, group.exporters = TRUE,
-  nr.also.exporters = NULL, jointly.affected.exporters = FALSE,
-  implementers = NULL, implementer.role = NULL,
-  keep.implementer = TRUE, announcement.period = NULL,
+  separate.exporter.groups = FALSE, nr.also.exporters = NULL,
+  jointly.affected.exporters = FALSE, implementers = NULL,
+  implementer.role = NULL, keep.implementer = TRUE,
+  group.implementers = TRUE, separate.implementer.groups = FALSE,
+  implementer.trade = NULL, announcement.period = NULL,
   implementation.period = NULL, revocation.period = NULL,
   in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
   group.type = TRUE, mast.chapters = NULL, keep.mast = NULL,
@@ -25,7 +28,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   intra.year.duration = TRUE, trade.statistic = "share",
   trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
-  rdata = FALSE, output.path = NULL)
+  rdata = FALSE, xlsx = FALSE, output.path = NULL)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -46,6 +49,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{group.importers}{Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
+\item{separate.importer.groups}{Specifiy whether to separately calculate groups in chosen importers ('TRUE') or not ('FALSE'). Default: FALSE.}
+
 \item{nr.also.importers}{Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
 
 \item{jointly.affected.importers}{Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
@@ -56,6 +61,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
+\item{separate.exporter.groups}{Specifiy whether to separately calculate groups in chosen exporters ('TRUE') or not ('FALSE'). Default: FALSE.}
+
 \item{nr.also.exporters}{Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
 
 \item{jointly.affected.exporters}{Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
@@ -65,6 +72,12 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{implementer.role}{Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').}
 
 \item{keep.implementer}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.}
+
+\item{group.implementers}{Specify whether to aggregate the statistics for all remaining implementers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
+
+\item{separate.implementer.groups}{Specifiy whether to separately calculate groups in chosen implementers ('TRUE') or not ('FALSE'). Default: FALSE.}
+
+\item{implementer.trade}{Specify whether you want to receive import or export shares for the implementer. Default: As implied by selection in other fields.}
 
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
@@ -114,11 +127,13 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{trade.statistic}{Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.}
 
-\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of the announcement or implementation date ('before/during annnoucement/implementation'). Default is 'base'.}
+\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.}
 
 \item{trade.data.path}{Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),}
 
 \item{rdata}{Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE}
+
+\item{xlsx}{Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE}
 
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
 }

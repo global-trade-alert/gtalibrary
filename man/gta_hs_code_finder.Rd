@@ -4,13 +4,20 @@
 \alias{gta_hs_code_finder}
 \title{Find HS codes for product names based on the search engines from EU customs and Eurostat.}
 \usage{
-gta_hs_code_finder(products)
+gta_hs_code_finder(products, sources = c("hs.descriptions", "eurostat",
+  "eu.customs", "zauba", "e.to.china", "google", "hsbianma", "eximguru",
+  "cybex"))
 }
 \arguments{
 \item{products}{A vector of product names (in characters).}
+
+\item{source}{Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google,  hsbianma, eximguru). Default is 'all'.}
+}
+\value{
+A data frame including the product names, HS codes and sources plus a vector of search terms that resulted in error messages.
 }
 \description{
-This function looks for HS codes using the search engines of EU customs and Eurostat. For Eurostat, it only collects the result if it is a direct match (i.e. no further information besides the product name has to be provided.). For the EU customs page, it captures all 6-digit HS codes that the search results for the given product name produce.
+This function looks for HS codes using various search engines.
 }
 \references{
 www.globaltradealert.org

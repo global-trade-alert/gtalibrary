@@ -5,9 +5,9 @@
 \title{Create ggplot maps.}
 \usage{
 gta_plot_tile(data = NULL, value.x = NULL, value.y = NULL,
-  values = NULL, colour.low = blue[4], colour.high = blue[1],
-  legend.title = NULL, title = NULL, x.axis.name = NULL,
-  y.axis.name = NULL)
+  values = NULL, colour.low = gta_colour$blue[4],
+  colour.high = gta_colour$blue[1], legend.title = NULL,
+  title = NULL, x.axis.name = NULL, y.axis.name = NULL)
 }
 \arguments{
 \item{data}{Specify the dataframe with the relevant columns.}

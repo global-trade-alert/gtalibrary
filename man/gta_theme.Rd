@@ -4,10 +4,11 @@
 \alias{gta_theme}
 \title{Define plot theme settings for ggplot.}
 \usage{
-gta_theme(base.size = 11, aspect.ratio = NULL,
+gta_theme(base.size = 14, aspect.ratio = NULL,
   font.colour = "#333333", base.family = "",
   legend.box.align = "horizontal", legend.title.align = 0.5,
-  x.bottom.angle = 0, x.top.angle = x.bottom.angle, y.left.angle = 0,
+  x.bottom.angle = 0, x.top.angle = x.bottom.angle,
+  x.bottom.align = 0.5, y.left.angle = 0,
   y.right.angle = y.left.angle)
 }
 \arguments{
@@ -24,6 +25,8 @@ gta_theme(base.size = 11, aspect.ratio = NULL,
 \item{x.bottom.angle}{Define the labels angle for the bottom x-axis as integer. Default: 0.}
 
 \item{x.top.angle}{Define the labels angle for the top x-axis as integer. If undefined, value will be taken from bottom x-axis.}
+
+\item{x.bottom.align}{Define the alignment of the bottom x-axis labels as integer (0 to 1). Default: 0.5.}
 
 \item{y.left.angle}{Define the labels angle for the left y-axis as integer. Default: 0.}
 
