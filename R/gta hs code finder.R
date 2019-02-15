@@ -73,7 +73,7 @@ gta_hs_code_finder=function(products,
 
           e=remDr$findElement(xpath="//textarea[@id='ccce-queryBox']")
           e$sendKeys(as.character(prd))
-          e$sendKeys(key$enter)
+          e$sendKeys('\ue007')
           Sys.sleep(2.5)
 
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
@@ -101,7 +101,7 @@ gta_hs_code_finder=function(products,
 
           e=remDr$findElement(css="#uxContentPlaceHolder_ucSearchBox1_ContentPanel1_uxValueToSearchTextBox")
           e$sendKeys(as.character(prd))
-          e$sendKeys(key$enter)
+          e$sendKeys('\ue007')
           Sys.sleep(2.5)
 
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
