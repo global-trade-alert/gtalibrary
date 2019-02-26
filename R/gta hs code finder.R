@@ -335,7 +335,7 @@ gta_hs_code_finder=function(products,
 
         if(length(simple.hs)==0 &
            length(unique(unlist(str_split(prd, " "))))>1 &
-           nrow(subset(find.hs), product.name==prd)==0){
+           nrow(subset(find.hs, product.name==prd))==0){
           simple.hs=character()
           for(word in unique(unlist(str_split(prd, " ")))){
             simple.hs=c(simple.hs, hs.names$HS12code[grepl(word, hs.names$hs.name)])
