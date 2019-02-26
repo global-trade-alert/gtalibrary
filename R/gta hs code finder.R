@@ -6,7 +6,8 @@
 #'
 #' @param products A vector of product names (in characters).
 #' @param source Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google, hsbianma, eximguru, cybex). Default is 'all'.
-
+#' @param aggregate Aggregate result to one row per product name - HS code combination. Default is TRUE.
+#'
 #' @return A data frame including the product names, HS codes and sources plus a vector of search terms that resulted in error messages.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -14,12 +15,15 @@
 
 
 gta_hs_code_finder=function(products,
-                            sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex")){
+                            sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
+                            aggregate=T){
 
   library(webdriver)
+  library(splitstackshape)
   library(XML)
   library(stringr)
   library(gtalibrary)
+  library(gtabastiat)
 
   find.hs=data.frame(product.name=character(), hs.code=character(), source=character(), stringsAsFactors = F)
 
@@ -36,31 +40,6 @@ gta_hs_code_finder=function(products,
     tryCatch({
 
 
-      if("hs.descriptions" %in% tolower(sources)){
-        print("Checking HS code descriptions ...")
-
-        simple.hs=hs.names$HS12code[grepl(prd, hs.names$hs.name)]
-
-        if(length(simple.hs)==0 & length(unique(unlist(str_split(prd, " "))))>1){
-          simple.hs=character()
-          for(word in unique(unlist(str_split(prd, " ")))){
-            simple.hs=c(simple.hs, hs.names$HS12code[grepl(word, hs.names$hs.name)])
-
-          }
-
-          simple.hs=unique(simple.hs)
-        }
-
-        if(length(simple.hs)>0)
-          find.hs=rbind(find.hs,
-                        data.frame(product.name=prd,
-                                   hs.code=simple.hs,
-                                   source="HS code descriptions",
-                                   stringsAsFactors = F)
-          )
-      }
-
-
       if(sum(as.numeric(c("eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma","eximguru", "cybex") %in% tolower(sources)))>0){
 
 
@@ -74,7 +53,19 @@ gta_hs_code_finder=function(products,
           e=remDr$findElement(xpath="//textarea[@id='ccce-queryBox']")
           e$sendKeys(as.character(prd))
           e$sendKeys('\ue007')
-          Sys.sleep(2.5)
+
+          print("Refreshing Eurostat ...")
+          refreshed=FALSE
+          t=Sys.time()
+
+          while(refreshed==F & as.numeric(Sys.time()-t)<=2.5){
+            print("Waiting ...")
+            html <- htmlParse(remDr$getSource()[[1]], asText=T)
+            refreshed=length(xpathSApply(html, "//h2[contains(text(),'assumed characteristics')]", xmlValue))>0
+
+          }
+          print("Eurostat's fresh!")
+
 
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
           if(length(xpathSApply(html, "//div[@id='hscode']",xmlValue))>0){
@@ -102,13 +93,25 @@ gta_hs_code_finder=function(products,
           e=remDr$findElement(css="#uxContentPlaceHolder_ucSearchBox1_ContentPanel1_uxValueToSearchTextBox")
           e$sendKeys(as.character(prd))
           e$sendKeys('\ue007')
-          Sys.sleep(2.5)
-
-          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           guru.path="//div[@class='Search']/descendant::table/descendant::tr/td[1]/a"
 
-          if(length(xpathSApply(html, guru.path,xmlValue))>0){
+          print("Refreshing Eximguru ...")
+          refreshed=FALSE
+          t=Sys.time()
+
+          while(refreshed==F & as.numeric(Sys.time()-t)<=2.5){
+            print("Waiting ...")
+            html <- htmlParse(remDr$getSource()[[1]], asText=T)
+            refreshed=length(xpathSApply(html, guru.path, xmlValue))>0
+
+          }
+          print("Eximguru's fresh!")
+
+
+          html <- htmlParse(remDr$getSource()[[1]], asText=T)
+
+         if(length(xpathSApply(html, guru.path,xmlValue))>0){
 
             guru.hs=unique(substr(unlist(str_extract_all(xpathSApply(html, guru.path,xmlValue),"\\d+")),1,6))
             guru.hs=guru.hs[nchar(guru.hs)>=4]
@@ -323,6 +326,32 @@ gta_hs_code_finder=function(products,
 
         } else {
         stop("No valid source specified.")
+        }
+
+      if("hs.descriptions" %in% tolower(sources)){
+        print("Checking HS code descriptions ...")
+
+        simple.hs=hs.names$HS12code[grepl(prd, hs.names$hs.name)]
+
+        if(length(simple.hs)==0 &
+           length(unique(unlist(str_split(prd, " "))))>1 &
+           nrow(subset(find.hs), product.name==prd)==0){
+          simple.hs=character()
+          for(word in unique(unlist(str_split(prd, " ")))){
+            simple.hs=c(simple.hs, hs.names$HS12code[grepl(word, hs.names$hs.name)])
+
+          }
+
+          simple.hs=unique(simple.hs)
+        }
+
+        if(length(simple.hs)>0)
+          find.hs=rbind(find.hs,
+                        data.frame(product.name=prd,
+                                   hs.code=simple.hs,
+                                   source="HS code descriptions",
+                                   stringsAsFactors = F)
+          )
       }
 
     },
@@ -330,6 +359,11 @@ gta_hs_code_finder=function(products,
 
       print(paste("Error for '",prd,"'. Please try it separately later.", sep=""))
       check.errors<<-c(check.errors, prd)
+
+      if(nrow(find.hs)>0){
+        findings.thusfar<<-find.hs
+      }
+
 
 
     }
@@ -343,13 +377,37 @@ gta_hs_code_finder=function(products,
 
   remDr$delete()
 
+  ## expanding HS codes
+  if(nrow(subset(find.hs, nchar(hs.code)<=4))>0){
+
+    short.hs=subset(find.hs, nchar(hs.code)<=4)
+
+    for(i in 1:nrow(short.hs)){
+      hs=gta_hs_code_check(as.integer(short.hs$hs.code[i]))
+
+      if(is.null(hs)==F){
+        short.hs$hs.code[i]=paste(gta_hs_code_check(as.integer(short.hs$hs.code[i])), collapse=";")
+      }else{
+        short.hs$hs.code[i]=999999
+      }
+    }
+    short.hs=cSplit(short.hs, which(names(short.hs)=="hs.code"), sep=";", direction="long")
+    short.hs=subset(short.hs, hs.code!=999999)
+
+    find.hs=rbind(subset(find.hs, nchar(hs.code)>4), short.hs)
+
+  }
 
 
-  nr.hits=aggregate(source ~ product.name + hs.code, find.hs, function(x) length(unique(x)))
-  names(nr.hits)=c("product.name","hs.code","nr.sources")
 
-  find.hs=merge(nr.hits, aggregate(source ~ product.name + hs.code, find.hs, function(x) paste(unique(x), collapse="; ")), by=c("product.name","hs.code"))
-  names(find.hs)=c("product.name","hs.code","nr.sources", "source.names")
+  if(aggregate){
+    nr.hits=aggregate(source ~ product.name + hs.code, find.hs, function(x) length(unique(x)))
+    names(nr.hits)=c("product.name","hs.code","nr.sources")
+
+    find.hs=merge(nr.hits, aggregate(source ~ product.name + hs.code, find.hs, function(x) paste(unique(x), collapse="; ")), by=c("product.name","hs.code"))
+    names(find.hs)=c("product.name","hs.code","nr.sources", "source.names")
+
+  }
 
 
   return(find.hs)
