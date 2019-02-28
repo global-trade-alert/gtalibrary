@@ -6,12 +6,14 @@
 \usage{
 gta_hs_code_finder(products, sources = c("hs.descriptions", "eurostat",
   "eu.customs", "zauba", "e.to.china", "google", "hsbianma", "eximguru",
-  "cybex"))
+  "cybex"), aggregate = T)
 }
 \arguments{
 \item{products}{A vector of product names (in characters).}
 
-\item{source}{Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google,  hsbianma, eximguru). Default is 'all'.}
+\item{aggregate}{Aggregate result to one row per product name - HS code combination. Default is TRUE.}
+
+\item{source}{Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google, hsbianma, eximguru, cybex). Default is 'all'.}
 }
 \value{
 A data frame including the product names, HS codes and sources plus a vector of search terms that resulted in error messages.

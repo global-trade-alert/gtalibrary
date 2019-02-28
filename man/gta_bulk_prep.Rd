@@ -9,7 +9,7 @@ gta_bulk_prep(dump.name = "data dump", master.frame = "master",
   sa.title = "title", sa.description = "announcement.description",
   announcement.date = "date.announced", sa.source = "source",
   source.off = "source.official", int.id = "intervention.id",
-  implementer = "implementing.jurisdiction",
+  implementer = "implementing.jurisdiction", implementer.type = "name",
   int.type = "intervention.type",
   int.description = "intervention.description",
   int.flow = "affected.flow", eval.gta = "gta.evaluation",
@@ -21,8 +21,9 @@ gta_bulk_prep(dump.name = "data dump", master.frame = "master",
   is.fta = "include.fta", int.prior = "level.prior",
   int.new = "level.new", int.unit = "level.unit",
   sectors.nonhs = "affected.sectors.nonhs",
-  dm.nonsupport = "dm.editor.choice", dm.freeze = "freeze.dm",
-  aj.nonsupport = "aj.editor.choice", aj.freeze = "freeze.aj",
+  dm.nonsupport = "dm.editor.choice", dm.type = "name",
+  dm.freeze = "freeze.dm", aj.nonsupport = "aj.editor.choice",
+  aj.type = "name", aj.freeze = "freeze.aj",
   hs.code = "affected.product", hs.prior = "atl.prior",
   hs.new = "atl.new", hs.unit = "atl.unit",
   hs.official = "atl.official", hs.inception = "atl.implemented",
@@ -52,6 +53,8 @@ gta_bulk_prep(dump.name = "data dump", master.frame = "master",
 \item{int.id}{Name of the column containing ther intervention ID. Default is 'intervention.id'.}
 
 \item{implementer}{Name of the column containing the implementing jurisdiction. Default is 'implementing.jurisdiction'.}
+
+\item{implementer.type}{State how the implementing countries are specified ('un','name'). Default is 'name'.}
 
 \item{int.type}{Name of the column containing the intervention type. Default is 'intervention.type'.}
 
@@ -89,9 +92,13 @@ gta_bulk_prep(dump.name = "data dump", master.frame = "master",
 
 \item{dm.nonsupport}{Name of the column containing the distorted markets that are not generated from a support table. Default is 'dm.editor.choice'.}
 
+\item{dm.type}{State how the distorted markets are specified ('un','name'). Default is 'name'.}
+
 \item{dm.freeze}{Name of the column containing whether the distorted market choice should be frozen as specified (T/F). Default is 'freeze.dm'.}
 
 \item{aj.nonsupport}{Name of the column containing the affected jurisdictions that are not generated from a support table. Default is 'aj.editor.choice'.}
+
+\item{aj.type}{State how the affected jurisdictions are specified ('un','name'). Default is 'name'.}
 
 \item{aj.freeze}{Name of the column containing whether the affected jurisdictions choice should be frozen as specified (T/F). Default is 'freeze.aj'.}
 
