@@ -42,7 +42,7 @@ gta_hs_vintage_converter=function(
 
     use.hs=c(2002, 2007, 2012, 2017)[matches==max(matches)]
 
-    hs.vintages= hs.vintages[hs.vintages$origin.vintage==paste("HS ", max(use.hs), sep="")]
+    hs.vintages= subset(hs.vintages, origin.vintage==paste("HS ", max(use.hs), sep=""))
 
     codes.converted=unique(hs.vintages$hs.2012[hs.vintages$origin.code %in% codes])
     codes.unconverted=codes[! codes %in% hs.vintages$origin.code]
