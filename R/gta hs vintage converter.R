@@ -21,19 +21,19 @@ gta_hs_vintage_converter=function(
   # Load HS vintages
   hs.vintages= gtalibrary::hs.vintages
 
-  if(origin!=c("best","any")){
+  if(! origin %in% c("best","any")){
 
-    hs.vintages= hs.vintages[hs.vintages$origin.vintage==paste("HS ", origin, sep="")]
+    hs.vintages= subset(hs.vintages, origin.vintage==paste("HS ", origin, sep=""))
     codes.converted=unique(hs.vintages$hs.2012[hs.vintages$origin.code %in% codes])
     codes.unconverted=! codes %in% hs.vintages$origin.code
 
   }
 
   if(origin=="best"){
-    hs.02= hs.vintages[hs.vintages$origin.vintage=="HS 2002"]
-    hs.07= hs.vintages[hs.vintages$origin.vintage=="HS 2007"]
-    hs.12= hs.vintages[hs.vintages$origin.vintage=="HS 2012"]
-    hs.17= hs.vintages[hs.vintages$origin.vintage=="HS 2017"]
+    hs.02= subset(hs.vintages, origin.vintage=="HS 2002")
+    hs.07= subset(hs.vintages, origin.vintage=="HS 2007")
+    hs.12= subset(hs.vintages, origin.vintage=="HS 2012")
+    hs.17= subset(hs.vintages, origin.vintage=="HS 2017")
 
     matches=c(length(intersect(codes, hs.02$origin.code)),
               length(intersect(codes, hs.07$origin.code)),
