@@ -54,11 +54,13 @@ gta_hs_vintage_converter=function(
   }
 
 
-  return(codes.converted)
   if(length(codes.unconverted)>0){
     print(paste("Could not match the following codes: ",paste(codes.unconverted, collapse=", "), sep=""))
   } else {
     print("All supplied codes were matched.")
   }
+
+  return(codes.converted)
+
 }
 
