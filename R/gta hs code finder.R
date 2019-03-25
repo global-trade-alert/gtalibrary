@@ -7,6 +7,9 @@
 #' @param products A vector of product names (in characters).
 #' @param source Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google, hsbianma, eximguru, cybex). Default is 'all'.
 #' @param aggregate Aggregate result to one row per product name - HS code combination. Default is TRUE.
+#' @param check.archive Specify whether the search term should be checked against the existing HS code archive. Only new terms will be returned. Default is FALSE.
+#' @param archive.location Specify the path to the archive location.
+
 #'
 #' @return A data frame including the product names, HS codes and sources plus a vector of search terms that resulted in error messages.
 #' @references www.globaltradealert.org
@@ -16,7 +19,9 @@
 
 gta_hs_code_finder=function(products,
                             sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
-                            aggregate=T){
+                            aggregate=T,
+                            check.archive=F,
+                            archive.location=NULL){
 
   library(webdriver)
   library(splitstackshape)
@@ -407,6 +412,19 @@ gta_hs_code_finder=function(products,
     find.hs=merge(nr.hits, aggregate(source ~ product.name + hs.code, find.hs, function(x) paste(unique(x), collapse="; ")), by=c("product.name","hs.code"))
     names(find.hs)=c("product.name","hs.code","nr.sources", "source.names")
 
+  }
+
+  if (check.archive) {
+    if (is.null(archive.location)==T) {
+      stop("Please provide archive location")
+    } else {
+
+      load(archive.location)
+
+      if (unique(tolower(find.hs$product.name)) %in% unique(tolower(phrase.table$phrase))) {
+        find.hs <- subset(find.hs, ! hs.code %in% unique(subset(code.suggested, phrase.id == phrase.table$phrase.id[tolower(phrase.table$phrase) == tolower(products)])$hs.code.6))
+      }
+    }
   }
 
 
