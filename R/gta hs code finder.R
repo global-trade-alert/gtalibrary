@@ -16,18 +16,6 @@
 #' @author Global Trade Alert
 
 
-
-products
-sources=c("hs.descriptions","eurostat", "eu.customs")
-aggregate=T
-check.archive=F
-archive.location=NULL
-check.archive = T
-archive.location = "17 Shiny/5 HS code finder (DEV)/database/GTA HS code database (DEV).Rdata"
-
-
-products = "Jigat"
-
 gta_hs_code_finder=function(products,
                             sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
                             aggregate=T,
