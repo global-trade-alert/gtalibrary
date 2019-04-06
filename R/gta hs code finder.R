@@ -16,6 +16,18 @@
 #' @author Global Trade Alert
 
 
+
+products
+sources=c("hs.descriptions","eurostat", "eu.customs")
+aggregate=T
+check.archive=F
+archive.location=NULL
+check.archive = T
+archive.location = "17 Shiny/5 HS code finder (DEV)/database/GTA HS code database (DEV).Rdata"
+
+
+products = "Jigat"
+
 gta_hs_code_finder=function(products,
                             sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
                             aggregate=T,
@@ -415,14 +427,16 @@ gta_hs_code_finder=function(products,
   }
 
   if (check.archive) {
-    if (is.null(archive.location)==T) {
-      stop("Please provide archive location")
-    } else {
+    if (nrow(find.hs)>0){
+      if (is.null(archive.location)==T) {
+        stop("Please provide archive location")
+      } else {
 
-      load(archive.location)
+        load(archive.location)
 
-      if (unique(tolower(find.hs$product.name)) %in% unique(tolower(phrase.table$phrase))) {
-        find.hs <- subset(find.hs, ! hs.code %in% unique(subset(code.suggested, phrase.id == phrase.table$phrase.id[tolower(phrase.table$phrase) == tolower(products)])$hs.code.6))
+        if (unique(tolower(find.hs$product.name)) %in% unique(tolower(phrase.table$phrase))) {
+          find.hs <- subset(find.hs, ! hs.code %in% unique(subset(code.suggested, phrase.id == phrase.table$phrase.id[tolower(phrase.table$phrase) == tolower(products)])$hs.code.6))
+        }
       }
     }
   }
