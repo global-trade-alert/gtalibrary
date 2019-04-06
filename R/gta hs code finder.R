@@ -16,7 +16,6 @@
 #' @author Global Trade Alert
 
 
-
 gta_hs_code_finder=function(products,
                             sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
                             aggregate=T,
@@ -406,12 +405,13 @@ gta_hs_code_finder=function(products,
 
 
   if(aggregate){
+    if (nrow(find.hs)>0){
     nr.hits=aggregate(source ~ product.name + hs.code, find.hs, function(x) length(unique(x)))
     names(nr.hits)=c("product.name","hs.code","nr.sources")
 
     find.hs=merge(nr.hits, aggregate(source ~ product.name + hs.code, find.hs, function(x) paste(unique(x), collapse="; ")), by=c("product.name","hs.code"))
     names(find.hs)=c("product.name","hs.code","nr.sources", "source.names")
-
+    }
   }
 
   if (check.archive) {
@@ -428,7 +428,9 @@ gta_hs_code_finder=function(products,
   }
 
 
+  if (nrow(find.hs)>0){
   return(find.hs)
+  }
 
   if(length(check.errors)==0){
     check.errors="This query went through without errors."
