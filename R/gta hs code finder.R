@@ -16,6 +16,8 @@
 #' @author Global Trade Alert
 
 
+products = "Jigat"
+
 gta_hs_code_finder=function(products,
                             sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
                             aggregate=T,
@@ -432,6 +434,8 @@ gta_hs_code_finder=function(products,
 
   if (nrow(find.hs)>0){
   return(find.hs)
+  } else {
+    return("This query has not found any new codes.")
   }
 
   if(length(check.errors)==0){
