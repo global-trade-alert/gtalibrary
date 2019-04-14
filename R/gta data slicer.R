@@ -231,7 +231,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
           error.message <<- c(T, stop.print)
           stop(stop.print)
 
-        } else{
+        } else {
 
           affected=gta_un_code_vector(affected.country, role="affected")
 
@@ -337,8 +337,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       master=subset(master, intervention.id %in% intersect(intersect(ac.ids, joint.ids),also.ids))
 
-      if(keep.others==FALSE){
-        master=subset(master, a.un %in% affected)
+      if(keep.others==FALSE & is.null(affected.country) == F){
+          master=subset(master, a.un %in% affected)
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Keep data for other jurisdictions affected alongside those specified:",
                                            choice="No"))
