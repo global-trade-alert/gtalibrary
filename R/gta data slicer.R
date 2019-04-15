@@ -261,7 +261,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       }
 
-      if (affected.jointly==T){
+      if (affected.jointly==T & is.null(affected.country)==F){
         joint.ids=subset(master, a.un %in% affected)$intervention.id
 
           for(aj in affected){
