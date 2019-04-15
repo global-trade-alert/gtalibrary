@@ -124,7 +124,7 @@ gta_trade_coverage <- function(
   # Initialising Function ---------------------------------------------------
 
   # load libraries
-  library("xlsx")
+  library("openxlsx")
   library("splitstackshape")
   library("data.table")
 
