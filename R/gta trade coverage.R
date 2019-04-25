@@ -286,7 +286,7 @@ gta_trade_coverage <- function(
     nr.exporter.min=nr.exporters[1]
     nr.exporter.max=nr.exporters[2]
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Nr. of also affected exporters: ", choice=paste(nr.exporter.min, nr.exporter.max, sep=" - ")))
+                            data.frame(parameter="Nr. of affected exporters: ", choice=paste(nr.exporter.min, nr.exporter.max, sep=" - ")))
 
 
     ## Calculation form
@@ -303,7 +303,7 @@ gta_trade_coverage <- function(
         exp.count=aggregate(exporter.un ~ intervention.id,interventions.by.exporter,function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of also affected exporters calculated based on: ", choice="All exporters"))
+                                data.frame(parameter="Nr. of affected exporters calculated based on: ", choice="All exporters"))
 
 
       }
@@ -313,7 +313,7 @@ gta_trade_coverage <- function(
         exp.count=aggregate(exporter.un ~ intervention.id,subset(interventions.by.exporter, exporter.un %in% exporting.country),function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of also affected exporters calculated based on: ", choice="Selected exporters"))
+                                data.frame(parameter="Nr. of affected exporters calculated based on: ", choice="Selected exporters"))
 
       }
 
@@ -323,7 +323,7 @@ gta_trade_coverage <- function(
 
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of also affected exporters calculated based on: ", choice="Unselected exporters"))
+                                data.frame(parameter="Nr. of affected exporters calculated based on: ", choice="Unselected exporters"))
 
       }
 
@@ -605,7 +605,7 @@ gta_trade_coverage <- function(
     nr.importer.min=nr.importers[1]
     nr.importer.max=nr.importers[2]
     parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Nr. of also affected importers: ", choice=paste(nr.importer.min, nr.importer.max, sep=" - ")))
+                            data.frame(parameter="Nr. of affected importers: ", choice=paste(nr.importer.min, nr.importer.max, sep=" - ")))
 
 
     ## Calculation form
@@ -622,7 +622,7 @@ gta_trade_coverage <- function(
         imp.count=aggregate(importer.un ~ intervention.id,interventions.by.importer,function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of also affected importers calculated based on: ", choice="All importers"))
+                                data.frame(parameter="Nr. of affected importers calculated based on: ", choice="All importers"))
 
 
       }
@@ -632,7 +632,7 @@ gta_trade_coverage <- function(
         imp.count=aggregate(importer.un ~ intervention.id,subset(interventions.by.importer, importer.un %in% importing.country),function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of also affected importers calculated based on: ", choice="Selected importers"))
+                                data.frame(parameter="Nr. of affected importers calculated based on: ", choice="Selected importers"))
 
       }
 
@@ -642,7 +642,7 @@ gta_trade_coverage <- function(
 
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of also affected importers calculated based on: ", choice="Unselected importers"))
+                                data.frame(parameter="Nr. of affected importers calculated based on: ", choice="Unselected importers"))
 
       }
 
