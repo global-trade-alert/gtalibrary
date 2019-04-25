@@ -11,9 +11,10 @@
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
 #' @param affected.country Specify the affected countries for your analysis. Default is 'any'. Permissible values are country names or UN codes.
 #' @param keep.affected Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.
+#' @param incl.affected.strictness Specify whether to include interventions that affect only one of the selected affected jurisdictions ('ONE'), at least one of the selected affected jurisdictions ('ONEPLUS') or all of the selected affected jurisdictions ('ALL'). Default is 'ONEPLUS'.
 #' @param keep.others Specify whether to keep the data for the other jurisdictions that happen to be affected alongside those you specified (T/F). Default is 'TRUE'.
-#' @param affected.jointly Specify whether included interventions shall affect all affected countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
-#' @param affected.also.nr Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.
+#' @param nr.affected Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(1,999).
+#' @param nr.affected.incl Specify whether in the number of importers affected by an intervention is calculated based only on the selected importers are included ('SELECTED'), only on the unselected importers ('UNSELECTED') or based on both ('ALL'). Default is 'ALL'.
 #' @param announcement.period Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param keep.implementation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing implementation.date.
@@ -52,9 +53,10 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          keep.implementer = TRUE,
                          affected.country = NULL,
                          keep.affected = NULL,
+                         incl.affected.strictness="ONEPLUS",
                          keep.others=TRUE,
-                         affected.jointly = FALSE,
-                         affected.also.nr = NULL,
+                         nr.affected=c(1,999),
+                         nr.affected.incl="ALL",
                          announcement.period = NULL,
                          implementation.period = NULL,
                          keep.implementation.na = NULL,
@@ -214,7 +216,6 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       # affected.country
       # keep.affected
-      # affected jointly
       # additional targets
       # due to the interdependece of these filters, we will only generate vectors of intervention IDs before subetting the result at the very end of this section.
 
@@ -222,7 +223,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter="Affected countries included:", choice="All"))
-        ac.ids=master$intervention.id
+        affected.interventions=master$intervention.id
 
       } else {
 
@@ -236,107 +237,149 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
           affected=gta_un_code_vector(affected.country, role="affected")
 
           if(keep.affected==T){
-            ac.ids=subset(master, a.un %in% affected)$intervention.id
-
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="Affected countries included:", choice=paste(affected.country, collapse = ", ")))
 
           } else {
-            ac.ids=subset(master,!  a.un %in% affected)$intervention.id
+            affected=setdiff(gtalibrary::country.correspondence$un_code, affected)
 
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="Affected countries included:", choice=paste("All except ", paste(affected.country, collapse = ", "), sep="")))
 
           }
 
+          affected.interventions=subset(master, a.un %in% affected)$intervention.id
+
 
         }
       }
 
       # Check # of rows
-      if(nrow(master)==0) {
+      if(length(affected.interventions)==0) {
         stop.print <- "Unfortunately no rows remaining after filtering for affected.country"
         error.message <<- c(T, stop.print)
         stop(stop.print)
 
       }
 
-      if (affected.jointly==T & is.null(affected.country)==F){
-        joint.ids=subset(master, a.un %in% affected)$intervention.id
 
-          for(aj in affected){
-            joint.ids=intersect(joint.ids, subset(master, a.un %in% aj)$intervention.id)
-          }
+    ## restrict data to the combination of selected affected jurisdictions
+    if(! incl.affected.strictness %in% c("ALL","ONE","ONEPLUS")){
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Affected jointly:", choice="Only jointly"))
+      stop.print <- "Please choose how to include the chosen affected jurisdictions (ONE/ALL/ONEPLUS)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
+    } else {
 
-      } else {
-        joint.ids=master$intervention.id
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Affected jointly:", choice="Jointly & individually"))
+      ## this is the 'ONEPLUS' case.
+      affected.combinations=unique(master$intervention.id)
+
+      if(incl.affected.strictness=="ALL"){
+
+        for(cty in affected){
+
+          a.c.temp=unique(subset(master, a.un==cty)$intervention.id)
+
+          affected.combinations=intersect(affected.combinations,
+                                          a.c.temp)
+          rm(a.c.temp)
+        }
+
       }
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for affected.jointly"
+
+      if(incl.affected.strictness=="ONE"){
+
+        one.aj=subset(master, a.un %in% affected)
+
+        one.aj=aggregate(a.un ~intervention.id, one.aj, function(x) length(unique(x)))
+
+        affected.combinations=subset(one.aj, a.un==1)$intervention.id
+
+        rm(one.aj)
+
+      }
+
+
+      if(length(affected.combinations)==0){
+
+        stop.print <- "No rows left for the selected affected jurisdiction combintion (parameter incl.affected.strictness)."
         error.message <<- c(T, stop.print)
         stop(stop.print)
 
       }
 
+    }
+    affected.interventions=intersect(affected.interventions, affected.combinations)
 
-      # Additionally affected
-      if(is.null(affected.also.nr)){
-        also.ids=master$intervention.id
+  ### applying the restrictions on the number of affected trading partners per intervention
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Number of also affected jurisdictions:", choice="Any number"))
+    ## min/max nr of affected jurisdictions
+    nr.affected.min=nr.affected[1]
+    nr.affected.max=nr.affected[2]
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of affected jurisdictions: ", choice=paste(nr.affected.min, nr.affected.max, sep=" - ")))
 
-      } else{
 
+    ## Calculation form
+    if(! nr.affected.incl %in% c("ALL","SELECTED","UNSELECTED")){
 
-        if(is.null(affected.country)){
-          # Check # of rows
-          if(nrow(master)==0) {
-            stop.print <- "Unfortunately no rows remaining while filtering for affected.also.nr"
-            error.message <<- c(T, stop.print)
-            stop(stop.print)
-          }
-          nr.affected=aggregate(affected.jurisdiction ~intervention.id, master, function(x) length(unique(x)))
-          also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
+      stop.print <- "Please choose which imports to include into the calculation for the number of affected jurisdictions (ALL/SELECTED/UNSELECTED)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
-        } else {
-          ## adding those where only the specified affected jurisdictions are affected
-          zero.ids=unique(subset(master, ! a.un %in% affected & is.na(a.un)==F)$intervention.id)
-          zero.ids=setdiff(ac.ids,zero.ids)
+    }else {
 
-          if(affected.also.nr==0){
-            also.ids=zero.ids
+      if(nr.affected.incl=="ALL"){
 
-          } else{
-            # Check # of rows
-            if(nrow(subset(master, ! a.un %in% affected))==0) {
-              stop.print <- "Unfortunately no rows remaining while filtering for affected.also.nr"
-              error.message <<- c(T, stop.print)
-              stop(stop.print)
-            }
-            nr.affected=aggregate(affected.jurisdiction ~intervention.id, subset(master, ! a.un %in% affected), function(x) length(unique(x)))
-            also.ids=subset(master, intervention.id %in% subset(nr.affected, affected.jurisdiction<=affected.also.nr)$intervention.id)$intervention.id
-            also.ids=c(zero.ids, also.ids)
-          }
-
-        }
+        imp.count=aggregate(a.un ~ intervention.id, master ,function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Number of also affected jurisdictions:", choice=paste(affected.also.nr, " or fewer",sep="")))
+                                data.frame(parameter="Nr. of affected jurisdictions calculated based on: ", choice="All affected jurisdictions"))
 
 
       }
 
-      master=subset(master, intervention.id %in% intersect(intersect(ac.ids, joint.ids),also.ids))
+      if(nr.affected.incl=="SELECTED"){
 
+        imp.count=aggregate(a.un ~ intervention.id,subset(master, a.un %in% affected),function(x) length(unique(x)))
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Nr. of affected jurisdictions calculated based on: ", choice="Selected affected jurisdictions"))
+
+      }
+
+      if(nr.affected.incl=="UNSELECTED"){
+
+        imp.count=aggregate(a.un ~ intervention.id,subset(master, ! a.un %in% affected),function(x) length(unique(x)))
+
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Nr. of affected jurisdictions calculated based on: ", choice="Unselected affected jurisdictions"))
+
+      }
+
+
+      affected.interventions=intersect(affected.interventions,
+                                       subset(imp.count, a.un>=nr.affected.min &
+                                                a.un<=nr.affected.max)$intervention.id)
+
+    }
+
+
+
+    if(length(affected.interventions)==0){
+      stop.print <- "There are no interventions that satisfy your choices for nr.affected, nr.affected.incl and incl.affected.strictness simultaneously."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
+
+
+    ## applying all these conditions
+      master=subset(master, intervention.id %in% affected.interventions)
+
+
+    ## keep.others
       if(keep.others==FALSE & is.null(affected.country) == F){
           master=subset(master, a.un %in% affected)
         parameter.choices=rbind(parameter.choices,

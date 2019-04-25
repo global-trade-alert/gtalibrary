@@ -7,8 +7,9 @@
 gta_data_slicer(data.path = "data/master_plus.Rdata",
   gta.evaluation = NULL, affected.flows = NULL,
   implementing.country = NULL, keep.implementer = TRUE,
-  affected.country = NULL, keep.affected = NULL, keep.others = TRUE,
-  affected.jointly = FALSE, affected.also.nr = NULL,
+  affected.country = NULL, keep.affected = NULL,
+  incl.affected.strictness = "ONEPLUS", keep.others = TRUE,
+  nr.affected = c(1, 999), nr.affected.incl = "ALL",
   announcement.period = NULL, implementation.period = NULL,
   keep.implementation.na = NULL, revocation.period = NULL,
   keep.revocation.na = NULL, submission.period = NULL,
@@ -37,11 +38,13 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{keep.affected}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.}
 
+\item{incl.affected.strictness}{Specify whether to include interventions that affect only one of the selected affected jurisdictions ('ONE'), at least one of the selected affected jurisdictions ('ONEPLUS') or all of the selected affected jurisdictions ('ALL'). Default is 'ONEPLUS'.}
+
 \item{keep.others}{Specify whether to keep the data for the other jurisdictions that happen to be affected alongside those you specified (T/F). Default is 'TRUE'.}
 
-\item{affected.jointly}{Specify whether included interventions shall affect all affected countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
+\item{nr.affected}{Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(1,999).}
 
-\item{affected.also.nr}{Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+\item{nr.affected.incl}{Specify whether in the number of importers affected by an intervention is calculated based only on the selected importers are included ('SELECTED'), only on the unselected importers ('UNSELECTED') or based on both ('ALL'). Default is 'ALL'.}
 
 \item{announcement.period}{Specify a period in which the announcements for your analysis have been made. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions announced since 'after.date'.}
 
