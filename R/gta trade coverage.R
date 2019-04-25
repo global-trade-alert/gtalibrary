@@ -1212,6 +1212,11 @@ gta_trade_coverage <- function(
 
     print("Merging base values into working data frame ...")
 
+    computational.threshold=1000000 # nr of rows I think the server can take.
+    nr.splits=round(nrow(duration.max)/computational.threshold+.5,0)
+
+    print(paste("Splitting the data set into",nr.splits,"parts for computational ease."))
+
     duration.max$iahs=duration.max$identifier
 
     if(is.null(implementer.trade)){
@@ -1223,12 +1228,38 @@ gta_trade_coverage <- function(
 
     if(trade.data %in% c("base", paste(2007:2017))){
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
-      master.coverage=merge(duration.max, trade.base.bilateral, by="iahs", all.x=T)
+
+      dm.split <- split(duration.max, sample(1:nr.splits, nrow(duration.max), replace=T))
+      dm.final=data.frame()
+      for(y in 1:nr.splits){
+        dm.t = dm.split[[y]]
+        dm.t=merge(dm.t, trade.base.bilateral, by="iahs", all.x=T)
+        dm.t=subset(dm.t, is.na(trade.value)==F)
+        dm.final = rbind(dm.final, dm.t)
+        rm(dm.t)
+        print(paste("Processed split", y))
+      }
+      master.coverage = dm.final
+
+
+
 
     } else {
       trade.base.bilateral=subset(trade.base.bilateral, year %in% c(year.start:year.end))
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
-      master.coverage=merge(duration.max, trade.base.bilateral, by=c("iahs","year"), all.x=T)
+
+      dm.split <- split(duration.max, sample(1:nr.splits, nrow(duration.max), replace=T))
+      dm.final=data.frame()
+      for(y in 1:nr.splits){
+        dm.t = dm.split[[y]]
+        dm.t=merge(dm.t, trade.base.bilateral, by=c("iahs","year"), all.x=T)
+        dm.t=subset(dm.t, is.na(trade.value)==F)
+        dm.final = rbind(dm.final, dm.t)
+        rm(dm.t)
+        print(paste("Processed split", y))
+      }
+      master.coverage = dm.final
+
     }
 
 
@@ -1243,19 +1274,26 @@ gta_trade_coverage <- function(
     }
 
 
-    if(nrow(master.coverage)>1000){
+    if(nrow(master.coverage)>computational.threshold){
+
+      nr.splits=round(nrow(master.coverage)/computational.threshold+.5,0)
+
+      print(paste("Splitting the remaining data set into",nr.splits,"parts for computational ease."))
+
       if("mast.chapter" %in% names(master.coverage) & "intervention.type" %in% names(master.coverage)){
 
         mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), intervention.type=character(), nr.of.hits=numeric())
 
-        mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+        mc.split <- split(master.coverage, sample(1:nr.splits, nrow(master.coverage), replace=T))
 
-        for(y in 1:5){
+        for(y in 1:nr.splits){
           mc.t = mc.split[[y]]
           mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type","nr.of.hits")])
           names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","intervention.type","nr.of.hits")
           mc.unique = rbind(mc.unique, mc.t)
           rm(mc.t)
+
+          print(paste("Processed split", y))
         }
 
         master.coverage = unique(mc.unique)
@@ -1266,9 +1304,9 @@ gta_trade_coverage <- function(
 
           mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), nr.of.hits=numeric())
 
-          mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+          mc.split <- split(master.coverage, sample(1:nr.splits, nrow(master.coverage), replace=T))
 
-          for(y in 1:5){
+          for(y in 1:nr.splits){
             mc.t = mc.split[[y]]
             mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter","nr.of.hits")])
             names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","nr.of.hits")
@@ -1284,9 +1322,9 @@ gta_trade_coverage <- function(
 
             mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), intervention.type=character(), nr.of.hits=numeric())
 
-            mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+            mc.split <- split(master.coverage, sample(1:nr.splits, nrow(master.coverage), replace=T))
 
-            for(y in 1:5){
+            for(y in 1:nr.splits){
               mc.t = mc.split[[y]]
               mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "intervention.type","nr.of.hits")])
               names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","intervention.type","nr.of.hits")
@@ -1302,9 +1340,9 @@ gta_trade_coverage <- function(
             mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), nr.of.hits=numeric())
 
 
-            mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+            mc.split <- split(master.coverage, sample(1:nr.splits, nrow(master.coverage), replace=T))
 
-            for(y in 1:5){
+            for(y in 1:nr.splits){
               mc.t = mc.split[[y]]
               mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected","nr.of.hits")])
               names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","nr.of.hits")
