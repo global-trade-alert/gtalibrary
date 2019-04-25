@@ -18,10 +18,11 @@
 #' @param jointly.affected.importers Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
 #' @param keep.exporters Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
+#' @param incl.exporters.strictness Specify whether to include interventions that affect only one of the selected exporters ('ONE'), at least one of the selected exporters ('ONEPLUS') or all of the selected exporters ('ALL'). Default is 'ONEPLUS'.
 #' @param group.exporters Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param separate.exporter.groups Specifiy whether to separately calculate groups in chosen exporters ('TRUE') or not ('FALSE'). Default: FALSE.
-#' @param nr.also.exporters Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.
-#' @param jointly.affected.exporters Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
+#' @param nr.exporters Specify the range for the number of exporters affected by an intervention. Default is any number i.e. c(1,999).
+#' @param nr.exporters.incl Specify whether in the number of exporters affected by an intervention is calculated based only on the selected exporters are included ('SELECTED'), only on the unselected exporters ('UNSELECTED') or based on both ('ALL'). Default is 'ALL'.
 #' @param implementers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).
 #' @param implementer.role Bilateral trade flows can be affected by multiple actors. Specify which actor's interventions you want to include. There are three roles: importer, exporter and 3rd country. Combinations are permissible. Default: c('importer','3rd country').
 #' @param keep.implementer Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated implementing country.
@@ -80,10 +81,11 @@ gta_trade_coverage <- function(
   jointly.affected.importers=FALSE,
   exporters = NULL,
   keep.exporters = NULL,
+  incl.exporters.strictness="ONEPLUS",
   group.exporters = TRUE,
   separate.exporter.groups = FALSE,
-  nr.also.exporters=NULL,
-  jointly.affected.exporters=FALSE,
+  nr.exporters=c(1,999),
+  nr.exporters.incl="ALL",
   implementers = NULL,
   implementer.role = NULL,
   keep.implementer= TRUE,
@@ -182,6 +184,8 @@ gta_trade_coverage <- function(
     ## Can be done here since they are always either a.un or i.un.
     ## Cannot be done for the importers!
 
+
+
     if(is.null(exporters)){
       exporting.country=gtalibrary::country.names$un_code
       parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice="All"))
@@ -190,6 +194,7 @@ gta_trade_coverage <- function(
 
       if(keep.exporters==T){
         exporting.country=gta_un_code_vector(exporters, "exporting")
+
         parameter.choices=rbind(parameter.choices, data.frame(parameter="Exporting countries:", choice=paste(exporters, collapse=", ")))
       }else{
         if(keep.exporters==F){
@@ -207,8 +212,66 @@ gta_trade_coverage <- function(
 
     }
 
+    #### imposing the exporting countries incl. the relevant conditions.
 
-    ## imposing the exporting countries incl. the relevant conditions.
+    ## restrict data to the combination of selected exporters
+    if(! incl.exporters.strictness %in% c("ALL","ONE","ONEPLUS")){
+
+      stop.print <- "Please choose how to include the chosen exporters (ONE/ALL/ONEPLUS)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
+    } else {
+
+      ## this is the 'ONEPLUS' case.
+      exporter.combinations=unique(master.sliced$intervention.id)
+
+      if(incl.exporters.strictness=="ALL"){
+
+        for(cty in exporting.country){
+
+          e.c.ids=unique(subset(master.sliced, a.un == cty & affected.flow %in% c("inward","outward subsidy"))$intervention.id)
+          e.c.ids=c(e.c.ids,unique(subset(master.sliced, i.un == cty & affected.flow %in% c("outward"))$intervention.id))
+
+          exporter.combinations=intersect(exporter.combinations,
+                                          e.c.ids)
+          rm(e.c.ids)
+        }
+
+      }
+
+
+      if(incl.exporters.strictness=="ONE"){
+        in.os=subset(master.sliced, a.un %in% exporting.country & affected.flow %in% c("inward","outward subsidy"))
+        setnames(in.os, "a.un","exporter.un")
+        out=subset(master.sliced, i.un %in% exporting.country& affected.flow %in% c("outward"))
+        setnames(out, "i.un","exporter.un")
+
+        one.exp=rbind(unique(in.os[,c("intervention.id","exporter.un")]),
+                      unique(out[,c("intervention.id","exporter.un")]))
+
+        one.exp=aggregate(exporter.un ~intervention.id, one.exp, function(x) length(unique(x)))
+
+        exporter.combinations=subset(one.exp, exporter.un==1)$intervention.id
+
+        rm(in.os, out, one.exp)
+
+      }
+
+
+      if(length(exporter.combinations)==0){
+
+        stop.print <- "No rows left for the selected exporter combintion (parameter incl.exporters.strictness)."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+
+      }
+
+    }
+
+    exporter.interventions=exporter.combinations
+
+    ## Nr of affected exporters
 
     interventions.by.exporter=unique(subset(master.sliced, affected.flow %in% c("inward","outward subsidy"))[,c("intervention.id","a.un")])
     names(interventions.by.exporter)=c("intervention.id", "i.un")
@@ -216,74 +279,79 @@ gta_trade_coverage <- function(
                                     unique(subset(master.sliced, ! affected.flow %in% c("inward","outward subsidy"))[,c("intervention.id","i.un")]))
     names(interventions.by.exporter)=c("intervention.id", "exporter.un")
 
+    ## Nr of exporters
+    nr.exporter.min=nr.exporters[1]
+    nr.exporter.max=nr.exporters[2]
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of also affected exporters: ", choice=paste(nr.exporter.min, nr.exporter.max, sep=" - ")))
 
-    if(is.null(exporters)){
-      exporter.count=aggregate(exporter.un ~ intervention.id, interventions.by.exporter,  function(x) length(unique(x)))
-      names(exporter.count)=c("intervention.id", "nr.exporters.hit")
-      sole.exporter=numeric()
+
+    ## Calculation form
+    if(! nr.exporters.incl %in% c("ALL","SELECTED","UNSELECTED")){
+
+      stop.print <- "Please choose which exports to include into the calculation for the number of affected exporters (ALL/SELECTED/UNSELECTED)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
     }else {
-      sole.exporter=setdiff(unique(subset(interventions.by.exporter, exporter.un %in% exporting.country)$intervention.id),
-                            unique(subset(interventions.by.exporter, ! exporter.un %in% exporting.country)$intervention.id))
-      exporter.count=aggregate(exporter.un ~ intervention.id, subset(interventions.by.exporter,! exporter.un %in% exporting.country),  function(x) length(unique(x)))
-      names(exporter.count)=c("intervention.id", "nr.exporters.hit")
 
-    }
+      if(nr.exporters.incl=="ALL"){
 
-
-    if(is.null(nr.also.exporters)){
-      exporter.interventions=unique(interventions.by.exporter$intervention.id)
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="Nr. of also affected exporters:", choice="Any"))
-    }else{
-
-      exporter.interventions=c(sole.exporter,unique(subset(exporter.count, nr.exporters.hit<=nr.also.exporters)$intervention.id))
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="Nr. of also affected exporters:", choice=paste(nr.also.exporters, " or less", sep="")))
-    }
-
-
-
-
-    if(is.null(jointly.affected.exporters)){
-      exporter.interventions=exporter.interventions
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="No, just at least one of them."))
-    }else{
-      if(jointly.affected.exporters){
-        exporter.interventions=intersect(exporter.interventions, subset(interventions.by.exporter, exporter.un==exporting.country[1])$intervention.id)
-
-        if(length(exporting.country)>1){
-          for(k in 2:length(exporting.country)){
-            exporter.interventions=intersect(exporter.interventions, subset(interventions.by.exporter, exporter.un==exporting.country[k])$intervention.id)
-          }
-        }
-
-        if(length(exporter.interventions)==0){
-          stop.print <- "There are no interventions that jointly affect all specified exporters."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)}
+        exp.count=aggregate(exporter.un ~ intervention.id,interventions.by.exporter,function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="Yes."))
+                                data.frame(parameter="Nr. of also affected exporters calculated based on: ", choice="All exporters"))
 
-      }else{
-        exporter.interventions=exporter.interventions
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Only include interventions where all specified exporters are affected:", choice="No, just at least one of them."))
+
       }
+
+      if(nr.exporters.incl=="SELECTED"){
+
+        exp.count=aggregate(exporter.un ~ intervention.id,subset(interventions.by.exporter, exporter.un %in% exporting.country),function(x) length(unique(x)))
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Nr. of also affected exporters calculated based on: ", choice="Selected exporters"))
+
+      }
+
+      if(nr.exporters.incl=="UNSELECTED"){
+
+        exp.count=aggregate(exporter.un ~ intervention.id,subset(interventions.by.exporter, ! exporter.un %in% exporting.country),function(x) length(unique(x)))
+
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Nr. of also affected exporters calculated based on: ", choice="Unselected exporters"))
+
+      }
+
+
+      exporter.interventions=intersect(exporter.interventions,
+                                       subset(exp.count, exporter.un>=nr.exporter.min &
+                                                exporter.un<=nr.exporter.max)$intervention.id)
+
     }
 
+
+
+    if(length(exporter.interventions)==0){
+      stop.print <- "There are no interventions that satisfy your choices for nr.exporters, nr.exporters.incl and incl.exporters.strictness simultaneously."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
+
+
+
+    ## Changing the master df to only include interventions with the desired exporters & conditions.
     ms=master.sliced[0,]
 
     if(nrow(subset(master.sliced, affected.flow %in% c("inward","outward subsidy")))>0){
-      ms=rbind(ms, subset(master.sliced, affected.flow %in% c("inward","outward subsidy") & a.un %in% exporting.country & intervention.id %in% exporter.interventions))
+      ms=rbind(ms, subset(master.sliced, affected.flow %in% c("inward","outward subsidy") & a.un %in% exporting.country))
     }
 
     if(nrow(subset(master.sliced, affected.flow=="outward"))>0){
-      ms=rbind(ms, subset(master.sliced, affected.flow=="outward" & i.un %in% exporting.country & intervention.id %in% exporter.interventions))
+      ms=rbind(ms, subset(master.sliced, affected.flow=="outward" & i.un %in% exporting.country))
     }
-    master.sliced=ms
+
+    master.sliced=subset(ms, intervention.id %in% exporter.interventions)
     master.sliced<<-master.sliced
     rm(ms)
 
@@ -1113,87 +1181,89 @@ gta_trade_coverage <- function(
     }
 
 
-    if("mast.chapter" %in% names(master.coverage) & "intervention.type" %in% names(master.coverage)){
+    if(nrow(master.coverage)>1000){
+      if("mast.chapter" %in% names(master.coverage) & "intervention.type" %in% names(master.coverage)){
 
-      mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), intervention.type=character(), nr.of.hits=numeric())
-
-      mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
-
-      for(y in 1:5){
-        mc.t = mc.split[[y]]
-        mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type","nr.of.hits")])
-        names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","intervention.type","nr.of.hits")
-        mc.unique = rbind(mc.unique, mc.t)
-        rm(mc.t)
-      }
-
-      master.coverage = unique(mc.unique)
-
-    }else{
-
-      if("mast.chapter" %in% names(master.coverage)){
-
-        mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), nr.of.hits=numeric())
+        mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), intervention.type=character(), nr.of.hits=numeric())
 
         mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
 
         for(y in 1:5){
           mc.t = mc.split[[y]]
-          mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter","nr.of.hits")])
-          names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","nr.of.hits")
+          mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter", "intervention.type","nr.of.hits")])
+          names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","intervention.type","nr.of.hits")
           mc.unique = rbind(mc.unique, mc.t)
           rm(mc.t)
         }
 
         master.coverage = unique(mc.unique)
 
-      } else {
+      }else{
 
-        if("intervention.type" %in% names(master.coverage)){
+        if("mast.chapter" %in% names(master.coverage)){
 
-          mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), intervention.type=character(), nr.of.hits=numeric())
+          mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), mast.chapter=character(), nr.of.hits=numeric())
 
           mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
 
           for(y in 1:5){
             mc.t = mc.split[[y]]
-            mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "intervention.type","nr.of.hits")])
-            names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","intervention.type","nr.of.hits")
+            mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "mast.chapter","nr.of.hits")])
+            names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected", "mast.chapter","nr.of.hits")
             mc.unique = rbind(mc.unique, mc.t)
             rm(mc.t)
           }
 
           master.coverage = unique(mc.unique)
-
 
         } else {
 
-          mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), nr.of.hits=numeric())
+          if("intervention.type" %in% names(master.coverage)){
+
+            mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), intervention.type=character(), nr.of.hits=numeric())
+
+            mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+
+            for(y in 1:5){
+              mc.t = mc.split[[y]]
+              mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected", "intervention.type","nr.of.hits")])
+              names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","intervention.type","nr.of.hits")
+              mc.unique = rbind(mc.unique, mc.t)
+              rm(mc.t)
+            }
+
+            master.coverage = unique(mc.unique)
 
 
-          mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+          } else {
 
-          for(y in 1:5){
-            mc.t = mc.split[[y]]
-            mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected","nr.of.hits")])
-            names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","nr.of.hits")
-            mc.unique = rbind(mc.unique, mc.t)
-            rm(mc.t)
+            mc.unique=data.frame(i.un=numeric(), a.un=numeric(), affected.product=numeric(), year=numeric(), trade.value.affected=numeric(), nr.of.hits=numeric())
+
+
+            mc.split <- split(master.coverage, sample(1:5, nrow(master.coverage), replace=T))
+
+            for(y in 1:5){
+              mc.t = mc.split[[y]]
+              mc.t = unique(mc.t[,c("i.un", "a.un", "hs6","year", "trade.value.affected","nr.of.hits")])
+              names(mc.t) = c("i.un", "a.un", "affected.product","year", "trade.value.affected","nr.of.hits")
+              mc.unique = rbind(mc.unique, mc.t)
+              rm(mc.t)
+            }
+
+            master.coverage = unique(mc.unique)
+
           }
-
-          master.coverage = unique(mc.unique)
 
         }
 
       }
-
     }
-    master.coverage=subset(master.coverage, is.na(trade.value.affected)==F)
+
 
 
     print("Merging base values into working data frame ... complete")
 
-
+    master.coverage=subset(master.coverage, is.na(trade.value.affected)==F)
     # Check # of rows
     if(nrow(master.coverage)==0) {
       stop.print <- "Unfortunately no rows remaining after merging trade base values into working data frame"

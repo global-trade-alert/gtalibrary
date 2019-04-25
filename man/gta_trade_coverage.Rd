@@ -11,9 +11,10 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   "outward subsidy"), importers = NULL, keep.importers = NULL,
   group.importers = TRUE, separate.importer.groups = FALSE,
   nr.also.importers = NULL, jointly.affected.importers = FALSE,
-  exporters = NULL, keep.exporters = NULL, group.exporters = TRUE,
-  separate.exporter.groups = FALSE, nr.also.exporters = NULL,
-  jointly.affected.exporters = FALSE, implementers = NULL,
+  exporters = NULL, keep.exporters = NULL,
+  incl.exporters.strictness = "ONEPLUS", group.exporters = TRUE,
+  separate.exporter.groups = FALSE, nr.exporters = c(1, 999),
+  nr.exporters.incl = "ALL", implementers = NULL,
   implementer.role = NULL, keep.implementer = TRUE,
   group.implementers = TRUE, separate.implementer.groups = FALSE,
   implementer.trade = NULL, announcement.period = NULL,
@@ -59,13 +60,15 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{keep.exporters}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.}
 
+\item{incl.exporters.strictness}{Specify whether to include interventions that affect only one of the selected exporters ('ONE'), at least one of the selected exporters ('ONEPLUS') or all of the selected exporters ('ALL'). Default is 'ONEPLUS'.}
+
 \item{group.exporters}{Specify whether to aggregate the statistics for all remaining exporters into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.}
 
 \item{separate.exporter.groups}{Specifiy whether to separately calculate groups in chosen exporters ('TRUE') or not ('FALSE'). Default: FALSE.}
 
-\item{nr.also.exporters}{Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.}
+\item{nr.exporters}{Specify the range for the number of exporters affected by an intervention. Default is any number i.e. c(1,999).}
 
-\item{jointly.affected.exporters}{Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.}
+\item{nr.exporters.incl}{Specify whether in the number of exporters affected by an intervention is calculated based only on the selected exporters are included ('SELECTED'), only on the unselected exporters ('UNSELECTED') or based on both ('ALL'). Default is 'ALL'.}
 
 \item{implementers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for implementers in the sample. Default: World (as in implemented by one).}
 
