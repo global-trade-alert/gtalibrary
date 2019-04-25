@@ -12,10 +12,11 @@
 #' @param affected.flows Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.
 #' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.
+#' @param incl.importers.strictness Specify whether to include interventions that affect only one of the selected importers ('ONE'), at least one of the selected importers ('ONEPLUS') or all of the selected importers ('ALL'). Default is 'ONEPLUS'.
 #' @param group.importers Specify whether to aggregate the statistics for all remaining importers into one group (TRUE) or whether create the statistics for every single one (FALSE). Default is TRUE.
 #' @param separate.importer.groups Specifiy whether to separately calculate groups in chosen importers ('TRUE') or not ('FALSE'). Default: FALSE.
-#' @param nr.also.importers Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.
-#' @param jointly.affected.importers Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
+#' @param nr.importers Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(1,999).
+#' @param nr.importers.incl Specify whether in the number of importers affected by an intervention is calculated based only on the selected importers are included ('SELECTED'), only on the unselected importers ('UNSELECTED') or based on both ('ALL'). Default is 'ALL'.
 #' @param exporters Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for exporters in the sample. Default: All exporters.
 #' @param keep.exporters Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
 #' @param incl.exporters.strictness Specify whether to include interventions that affect only one of the selected exporters ('ONE'), at least one of the selected exporters ('ONEPLUS') or all of the selected exporters ('ALL'). Default is 'ONEPLUS'.
@@ -75,9 +76,11 @@ gta_trade_coverage <- function(
   affected.flows = c("inward", "outward subsidy"),
   importers = NULL,
   keep.importers = NULL,
+  incl.importers.strictness="ONEPLUS",
   group.importers = TRUE,
   separate.importer.groups = FALSE,
-  nr.also.importers=NULL,
+  nr.importers=c(1,999),
+  nr.importers.incl="ALL",
   jointly.affected.importers=FALSE,
   exporters = NULL,
   keep.exporters = NULL,
@@ -537,66 +540,125 @@ gta_trade_coverage <- function(
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, collapse=", ")))
 
 
-    ## adding the filters for nr.also.affected.importer and jointly.affected.importers
+
+
+    ## restrict data to the combination of selected importers
+    if(! incl.importers.strictness %in% c("ALL","ONE","ONEPLUS")){
+
+      stop.print <- "Please choose how to include the chosen importers (ONE/ALL/ONEPLUS)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
+
+    } else {
+
+      ## this is the 'ONEPLUS' case.
+      importer.combinations=unique(master.sliced$intervention.id)
+
+      if(incl.importers.strictness=="ALL"){
+
+        for(cty in importing.country){
+
+          e.c.ids=unique(subset(master.tuple, i.un==cty)$intervention.id)
+
+          importer.combinations=intersect(importer.combinations,
+                                          e.c.ids)
+          rm(e.c.ids)
+        }
+
+      }
+
+
+      if(incl.importers.strictness=="ONE"){
+
+        one.imp=subset(master.tuple, i.un %in% importing.country)
+        one.imp=unique(one.imp[,c("intervention.id","i.un")])
+
+        one.imp=aggregate(i.un ~intervention.id, one.imp, function(x) length(unique(x)))
+
+        importer.combinations=subset(one.imp, i.un==1)$intervention.id
+
+        rm(in.os, out, one.imp)
+
+      }
+
+
+      if(length(importer.combinations)==0){
+
+        stop.print <- "No rows left for the selected importer combintion (parameter incl.importers.strictness)."
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+
+      }
+
+    }
+    importer.interventions=importer.combinations
+
+
+
+    ## Nr of affected importers
     interventions.by.importer=unique(master.tuple[,c("intervention.id","i.un")])
     names(interventions.by.importer)=c("intervention.id", "importer.un")
 
 
-    if(is.null(importers)){
-      importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, i.un %in% importing.country), function(x) length(unique(x)))
-      names(importer.count)=c("intervention.id", "nr.importers.hit")
-      sole.importer=numeric()
 
-    }else{
-      importer.count=aggregate(i.un ~ intervention.id,subset(master.tuple, ! i.un %in% importing.country), function(x) length(unique(x)))
-      names(importer.count)=c("intervention.id", "nr.importers.hit")
-
-      sole.importer=setdiff(unique(subset(master.tuple, i.un %in% importing.country)$intervention.id),
-                            unique(subset(master.tuple, ! i.un %in% importing.country)$intervention.id))
-
-    }
+    ## min/max nr of importers
+    nr.importer.min=nr.importers[1]
+    nr.importer.max=nr.importers[2]
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Nr. of also affected importers: ", choice=paste(nr.importer.min, nr.importer.max, sep=" - ")))
 
 
-    if(is.null(nr.also.importers)){
-      importer.interventions=unique(interventions.by.importer$intervention.id)
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="Nr. of also affected importers:", choice="Any"))
-    }else{
-      importer.interventions=c(sole.importer,unique(subset(importer.count, nr.importers.hit<=nr.also.importers)$intervention.id))
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="Nr. of also affected importers:", choice=paste(nr.also.importers, " or less", sep="")))
-    }
+    ## Calculation form
+    if(! nr.importers.incl %in% c("ALL","SELECTED","UNSELECTED")){
 
+      stop.print <- "Please choose which imports to include into the calculation for the number of affected importers (ALL/SELECTED/UNSELECTED)."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)
 
+    }else {
 
-    if(is.null(jointly.affected.importers)){
-      importer.interventions=importer.interventions
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="Only include interventions where all specified importers are affected:", choice="No, just at least one of them."))
-    }else{
-      if(jointly.affected.importers){
-        importer.interventions=intersect(importer.interventions, subset(interventions.by.importer, importer.un==importing.country[1])$intervention.id)
+      if(nr.importers.incl=="ALL"){
 
-        if(length(importing.country)>1){
-          for(k in 2:length(importing.country)){
-            importer.interventions=intersect(importer.interventions, subset(interventions.by.importer, importer.un==importing.country[k])$intervention.id)
-          }
-        }
-
-        if(length(importer.interventions)==0){
-          stop.print <- "There are no interventions that jointly affect all specified importers."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)}
+        imp.count=aggregate(importer.un ~ intervention.id,interventions.by.importer,function(x) length(unique(x)))
 
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Only include interventions where all specified importers are affected:", choice="Yes."))
+                                data.frame(parameter="Nr. of also affected importers calculated based on: ", choice="All importers"))
 
-      }else{
-        importer.interventions=importer.interventions
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Only include interventions where all specified importers are affected:", choice="No, just at least one of them."))
+
       }
+
+      if(nr.importers.incl=="SELECTED"){
+
+        imp.count=aggregate(importer.un ~ intervention.id,subset(interventions.by.importer, importer.un %in% importing.country),function(x) length(unique(x)))
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Nr. of also affected importers calculated based on: ", choice="Selected importers"))
+
+      }
+
+      if(nr.importers.incl=="UNSELECTED"){
+
+        imp.count=aggregate(importer.un ~ intervention.id,subset(interventions.by.importer, ! importer.un %in% importing.country),function(x) length(unique(x)))
+
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Nr. of also affected importers calculated based on: ", choice="Unselected importers"))
+
+      }
+
+
+      importer.interventions=intersect(importer.interventions,
+                                       subset(imp.count, importer.un>=nr.importer.min &
+                                                importer.un<=nr.importer.max)$intervention.id)
+
     }
+
+
+
+    if(length(importer.interventions)==0){
+      stop.print <- "There are no interventions that satisfy your choices for nr.importers, nr.importers.incl and incl.importers.strictness simultaneously."
+      error.message <<- c(T, stop.print)
+      stop(stop.print)}
 
 
 
