@@ -331,6 +331,9 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
     }else {
 
+      # ensuring zero-AJ interventions are counted
+      master$a.un[is.na(master$a.un)]=1234
+
       if(nr.affected.incl=="ALL"){
 
         imp.count=aggregate(a.un ~ intervention.id, master ,function(x) length(unique(x)))
@@ -364,6 +367,8 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
       affected.interventions=intersect(affected.interventions,
                                        subset(imp.count, a.un>=nr.affected.min &
                                                 a.un<=nr.affected.max)$intervention.id)
+
+      master$a.un[master$a.un==1234]=NA
 
     }
 
