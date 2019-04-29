@@ -52,6 +52,7 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
+#' @param reporting.period Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).
 #' @param intra.year.duration Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.
 #' @param trade.statistic Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.
 #' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
@@ -117,6 +118,7 @@ gta_trade_coverage <- function(
   intervention.ids = NULL,
   keep.interventions = NULL,
   lag.adjustment=NULL,
+  reporting.period=NULL,
   intra.year.duration=TRUE,
   trade.statistic="share",
   trade.data="base",
@@ -164,7 +166,8 @@ gta_trade_coverage <- function(
                     keep.hs = keep.hs,
                     intervention.ids = intervention.ids,
                     keep.interventions = keep.interventions,
-                    lag.adjustment=lag.adjustment)
+                    lag.adjustment=lag.adjustment,
+                    reporting.period=reporting.period)
 
 
     ## removing certain problemtic, wide-reaching cases until further investigation

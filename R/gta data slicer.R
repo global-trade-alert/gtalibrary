@@ -37,6 +37,7 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
+#' @param reporting.period Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).
 #' @param df.name Set the name of the generated result data frame. Default is master.sliced.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
@@ -79,6 +80,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                          intervention.ids = NULL,
                          keep.interventions = NULL,
                          lag.adjustment=NULL,
+                         reporting.period=NULL,
                          df.name="master.sliced",
                          pc.name="parameter.choice.slicer",
                          xlsx = FALSE,
@@ -1241,6 +1243,42 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
         stop(stop.print)
 
       }
+
+
+      # reporting period
+      if(is.null(reporting.period)){
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Reporting period:", choice="Complete GTA monitoring period"))
+
+      } else {
+
+        report.start=as.Date(reporting.period[1], "%Y-%m-%d")
+        report.end=as.Date(reporting.period[2], "%Y-%m-%d")
+
+        if(is.na(report.start)|is.na(report.end)){
+          stop.print <- "Reporting period does not correspond to format YYY-MM-DD"
+          error.message <<- c(T, stop.print)
+          stop(stop.print)
+
+        }
+
+        master=subset(master, date.published>=report.start & date.published<=report.end)
+
+
+        parameter.choices=rbind(parameter.choices,
+                                data.frame(parameter="Reporting period:", choice="Complete GTA monitoring period"))
+
+      }
+
+      # Check # of rows
+      if(nrow(master)==0) {
+        stop.print <- "Unfortunately no rows remaining after filtering for reporting.period"
+        error.message <<- c(T, stop.print)
+        stop(stop.print)
+
+      }
+
 
       ######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
       # intervention.id

@@ -10,11 +10,11 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   gta.evaluation = NULL, affected.flows = c("inward",
   "outward subsidy"), importers = NULL, keep.importers = NULL,
   incl.importers.strictness = "ONEPLUS", group.importers = TRUE,
-  separate.importer.groups = FALSE, nr.importers = c(1, 999),
+  separate.importer.groups = FALSE, nr.importers = c(0, 999),
   nr.importers.incl = "ALL", jointly.affected.importers = FALSE,
   exporters = NULL, keep.exporters = NULL,
   incl.exporters.strictness = "ONEPLUS", group.exporters = TRUE,
-  separate.exporter.groups = FALSE, nr.exporters = c(1, 999),
+  separate.exporter.groups = FALSE, nr.exporters = c(0, 999),
   nr.exporters.incl = "ALL", implementers = NULL,
   implementer.role = NULL, keep.implementer = TRUE,
   group.implementers = TRUE, separate.implementer.groups = FALSE,
@@ -27,8 +27,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   hit.brackets = c(1, 99999), intervention.ids = NULL,
   keep.interventions = NULL, lag.adjustment = NULL,
-  intra.year.duration = TRUE, trade.statistic = "share",
-  trade.data = "base",
+  reporting.period = NULL, intra.year.duration = TRUE,
+  trade.statistic = "share", trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE, xlsx = FALSE, output.path = NULL)
 }
@@ -128,6 +128,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{keep.interventions}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
+
+\item{reporting.period}{Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).}
 
 \item{intra.year.duration}{Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.}
 
