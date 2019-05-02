@@ -49,76 +49,74 @@
 #' @author Global Trade Alert
 
 
-gta_plot_wrapper <- function(plot.title = NULL,
-                        plot.subtitle = NULL,
-                        x.data.type = "continuous",
-                        x.bottom.name = NULL,
-                        x.bottom.breaks = waiver(),
-                        x.bottom.limits = c(NA,NA),
-                        x.bottom.labels = waiver(),
-                        x.bottom.expand = c(0.05,0.05),
-                        x.top.enable = F,
-                        x.top.transform = 1,
-                        x.top.name = x.bottom.name,
-                        x.top.breaks = x.bottom.breaks,
-                        x.top.limits = x.bottom.limits,
-                        x.top.labels = waiver(),
-                        y.data.type = "continuous",
-                        y.left.name = NULL,
-                        y.left.breaks = waiver(),
-                        y.left.limits = c(NA,NA),
-                        y.left.labels = waiver(),
-                        y.left.expand = c(0.05,0.05),
-                        y.right.enable = T,
-                        y.right.transform = 1,
-                        y.right.name = y.left.name,
-                        y.right.breaks = y.left.breaks,
-                        y.right.limits = y.left.limits,
-                        y.right.labels = y.left.labels,
-                        colour.palette = gta_colour$qualitative,
-                        colour.labels = waiver(),
-                        colour.legend.title = waiver(),
-                        colour.legend.col = 1,
-                        fill.palette = gta_colour$qualitative,
-                        fill.labels = waiver(),
-                        fill.legend.title = waiver(),
-                        fill.legend.col = 1,
-                        flip.plot = F,
-                        facet.var = NULL,
-                        facet.ncol = 1,
-                        facet.nrow = 1
-                        ){
+gta_plot_wrapper <- function(
+  data=NULL,
+  data.x=NULL,
+  data.y=NULL,
+  group=NULL,
+  plot.title = NULL,
+  plot.subtitle = NULL,
+  x.data.type = "continuous",
+  x.bottom.name = NULL,
+  x.bottom.breaks = waiver(),
+  x.bottom.limits = NULL,
+  x.bottom.labels = waiver(),
+  x.bottom.expand = c(0.05,0.05),
+  x.top.enable = F,
+  x.top.transform = 1,
+  x.top.name = x.bottom.name,
+  x.top.breaks = x.bottom.breaks,
+  x.top.limits = x.bottom.limits,
+  x.top.labels = waiver(),
+  y.data.type = "continuous",
+  y.left.name = NULL,
+  y.left.breaks = waiver(),
+  y.left.limits = NULL,
+  y.left.labels = waiver(),
+  y.left.expand = c(0.05,0.05),
+  y.right.enable = T,
+  y.right.transform = 1,
+  y.right.name = y.left.name,
+  y.right.breaks = y.left.breaks,
+  y.right.limits = y.left.limits,
+  y.right.labels = y.left.labels,
+  colour.palette = gta_colour$qualitative,
+  colour.labels = waiver(),
+  colour.legend.title = waiver(),
+  colour.legend.col = 1,
+  fill.palette = gta_colour$qualitative,
+  fill.labels = waiver(),
+  fill.legend.title = waiver(),
+  fill.legend.col = 1,
+  flip.plot = F,
+  facet.var = NULL,
+  facet.ncol = 1,
+  facet.nrow = 1
+){
   library("scales")
+
   gta_colour_palette()
+
+  if(is.character(data[,data.x])) {
+    data[,data.x] <- as.factor(data[,data.x])
+  }
+  if(is.character(data[,data.y])) {
+    data[,data.y] <- as.factor(data[,data.y])
+  }
 
   list(
 
-  ggtitle(plot.title,
-          subtitle = plot.subtitle),
+    ggtitle(plot.title,
+            subtitle = plot.subtitle),
 
 
-  labs(x=x.bottom.name,
-       y=y.left.name),
+    labs(x=x.bottom.name,
+         y=y.left.name),
 
-if (tolower(y.data.type) == "continuous"){
-    if (y.right.enable==T){
-      scale_y_continuous(limits = y.left.limits,
-                         breaks = y.left.breaks,
-                         expand = y.left.expand,
-                         labels = y.left.labels,
-                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",y.right.transform))),
-                                             name = y.right.name,
-                                             labels = y.right.labels,
-                                             breaks = y.right.breaks))
-        } else {
-        scale_y_continuous(limits = y.left.limits,
-                             breaks = y.left.breaks,
-                             expand = y.left.expand,
-                             labels = y.left.labels)}
 
-  } else if (tolower(y.data.type) == "discrete") {
+    if (is.numeric(data[,data.y])){
       if (y.right.enable==T){
-        scale_y_discrete(limits = y.left.limits,
+        scale_y_continuous(limits = y.left.limits,
                            breaks = y.left.breaks,
                            expand = y.left.expand,
                            labels = y.left.labels,
@@ -127,18 +125,28 @@ if (tolower(y.data.type) == "continuous"){
                                                labels = y.right.labels,
                                                breaks = y.right.breaks))
       } else {
-        scale_y_discrete(limits = y.left.limits,
+        scale_y_continuous(limits = y.left.limits,
                            breaks = y.left.breaks,
                            expand = y.left.expand,
-                           labels = y.left.labels)}},
+                           labels = y.left.labels)}
 
+    } else if (is.numeric(data[,data.y])==F) {
+      if (y.right.enable==T){
+        scale_y_discrete(limits = y.left.limits,
+                         breaks = y.left.breaks,
+                         expand = y.left.expand,
+                         labels = y.left.labels,
+                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",y.right.transform))),
+                                             name = y.right.name,
+                                             labels = y.right.labels,
+                                             breaks = y.right.breaks))
+      } else {
+        scale_y_discrete(limits = y.left.limits,
+                         breaks = y.left.breaks,
+                         expand = y.left.expand,
+                         labels = y.left.labels)}},
 
-  if ((tolower(x.data.type) %in% c("continuous", "discrete")) == F){
-    stop("Please specify data datatype of the x-axis data, 'continuous' or 'discrete'")
-
-    } else {
-
-    if (tolower(x.data.type) == "continuous") {
+    if (is.numeric(data[,data.x])) {
       if (x.top.enable==T){
         scale_x_continuous(limits = x.bottom.limits,
                            breaks = x.bottom.breaks,
@@ -154,34 +162,34 @@ if (tolower(y.data.type) == "continuous"){
                            expand = x.bottom.expand,
                            labels = x.bottom.labels)}
 
-      } else if (tolower(x.data.type) == "discrete") {
-        if (x.top.enable==T){
-          scale_x_discrete(limits = x.bottom.limits,
-                             breaks = x.bottom.breaks,
-                             expand = x.bottom.expand,
-                             labels = x.bottom.labels,
-                             sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",x.top.transform))),
-                                                 name = x.top.name,
-                                                 labels = x.top.labels,
-                                                 breaks = x.top.breaks))
-        } else {
-          scale_x_discrete(limits = x.bottom.limits,
-                             breaks = x.bottom.breaks,
-                             expand = x.bottom.expand,
-                             labels = x.bottom.labels)}}},
+    } else if (is.numeric(data[,data.x])==F) {
+      if (x.top.enable==T){
+        scale_x_discrete(limits = x.bottom.limits,
+                         breaks = x.bottom.breaks,
+                         expand = x.bottom.expand,
+                         labels = x.bottom.labels,
+                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",x.top.transform))),
+                                             name = x.top.name,
+                                             labels = x.top.labels,
+                                             breaks = x.top.breaks))
+      } else {
+        scale_x_discrete(limits = x.bottom.limits,
+                         breaks = x.bottom.breaks,
+                         expand = x.bottom.expand,
+                         labels = x.bottom.labels)}},
 
 
-  scale_color_manual(values=colour.palette, labels=colour.labels),
+    scale_color_manual(values=colour.palette, labels=colour.labels),
 
 
-  scale_fill_manual(values=fill.palette, labels = fill.labels),
+    scale_fill_manual(values=fill.palette, labels = fill.labels),
 
-  guides(color = guide_legend(title = colour.legend.title, title.position = "top", ncol = colour.legend.col),
-         fill = guide_legend(title = fill.legend.title, title.position = "top", ncol = fill.legend.col)),
-
-
-  if (flip.plot == T) {coord_flip()},
+    guides(color = guide_legend(title = colour.legend.title, title.position = "top", ncol = colour.legend.col),
+           fill = guide_legend(title = fill.legend.title, title.position = "top", ncol = fill.legend.col)),
 
 
-  if (is.null(facet.var)==F){facet_wrap(facets=vars(eval(facet.var)), ncol = facet.ncol, nrow = facet.nrow)}
-)}
+    if (flip.plot == T) {coord_flip()},
+
+
+    if (is.null(facet.var)==F){facet_wrap(facets=vars(eval(facet.var)), ncol = facet.ncol, nrow = facet.nrow)}
+  )}
