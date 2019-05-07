@@ -10,9 +10,6 @@
 
 gta_update_library = function(x){
   devtools::install_github("global-trade-alert/gtalibrary", force=T)
-  detach("package:gtalibrary", unload=T, force=T)
-
-  gc()
   library("gtalibrary")
 
   print("You are up to date.")
