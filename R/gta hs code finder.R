@@ -76,10 +76,11 @@ gta_hs_code_finder=function(products,
 
             find.hs=rbind(find.hs,
                           data.frame(product.name=prd,
-                          hs.code=as.character(paste(unlist(str_extract_all(xpathSApply(html, "//div[@id='hscode']",xmlValue), "\\d+")),collapse="")),
-                          source="Eurostat",
-                          stringsAsFactors = F)
-                          )
+                                     hs.code=as.character(paste(unlist(str_extract_all(xpathSApply(html, "//div[@id='hscode']",xmlValue), "\\d+")),collapse="")),
+                                     hs.order=1,
+                                     source="Eurostat",
+                                     stringsAsFactors = F)
+            )
           }
 
           rm(html)
@@ -115,7 +116,7 @@ gta_hs_code_finder=function(products,
 
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
-         if(length(xpathSApply(html, guru.path,xmlValue))>0){
+          if(length(xpathSApply(html, guru.path,xmlValue))>0){
 
             guru.hs=unique(substr(unlist(str_extract_all(xpathSApply(html, guru.path,xmlValue),"\\d+")),1,6))
             guru.hs=guru.hs[nchar(guru.hs)>=4]
@@ -125,6 +126,7 @@ gta_hs_code_finder=function(products,
               find.hs=rbind(find.hs,
                             data.frame(product.name=prd,
                                        hs.code=guru.hs,
+                                       hs.order=1:length(guru.hs),
                                        source="Eximguru",
                                        stringsAsFactors = F)
               )
@@ -154,6 +156,7 @@ gta_hs_code_finder=function(products,
             find.hs=rbind(find.hs,
                           data.frame(product.name=prd,
                                      hs.code=customs.found,
+                                     hs.order=1:length(customs.found),
                                      source="EU Customs (2013 edition)",
                                      stringsAsFactors = F)
             )
@@ -179,6 +182,7 @@ gta_hs_code_finder=function(products,
             find.hs=rbind(find.hs,
                           data.frame(product.name=prd,
                                      hs.code=google.hs,
+                                     hs.order=1:length(google.hs),
                                      source="Google",
                                      stringsAsFactors = F)
             )
@@ -210,6 +214,7 @@ gta_hs_code_finder=function(products,
               find.hs=rbind(find.hs,
                             data.frame(product.name=prd,
                                        hs.code=zauba.hs,
+                                       hs.order=1:length(zauba.hs),
                                        source="Zauba",
                                        stringsAsFactors = F)
               )
@@ -242,6 +247,7 @@ gta_hs_code_finder=function(products,
               find.hs=rbind(find.hs,
                             data.frame(product.name=prd,
                                        hs.code=etc.hs,
+                                       hs.order=1:length(etc.hs),
                                        source="E-to-China",
                                        stringsAsFactors = F)
               )
@@ -278,6 +284,7 @@ gta_hs_code_finder=function(products,
               find.hs=rbind(find.hs,
                             data.frame(product.name=prd,
                                        hs.code=bianma.hs,
+                                       hs.order=1:length(bianma.hs),
                                        source="HSbianma",
                                        stringsAsFactors = F)
               )
@@ -314,6 +321,7 @@ gta_hs_code_finder=function(products,
               find.hs=rbind(find.hs,
                             data.frame(product.name=prd,
                                        hs.code=cybex.hs,
+                                       hs.order=1:length(cybex.hs),
                                        source="Cybex",
                                        stringsAsFactors = F)
               )
@@ -328,9 +336,9 @@ gta_hs_code_finder=function(products,
 
         }
 
-        } else {
+      } else {
         stop("No valid source specified.")
-        }
+      }
 
       if("hs.descriptions" %in% tolower(sources)){
         print("Checking HS code descriptions ...")
@@ -353,6 +361,7 @@ gta_hs_code_finder=function(products,
           find.hs=rbind(find.hs,
                         data.frame(product.name=prd,
                                    hs.code=simple.hs,
+                                   hs.order=1:length(simple.hs),
                                    source="HS code descriptions",
                                    stringsAsFactors = F)
           )
@@ -406,11 +415,11 @@ gta_hs_code_finder=function(products,
 
   if(aggregate){
     if (nrow(find.hs)>0){
-    nr.hits=aggregate(source ~ product.name + hs.code, find.hs, function(x) length(unique(x)))
-    names(nr.hits)=c("product.name","hs.code","nr.sources")
+      nr.hits=aggregate(source ~ product.name + hs.code, find.hs, function(x) length(unique(x)))
+      names(nr.hits)=c("product.name","hs.code","nr.sources")
 
-    find.hs=merge(nr.hits, aggregate(source ~ product.name + hs.code, find.hs, function(x) paste(unique(x), collapse="; ")), by=c("product.name","hs.code"))
-    names(find.hs)=c("product.name","hs.code","nr.sources", "source.names")
+      find.hs=merge(nr.hits, aggregate(source ~ product.name + hs.code, find.hs, function(x) paste(unique(x), collapse="; ")), by=c("product.name","hs.code"))
+      names(find.hs)=c("product.name","hs.code","nr.sources", "source.names")
     }
   }
 
@@ -431,7 +440,7 @@ gta_hs_code_finder=function(products,
 
 
   if (nrow(find.hs)>0){
-  return(find.hs)
+    return(find.hs)
   } else {
     return("This query has not found any new codes.")
   }
