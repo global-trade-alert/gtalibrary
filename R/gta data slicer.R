@@ -482,12 +482,13 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       if(is.null(date.period)){
 
-        if(keep.implementation.na==F) {
+        if(is.null(keep.implementation.na)==F) {
+          if(keep.implementation.na==F) {
 
           master=subset(master, is.na(date.implemented)==F)
           parameter.choices=rbind(parameter.choices,
                                   data.frame(parameter="Implementation period:", choice="Full GTA monitoring period, and excluding interventions without implementation date"))
-
+          }
 
         } else {
 
