@@ -739,7 +739,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                                 data.frame(parameter="Currently in force:", choice="Regardless"))
       } else {
 
-      if(is.null(in.force.today)==F){
+      if(tolower(in.force.today) %in% c("yes","no","any")){
 
         if(tolower(in.force.today)=="any"){
 
@@ -747,7 +747,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
                                   data.frame(parameter="Currently in force:", choice="Regardless"))
         }
 
-        if (tolower(in.force.today)=="yes"){
+        if(tolower(in.force.today)=="yes"){
 
           master=subset(master, date.implemented<=Sys.Date() & (is.na(date.removed)==T|date.removed>=Sys.Date()))
 
