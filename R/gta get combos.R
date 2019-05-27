@@ -23,6 +23,8 @@ gta_get_combos=function(recombine.me=NULL,
     stop("The supplied vector has less than two elements.")
   }
   
+  recombine.me=list(recombine.me)
+  
   ## setting the minimum number of elements inside a combination.
   combo.tuple.min=tuple.range[1]
   
