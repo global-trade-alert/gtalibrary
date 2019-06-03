@@ -183,15 +183,8 @@ gta_trade_value_bilateral <- function(
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="CPC sectors included in trade data:", choice=paste(sprintf("%03i",cpc.sectors), collapse = ", ")))
 
-      if(keep.cpc==T){
-        hs.codes=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
-        keep.hs=keep.cpc
-      }else {
-        strs=gtalibrary::cpc.to.hs
-        hs.codes=strs$hs[strs$cpc %in% cpc.sectors]
-        keep.hs=keep.cpc
-        rm(strs)
-      }
+      hs.codes=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
+      keep.hs=keep.cpc
 
     } else {
 
@@ -223,6 +216,8 @@ gta_trade_value_bilateral <- function(
     } else{
       trade.base=subset(trade.base, ! hs6 %in% hs.codes)
     }
+  } else {
+    stop("hs.coded parameter is NULL")
   }
 
 
