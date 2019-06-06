@@ -25,7 +25,7 @@ gta_plot_saver(plot = NULL, path = "/", name = "plot", width = 21,
 
 \item{width}{Takes in a specific plot height. If unspecified, height will be calculated through aspect.ratio.}
 
-\item{eps}{Set cairo_ps output to TRUE if you want to generate an eps file with transparency levels. Please make sure "Cairo" package is installed on your machine. Default: FALSE.}
+\item{eps}{Set cairo_ps output to TRUE if you want to generate an eps file with transparency levels. Default: FALSE.}
 }
 \description{
 This function saves ggplot objects as png and eps. Optimized for width of A4 paper, but can be changed accordingly.
