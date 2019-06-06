@@ -5,7 +5,8 @@
 \title{Save png and eps plots together more easily.}
 \usage{
 gta_plot_saver(plot = NULL, path = "/", name = "plot", width = 21,
-  height = NULL, png = T, eps = T, aspect.ratio = 21/29.7)
+  height = NULL, png = T, eps = T, cairo_ps = F,
+  aspect.ratio = 21/29.7)
 }
 \arguments{
 \item{plot}{Specify the plot to save.}
@@ -23,6 +24,8 @@ gta_plot_saver(plot = NULL, path = "/", name = "plot", width = 21,
 \item{aspect.ratio}{Define the aspect ratio of the plot as integer. Width = 1, height = 1*aspect.ratio. If height is defined, aspect.ratio does have no effect.}
 
 \item{width}{Takes in a specific plot height. If unspecified, height will be calculated through aspect.ratio.}
+
+\item{eps}{Set cairo_ps output to TRUE if you want to generate an eps file with transparency levels. Please make sure "Cairo" package is installed on your machine. Default: FALSE.}
 }
 \description{
 This function saves ggplot objects as png and eps. Optimized for width of A4 paper, but can be changed accordingly.
