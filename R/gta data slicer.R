@@ -96,7 +96,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
   parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
 
   ## data path
-  if(data.path=="online"){
+  if(tolower(data.path)=="online"){
     print("Downloading the latest copy of the GTA dataset.The file is deleted after loading the data into your environment.")
     download.file("https://www.dropbox.com/s/78kpe232p2b36ze/GTA%20full%20data%20export.Rdata?dl=1","GTA data.Rdata")
     load("GTA data.Rdata")
