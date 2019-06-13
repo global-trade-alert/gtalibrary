@@ -216,8 +216,6 @@ gta_trade_value_bilateral <- function(
     } else{
       trade.base=subset(trade.base, ! hs6 %in% hs.codes)
     }
-  } else {
-    stop("hs.coded parameter is NULL")
   }
 
 
