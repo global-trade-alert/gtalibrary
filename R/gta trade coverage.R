@@ -69,8 +69,8 @@
 # Function infos and parameters  --------------------------------------------
 
 gta_trade_coverage <- function(
-  data.path="0 report production/GTA 24/0 GTA database at production/master_plus.Rdata",
-  replica.path="0 report production/GTA 24/0 GTA database at production/database replica - parts - base.Rdata",
+  data.path="data/master_plus.Rdata",
+  replica.path="data/database replica/database replica - parts - base.Rdata",
   coverage.period=NULL,
   current.year.todate=TRUE,
   gta.evaluation= NULL,
