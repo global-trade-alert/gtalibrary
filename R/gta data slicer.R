@@ -47,7 +47,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-gta_data_slicer=function(data.path = "0 report production/GTA 24/0 GTA database at production/master_plus.Rdata",
+gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                          gta.evaluation= NULL,
                          affected.flows = NULL,
                          implementing.country = NULL,
