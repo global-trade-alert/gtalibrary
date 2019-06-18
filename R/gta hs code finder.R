@@ -9,7 +9,8 @@
 #' @param aggregate Aggregate result to one row per product name - HS code combination. Default is TRUE.
 #' @param check.archive Specify whether the search term should be checked against the existing HS code archive. Only new terms will be returned. Default is FALSE.
 #' @param archive.location Specify the path to the archive location.
-
+#' @param wait.time Time in seconds that you are willing to wait for a source to load.
+#'
 #'
 #' @return A data frame including the product names, HS codes and sources plus a vector of search terms that resulted in error messages.
 #' @references www.globaltradealert.org
@@ -20,7 +21,8 @@ gta_hs_code_finder=function(products,
                             sources=c("hs.descriptions","eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma", "eximguru", "cybex"),
                             aggregate=T,
                             check.archive=F,
-                            archive.location=NULL){
+                            archive.location=NULL,
+                            wait.time=4){
 
   library(webdriver)
   library(splitstackshape)
@@ -58,18 +60,8 @@ gta_hs_code_finder=function(products,
           e$sendKeys(as.character(prd))
           e$sendKeys('\ue007')
 
-          print("Refreshing Eurostat ...")
-          refreshed=FALSE
-          t=Sys.time()
-
-          while(refreshed==F & as.numeric(Sys.time()-t)<=2.5){
-            print("Waiting ...")
-            html <- htmlParse(remDr$getSource()[[1]], asText=T)
-            refreshed=length(xpathSApply(html, "//h2[contains(text(),'assumed characteristics')]", xmlValue))>0
-
-          }
-          print("Eurostat's fresh!")
-
+          b_load_site(xpath="//h2[contains(text(),'assumed characteristics')]",
+                      wait=wait.time)
 
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
           if(length(xpathSApply(html, "//div[@id='hscode']",xmlValue))>0){
@@ -101,18 +93,9 @@ gta_hs_code_finder=function(products,
 
           guru.path="//div[@class='Search']/descendant::table/descendant::tr/td[1]/a"
 
-          print("Refreshing Eximguru ...")
-          refreshed=FALSE
-          t=Sys.time()
 
-          while(refreshed==F & as.numeric(Sys.time()-t)<=2.5){
-            print("Waiting ...")
-            html <- htmlParse(remDr$getSource()[[1]], asText=T)
-            refreshed=length(xpathSApply(html, guru.path, xmlValue))>0
-
-          }
-          print("Eximguru's fresh!")
-
+          b_load_site(xpath=guru.path,
+                      wait=wait.time)
 
           html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
@@ -199,9 +182,14 @@ gta_hs_code_finder=function(products,
           print("Checking Zauba ...")
 
           remDr$go(paste("https://www.zauba.com/USA-htscodes/", paste(gsub(" ","+", prd), sep="-"),sep=""))
-          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           zauba.path="//table/descendant::td/descendant::a"
+
+          b_load_site(xpath=zauba.path,
+                      wait=wait.time)
+
+
+          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           if(length(xpathSApply(html, zauba.path, xmlValue))>0){
 
@@ -233,9 +221,13 @@ gta_hs_code_finder=function(products,
           print("Checking E-to-China ...")
 
           remDr$go(paste("http://hs.e-to-china.com/ks-", paste(gsub(" ","+", prd), sep="+"),"-d_3-t_1.html",sep=""))
-          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           etc.path="//a[@class='hs_tree']"
+
+          b_load_site(xpath=etc.path,
+                      wait=wait.time)
+
+          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           if(length(xpathSApply(html, etc.path, xmlGetAttr, "name"))>0){
 
@@ -270,9 +262,13 @@ gta_hs_code_finder=function(products,
           print("Checking HSbianma ...")
 
           remDr$go(paste("https://hsbianma.com/Search?keywords=",gsub(" ","%20",prd),"&filterFailureCode=true", sep=""))
-          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           bianma.path="//table[@class='result']//descendant::tr/td[1]/a"
+
+          b_load_site(xpath=bianma.path,
+                      wait=wait.time)
+
+          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           if(length(xpathSApply(html, bianma.path, xmlValue))>0){
 
@@ -306,10 +302,13 @@ gta_hs_code_finder=function(products,
           print("Checking Cybex ...")
 
           remDr$go(paste("http://www.cybex.in/HS-Codes/of-",gsub(" ","-",prd),".aspx", sep=""))
-          html <- htmlParse(remDr$getSource()[[1]], asText=T)
-
 
           cybex.path="//span[contains(text(),'Hs Code')]/following-sibling::a[1]"
+
+          b_load_site(xpath=cybex.path,
+                      wait=wait.time)
+
+          html <- htmlParse(remDr$getSource()[[1]], asText=T)
 
           if(length(xpathSApply(html, cybex.path, xmlValue))>0){
 
