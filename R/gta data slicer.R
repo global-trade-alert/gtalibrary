@@ -277,7 +277,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
       ## this is the 'ONEPLUS' case.
       affected.combinations=unique(master$intervention.id)
 
-      if(incl.affected.strictness=="ALL"){
+      if(toupper(incl.affected.strictness)=="ALL"){
 
         for(cty in affected){
 
@@ -291,7 +291,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
       }
 
 
-      if(incl.affected.strictness=="ONE"){
+      if(toupper(incl.affected.strictness)=="ONE"){
 
         one.aj=subset(master, a.un %in% affected)
 
