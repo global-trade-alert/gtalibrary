@@ -852,7 +852,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.mast)){
+        if(is.null(keep.mast) | !is.logical(keep.mast)){
           stop.print <- "Please specify whether you want to focus on the specified mast chapters or exclude them (keep.mast=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -882,7 +882,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
 
-            } else {
+            } else if(keep.mast==F){
               master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
 
               parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice=="All"]="As implied by MAST choice"
@@ -916,7 +916,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.level)){
+        if(is.null(keep.level) | !is.logical(keep.level)){
           stop.print <- "Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -940,7 +940,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Implementation levels included:", choice=paste(implementation.level, collapse = ", ")))
 
-            } else {
+            } else if(keep.level==F){
               master=subset(master, ! tolower(implementation.level) %in% tolower(implementation.level.choice))
 
               parameter.choices=rbind(parameter.choices,
