@@ -22,7 +22,7 @@ gta_hs_code_finder=function(products,
                             aggregate=T,
                             check.archive=F,
                             archive.location=NULL,
-                            wait.time=60){
+                            wait.time=4){
 
   library(webdriver)
   library(splitstackshape)
@@ -34,7 +34,7 @@ gta_hs_code_finder=function(products,
   find.hs=data.frame(product.name=character(), hs.code=character(), source=character(), stringsAsFactors = F)
 
   pjs <- run_phantomjs()
-  remDr=Session$new(port=pjs$port)
+  remDr<<-Session$new(port=pjs$port)
 
   check.errors=character()
 
@@ -450,4 +450,6 @@ gta_hs_code_finder=function(products,
 
   hs.code.check.errors<<-check.errors
 }
+
+
 
