@@ -306,7 +306,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       if(length(affected.combinations)==0){
 
-        stop.print <- "No rows left for the selected affected jurisdiction combintion (parameter incl.affected.strictness)."
+        stop.print <- "No rows left for the selected affected jurisdiction combination (parameter incl.affected.strictness)."
         error.message <<- c(T, stop.print)
         stop(stop.print)
 
