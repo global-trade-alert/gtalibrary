@@ -789,7 +789,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.type)){
+        if(is.null(keep.type) | !is.logical(keep.type)){
           stop.print <- "Please specify whether you want to focus on the specified intervention types or exclude them (keep.type=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -808,7 +808,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Intervention types included:", choice=paste(intervention.types, collapse = ", ")))
 
-            } else {
+            } else if (keep.type==F){
               master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.types))
 
               parameter.choices=rbind(parameter.choices,
