@@ -852,7 +852,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.mast)){
+        if(is.null(keep.mast) | !is.logical(keep.mast)){
           stop.print <- "Please specify whether you want to focus on the specified mast chapters or exclude them (keep.mast=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -882,7 +882,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
 
-            } else {
+            } else if(keep.mast==F){
               master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
 
               parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice=="All"]="As implied by MAST choice"
@@ -916,7 +916,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.level)){
+        if(is.null(keep.level) | !is.logical(keep.level)){
           stop.print <- "Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -940,7 +940,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Implementation levels included:", choice=paste(implementation.level, collapse = ", ")))
 
-            } else {
+            } else if(keep.level==F){
               master=subset(master, ! tolower(implementation.level) %in% tolower(implementation.level.choice))
 
               parameter.choices=rbind(parameter.choices,
@@ -971,7 +971,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.firms)){
+        if(is.null(keep.firms) | !is.logical(keep.firms)){
           stop.print <- "Please specify whether you want to focus on the specified eligibe firms categories or exclude them (keep.level=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -995,7 +995,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
               parameter.choices=rbind(parameter.choices,
                                       data.frame(parameter="Eligible firms categories included:", choice=paste(eligible.firms, collapse = ", ")))
 
-            } else {
+            } else if (keep.firms==F){
               master=subset(master, ! tolower(eligible.firms) %in% tolower(eligible.firms.choice))
 
               parameter.choices=rbind(parameter.choices,
@@ -1026,7 +1026,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.cpc)){
+        if(is.null(keep.cpc) | !is.logical(keep.cpc)){
           stop.print <- "Please specify whether you want to focus on the specified CPC sectors or exclude them (keep.cpc=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -1049,7 +1049,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="CPC codes included:", choice=paste(cpc.sectors, collapse = ", ")))
 
-          } else {
+          } else if (keep.cpc==F){
             master.temp=subset(master.temp, ! as.numeric(affected.sector) %in% cpc.sectors)
 
             parameter.choices=rbind(parameter.choices,
@@ -1141,7 +1141,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.hs)){
+        if(is.null(keep.hs) | !is.logical(keep.hs)){
           stop.print <- "Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -1163,7 +1163,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="HS codes included:", choice=paste(hs.codes, collapse = ", ")))
 
-          } else {
+          } else if(keep.hs==F){
             master.temp=subset(master.temp, ! affected.product %in% hs.codes)
 
             parameter.choices=rbind(parameter.choices,
@@ -1301,7 +1301,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.interventions)){
+        if(is.null(keep.interventions) | !is.logical(keep.interventions)){
           stop.print <- "Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.interventions=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -1326,7 +1326,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="Intervention IDs included:", choice=paste(intervention.ids, collapse = ", ")))
 
-          } else {
+          } else if(keep.interventions==F){
             master=subset(master, ! intervention.id %in% intervention.ids)
 
             parameter.choices=rbind(parameter.choices,
