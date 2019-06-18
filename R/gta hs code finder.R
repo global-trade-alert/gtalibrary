@@ -22,7 +22,7 @@ gta_hs_code_finder=function(products,
                             aggregate=T,
                             check.archive=F,
                             archive.location=NULL,
-                            wait.time=4){
+                            wait.time=60){
 
   library(webdriver)
   library(splitstackshape)
@@ -450,5 +450,4 @@ gta_hs_code_finder=function(products,
 
   hs.code.check.errors<<-check.errors
 }
-
 
