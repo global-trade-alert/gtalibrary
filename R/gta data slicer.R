@@ -229,7 +229,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.affected)){
+        if(is.null(keep.affected) | !is.logical(keep.affected)){
           stop.print <- "Please specify whether you want to focus on the specified affected countries or exclude them (keep.affected=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -242,7 +242,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="Affected countries included:", choice=paste(affected.country, collapse = ", ")))
 
-          } else {
+          } else if (keep.affected == F){
             affected=setdiff(gtalibrary::country.correspondence$un_code, affected)
 
             parameter.choices=rbind(parameter.choices,
