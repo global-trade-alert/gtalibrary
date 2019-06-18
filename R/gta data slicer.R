@@ -183,7 +183,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
 
       } else {
 
-        if(is.null(keep.implementer)){
+        if(is.null(keep.implementer) & keep.implementer!= T & keep.implementer != F){
           stop.print <- "Please specify whether you want to focus on the specified implementing countries or exclude them (keep.implementer=T/F)."
           error.message <<- c(T, stop.print)
           stop(stop.print)
@@ -198,7 +198,7 @@ gta_data_slicer=function(data.path="data/master_plus.Rdata",
             parameter.choices=rbind(parameter.choices,
                                     data.frame(parameter="Implementing countries included:", choice=paste(implementing.country, collapse = ", ")))
 
-          } else {
+          } else if (keep.implementer==F){
             master=subset(master, ! i.un %in% implementers)
 
             parameter.choices=rbind(parameter.choices,
