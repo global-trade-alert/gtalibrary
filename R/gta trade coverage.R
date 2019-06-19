@@ -1268,11 +1268,11 @@ gta_trade_coverage <- function(
     }
 
 
-    if(intra.year.duration == T){
+    if(intra.year.duration){
       master.coverage$trade.value.affected=master.coverage$share* master.coverage$trade.value
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Adjusted for intra-year duration:", choice="Yes"))
-    } else if(intra.year.duration == F){
+    } else {
       master.coverage$trade.value.affected=master.coverage$trade.value
       parameter.choices=rbind(parameter.choices,
                               data.frame(parameter="Adjusted for intra-year duration:", choice="No"))
