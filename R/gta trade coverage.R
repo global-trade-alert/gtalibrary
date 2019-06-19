@@ -514,10 +514,10 @@ gta_trade_coverage <- function(
       implementing.country=gtalibrary::country.names$un_code
       parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice="All"))
     }else {
-      if(keep.implementer==T){
+      if(keep.implementer){
         implementing.country=gta_un_code_vector(implementers, "implementing")
         parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste(implementers, collapse=", ")))
-      } else if(keep.implementer==F){
+      } else {
         implementing.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(implementers, "implementing"))
         parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste("all except ",paste(implementers, collapse=", "), sep="")))
       }
