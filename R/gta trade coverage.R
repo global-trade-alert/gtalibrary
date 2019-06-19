@@ -2075,7 +2075,7 @@ gta_trade_coverage <- function(
     ## Concluding cosmetics
     print("Making it pretty ...")
     ## importer names
-    countries=gtalibrary::country.names
+    countries=gtalibrary::country.names[,c("un_code","name","jurisdiction.id")]
     countries$name=as.character(countries$name)
 
     # rbind country group names if necessary
