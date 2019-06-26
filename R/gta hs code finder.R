@@ -422,6 +422,7 @@ gta_hs_code_finder=function(products,
     }
   }
 
+  already.in.archive=data.frame()
   if (check.archive) {
     if (nrow(find.hs)>0){
       if (is.null(archive.location)==T) {
@@ -431,7 +432,9 @@ gta_hs_code_finder=function(products,
         load(archive.location)
 
         if (unique(tolower(find.hs$product.name)) %in% unique(tolower(phrase.table$phrase))) {
-          find.hs <- subset(find.hs, ! hs.code %in% unique(subset(code.suggested, phrase.id == phrase.table$phrase.id[tolower(phrase.table$phrase) == tolower(products)])$hs.code.6))
+
+          find.hs$in.archive=find.hs$hs.code %in% unique(subset(code.suggested, phrase.id %in% phrase.table$phrase.id[tolower(phrase.table$phrase) == tolower(products)])$hs.code.6)
+
         }
       }
     }
