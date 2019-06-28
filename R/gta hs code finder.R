@@ -49,7 +49,8 @@ gta_hs_code_finder=function(products,
       if(sum(as.numeric(c("eurostat", "eu.customs", "zauba", "e.to.china", "google","hsbianma","eximguru", "cybex") %in% tolower(sources)))>0){
 
 
-        if("eurostat" %in% tolower(sources)){
+        tryCatch({
+          if("eurostat" %in% tolower(sources)){
 
           print("Checking Eurostat ...")
 
@@ -77,10 +78,24 @@ gta_hs_code_finder=function(products,
 
           rm(html)
 
+          }
+        },
+        error = function(c) {
+
+          print(paste("Eurostat: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
+
+
+
         }
+        )
 
-
-        if("eximguru" %in% tolower(sources)){
+        tryCatch({
+          if("eximguru" %in% tolower(sources)){
 
           print("Checking Eximguru ...")
 
@@ -123,8 +138,23 @@ gta_hs_code_finder=function(products,
 
 
         }
+        },
+        error = function(c) {
 
-        if("eu.customs" %in% tolower(sources)){
+          print(paste("Eximguru: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
+
+
+
+        }
+        )
+
+        tryCatch({
+          if("eu.customs" %in% tolower(sources)){
 
           print("Checking EU customs ...")
 
@@ -147,8 +177,23 @@ gta_hs_code_finder=function(products,
             rm(customs.found, html)
           }
         }
+        },
+        error = function(c) {
 
-        if("google" %in% tolower(sources)){
+          print(paste("EU customs: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
+
+
+
+        }
+        )
+
+        tryCatch({
+          if("google" %in% tolower(sources)){
 
           print("Checking Google ...")
 
@@ -174,10 +219,23 @@ gta_hs_code_finder=function(products,
 
           rm(google.txt, google.hs, html)
         }
+        },
+        error = function(c) {
+
+          print(paste("Google: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
 
 
 
-        if("zauba" %in% tolower(sources)){
+        }
+        )
+
+        tryCatch({
+          if("zauba" %in% tolower(sources)){
 
           print("Checking Zauba ...")
 
@@ -215,8 +273,23 @@ gta_hs_code_finder=function(products,
 
           rm(html)
         }
+        },
+        error = function(c) {
 
-        if("e.to.china" %in% tolower(sources)){
+          print(paste("Zauba: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
+
+
+
+        }
+        )
+
+        tryCatch({
+          if("e.to.china" %in% tolower(sources)){
 
           print("Checking E-to-China ...")
 
@@ -255,9 +328,23 @@ gta_hs_code_finder=function(products,
           rm(html)
 
         }
+        },
+        error = function(c) {
+
+          print(paste("HS e-t-n: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
 
 
-        if("hsbianma" %in% tolower(sources)){
+
+        }
+        )
+
+        tryCatch({
+          if("hsbianma" %in% tolower(sources)){
 
           print("Checking HSbianma ...")
 
@@ -295,9 +382,23 @@ gta_hs_code_finder=function(products,
 
 
         }
+        },
+        error = function(c) {
+
+          print(paste("hsbianma: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
 
 
-        if("cybex" %in% tolower(sources)){
+
+        }
+        )
+
+        tryCatch({
+          if("cybex" %in% tolower(sources)){
 
           print("Checking Cybex ...")
 
@@ -334,6 +435,20 @@ gta_hs_code_finder=function(products,
 
 
         }
+        },
+        error = function(c) {
+
+          print(paste("Cybex: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
+
+
+
+        }
+        )
 
       } else {
         stop("No valid source specified.")
