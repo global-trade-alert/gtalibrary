@@ -31,7 +31,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   reporting.period = NULL, intra.year.duration = TRUE,
   trade.statistic = "share", trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
-  rdata = FALSE, xlsx = FALSE, output.path = NULL)
+  rdata = FALSE, xlsx = FALSE, output.path = NULL,
+  xlsx.interventions = FALSE, out.path.interventions = NULL)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -147,6 +148,10 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{xlsx}{Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE}
 
 \item{output.path}{Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.}
+
+\item{xlsx.interventions}{Takes value TRUE or FALSE. If TRUE, xlsx file with a list of used interventions will be stored. Default: FALSE}
+
+\item{output.path.interventions}{Takes the value of the output path for the interventions list file (without the filename) added to the working directory as a string starting with "/". Default: None.}
 }
 \value{
 Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.

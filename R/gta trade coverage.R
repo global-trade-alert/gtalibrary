@@ -61,6 +61,9 @@
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
 #' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
+#' @param xlsx.interventions Takes value TRUE or FALSE. If TRUE, xlsx file with a list of used interventions will be stored. Default: FALSE
+#' @param output.path.interventions Takes the value of the output path for the interventions list file (without the filename) added to the working directory as a string starting with "/". Default: None.
+
 
 #' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
 #' @references www.globaltradealert.org
@@ -128,7 +131,9 @@ gta_trade_coverage <- function(
   trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE,
   xlsx = FALSE,
-  output.path = NULL) {
+  output.path = NULL,
+  xlsx.interventions = FALSE,
+  out.path.interventions = NULL) {
 
 
   # Initialising Function ---------------------------------------------------
@@ -190,6 +195,24 @@ gta_trade_coverage <- function(
     # rm(parameter.choice.slicer)
     print("Slicing GTA master data set ... complete.")
 
+
+    # Optional output of interventions list
+    if (xlsx.interventions) {
+      ## writing to disk
+      print("Saving Interventions list ...")
+      interventions.list <- master.sliced
+      interventions.list <- unique(interventions.list[,c("intervention.id", "implementing.jurisdiction", "title", "intervention.type", "gta.evaluation", "date.announced", "date.implemented", "date.removed")])
+      interventions.list$url <- paste0("http://www.globatradealert.org/intervention/",interventions.list$intervention.id)
+
+      if(is.null(output.path)){
+          write.xlsx(interventions.list, file=paste("GTA coverage interventions list from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
+          print("Saving Interventions list ... completed in working directory")
+        } else {
+          write.xlsx(interventions.list, file=output.path.interventions, rowNames = F)
+          # write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
+          print("Saving Interventions list ... completed in output path")
+        }
+    }
 
     ### restricted the data set to the specified exporters.
     ## Can be done here since they are always either a.un or i.un.
