@@ -20,10 +20,10 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   group.implementers = TRUE, separate.implementer.groups = FALSE,
   implementer.trade = NULL, announcement.period = NULL,
   implementation.period = NULL, revocation.period = NULL,
-  keep.revocation.na = NULL, in.force.today = NULL,
-  intervention.types = NULL, keep.type = NULL, group.type = TRUE,
-  mast.chapters = NULL, keep.mast = NULL, group.mast = TRUE,
-  implementation.level = NULL, keep.level = NULL,
+  keep.revocation.na = NULL, submission.period = NULL,
+  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
+  group.type = TRUE, mast.chapters = NULL, keep.mast = NULL,
+  group.mast = TRUE, implementation.level = NULL, keep.level = NULL,
   eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
   keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
   hit.brackets = c(1, 99999), intervention.ids = NULL,
@@ -91,6 +91,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{implementation.period}{Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.}
 
 \item{revocation.period}{Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
+
+\item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 
 \item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
 
