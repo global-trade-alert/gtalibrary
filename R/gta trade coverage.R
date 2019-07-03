@@ -133,7 +133,7 @@ gta_trade_coverage <- function(
   xlsx = FALSE,
   output.path = NULL,
   xlsx.interventions = FALSE,
-  out.path.interventions = NULL) {
+  output.path.interventions = NULL) {
 
 
   # Initialising Function ---------------------------------------------------
@@ -204,7 +204,7 @@ gta_trade_coverage <- function(
       interventions.list <- unique(interventions.list[,c("intervention.id", "implementing.jurisdiction", "title", "intervention.type", "gta.evaluation", "date.announced", "date.implemented", "date.removed")])
       interventions.list$url <- paste0("http://www.globatradealert.org/intervention/",interventions.list$intervention.id)
 
-      if(is.null(output.path)){
+      if(is.null(output.path.interventions)){
           write.xlsx(interventions.list, file=paste("GTA coverage interventions list from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
           print("Saving Interventions list ... completed in working directory")
         } else {
