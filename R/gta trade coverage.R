@@ -2224,6 +2224,9 @@ gta_trade_coverage <- function(
     # bilateral.trade<<-trade.base.bilateral
     parameter.choices<<-parameter.choices
     error.message <<- FALSE
+    if(xlsx.interventions) {
+      interventions.list <<- interventions.list
+    }
 
   },
 
