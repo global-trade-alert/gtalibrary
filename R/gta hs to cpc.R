@@ -10,7 +10,7 @@
 #' @author Global Trade Alert
 
 gta_hs_to_cpc=function(codes){
-  code.correspondence=read.csv("R help files/cpc 2.1 to HS 2012.csv", sep=";")
+  code.correspondence=read.csv("definitions/cpc-to-hs/cpc21-hs2012.csv", sep=";")
   names(code.correspondence)=c("cpc.3digit", "hs.6digit") ## JF has some importing issue, thus the renaming here.
 
   codes=gta_hs_code_check(codes)
