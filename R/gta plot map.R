@@ -48,23 +48,27 @@ gta_plot_map <- function(data = NULL,
 
   ###### IMPORTANT, sort for X (id) again
   world <-  world[with(world, order(X)),]
-  world$value[is.na(world$value) == T] <- 0
+  # world$value[is.na(world$value) == T] <- 0
 
   if (length(range.split)==1){
-  eval(parse(text=paste("range.split <- seq(",min(world$value),",",max(world$value),",",max(world$value)/range.split,")",sep="")))
-    range.split <- range.split[2:length(range.split)]
+  eval(parse(text=paste("range.split <- seq(",min(world$value, na.rm=T),",",max(world$value, na.rm=T),",",(max(world$value, na.rm=T)-min(world$value, na.rm=T))/(range.split-1),")",sep="")))
+    range.split <- range.split[1:length(range.split)]
     if(length(legend.labels)>0) {
       if(length(range.split)!=length(legend.labels)) {
         stop("Please make sure that range.split and legend.labels have the same number of elements.")
       }
+    } else {
+      legend.labels <- paste(range.split, sep=",")
     }
   }
   if (length(range.split)>1) {
-    range.split <- range.split[2:length(range.split)]
+    range.split <- range.split[1:length(range.split)]
     if(length(legend.labels)>0) {
       if(length(range.split)!=length(legend.labels)) {
         stop("Please make sure that range.split and legend.labels have the same number of elements.")
       }
+    } else {
+      legend.labels <- paste(range.split, sep=",")
     }
   }
 
@@ -75,7 +79,7 @@ gta_plot_map <- function(data = NULL,
     coord_fixed() + # Important to fix world map proportions
     ggtitle(title) +
     labs(x="", y="") +
-    scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels) + # Set color gradient
+    scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels, na.value = "#CCCCCC") + # Set color gradient
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
@@ -102,12 +106,12 @@ gta_plot_map <- function(data = NULL,
     marked.country <- gta_un_code_vector(marked.country)
 
     plot = ggplot() +
-      geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white") +
+      geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white", ) +
       geom_polygon(data=subset(world, UN == marked.country), aes(x=long, y=lat, group = group), fill=marked.colour, size = 0.2, colour = "white") +
       coord_fixed() + # Important to fix world map proportions
       ggtitle(title) +
       labs(x="", y="") +
-      scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels) + # Set color gradient
+      scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels, na.value = "#CCCCCC") + # Set color gradient
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
             axis.ticks.x=element_blank(),
