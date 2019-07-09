@@ -725,15 +725,14 @@ gta_trade_coverage <- function(
       interventions.list$url <- paste0("http://www.globatradealert.org/intervention/",interventions.list$intervention.id)
 
       if(is.null(output.path.interventions)){
-        write.xlsx(interventions.list, file=paste("GTA coverage interventions list from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
+        openxlsx::write.xlsx(interventions.list, file=paste("GTA coverage interventions list from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
         print("Saving Interventions list ... completed in working directory")
       } else {
-        write.xlsx(interventions.list, file=output.path.interventions, rowNames = F)
+        openxlsx::write.xlsx(interventions.list, file=output.path.interventions, rowNames = F)
         # write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
         print("Saving Interventions list ... completed in output path")
       }
     }
-
 
     ### SECTION X: Processing the data
     ## create max duration for all instruments and per importer-exporter-product year
@@ -2208,13 +2207,13 @@ gta_trade_coverage <- function(
       print("Saving XLSX ...")
       if(is.null(output.path)){
         xlsxList = list("Estimates" = trade.coverage.estimates, "Parameter choices" = parameter.choices)
-        write.xlsx(xlsxList, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
+        openxlsx::write.xlsx(xlsxList, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
         # write.xlsx(trade.coverage.estimates, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Estimates", row.names = F)
         # write.xlsx(parameter.choices, file=paste("GTA trade coverage estimates from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
         print("Saving XLSX ... completed in working directory")
       } else {
         xlsxList = list("Estimates" = trade.coverage.estimates, "Parameter choices" = parameter.choices)
-        write.xlsx(xlsxList, file=output.path, rowNames = F)
+        openxlsx::write.xlsx(xlsxList, file=output.path, rowNames = F)
         # write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
         print("Saving XLSX ... completed in output path")
       }
