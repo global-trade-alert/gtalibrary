@@ -15,6 +15,7 @@ gta_hs_to_cpc=function(codes){
 
   codes=gta_hs_code_check(codes)
   codes=code.correspondence$cpc.3digit[code.correspondence$hs.6digit %in% codes]
+  codes = ifelse(nchar(codes)==4, substr(codes,1,2), substr(codes,1,3))
   return(codes)
   rm(codes, code.correspondence)
 
