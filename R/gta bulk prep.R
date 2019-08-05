@@ -407,10 +407,10 @@ gta_bulk_prep = function(
 
   ## adding the zeros
   master$affected.product=as.character(master$affected.product)
-  master$affected.product[nchar(master$affected.product)==5]=paste(0, master$affected.product[nchar(master$affected.product)==5], sep="")
+  master$affected.product[nchar(master$affected.product)==5 & is.na(master$affected.product)==F]=paste(0, master$affected.product[nchar(master$affected.product)==5 & is.na(master$affected.product)==F], sep="")
 
   master$atl.sector=as.character(master$atl.sector)
-  master$atl.sector[nchar(master$atl.sector)==2]=paste(0, master$atl.sector[nchar(master$atl.sector)==2], sep="")
+  master$atl.sector[nchar(master$atl.sector)==2 & is.na(master$atl.sector)==F]=paste(0, master$atl.sector[nchar(master$atl.sector)==2 & is.na(master$atl.sector)==F], sep="")
 
   print("... pulling it all together.")
   affected.tl=unique(data.frame(import_intervention_id=master$intervention.id,
