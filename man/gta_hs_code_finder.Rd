@@ -7,7 +7,7 @@
 gta_hs_code_finder(products, sources = c("hs.descriptions", "eurostat",
   "eu.customs", "zauba", "e.to.china", "google", "hsbianma", "eximguru",
   "cybex"), aggregate = T, check.archive = F,
-  archive.location = NULL)
+  archive.location = NULL, wait.time = 4)
 }
 \arguments{
 \item{products}{A vector of product names (in characters).}
@@ -17,6 +17,8 @@ gta_hs_code_finder(products, sources = c("hs.descriptions", "eurostat",
 \item{check.archive}{Specify whether the search term should be checked against the existing HS code archive. Only new terms will be returned. Default is FALSE.}
 
 \item{archive.location}{Specify the path to the archive location.}
+
+\item{wait.time}{Time in seconds that you are willing to wait for a source to load.}
 
 \item{source}{Define which source(s) to check for HS codes (hs.descriptions, eurostat, eu.customs, zauba, e.to.china, google, hsbianma, eximguru, cybex). Default is 'all'.}
 }
