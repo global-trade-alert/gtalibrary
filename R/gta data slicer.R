@@ -1047,13 +1047,13 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
             master.temp=subset(master.temp, as.numeric(affected.sector) %in% cpc.sectors)
 
             parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="CPC codes included:", choice=paste(cpc.sectors, collapse = ", ")))
+                                    data.frame(parameter="CPC sectors included:", choice=paste(cpc.sectors, collapse = ", ")))
 
           } else if (keep.cpc==F){
             master.temp=subset(master.temp, ! as.numeric(affected.sector) %in% cpc.sectors)
 
             parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="CPC codes included:", choice=paste("All except ", paste(cpc.sectors, collapse = ", "), sep="")))
+                                    data.frame(parameter="CPC sectors included:", choice=paste("All except ", paste(cpc.sectors, collapse = ", "), sep="")))
 
           }
 
