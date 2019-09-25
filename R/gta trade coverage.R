@@ -1115,24 +1115,24 @@ gta_trade_coverage <- function(
       # Add country groups and sum up their trade values
 
       if (separate.importer.groups) {
-        importer.country.groups = importers[importers %in% country.groups$country.groups]
+        importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
         for (i in importer.country.groups){
-          trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[country.correspondence$name == i])
+          trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])
           if ("year" %in% names(trade.base.bilateral)) {
             trade.base.bilateral.temp <- aggregate(trade.value~a.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~a.un+hs6, trade.base.bilateral.temp, sum) }
-          trade.base.bilateral.temp$i.un = country.groups$code[country.groups$country.groups == i]
+          trade.base.bilateral.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
           trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
           rm(trade.base.bilateral.temp)
         }
       }
 
       if (separate.exporter.groups) {
-        exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+        exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
         for (i in exporter.country.groups){
-          trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[country.correspondence$name == i])
+          trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])
           if ("year" %in% names(trade.base.bilateral)) {
             trade.base.bilateral.temp <- aggregate(trade.value~i.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~i.un+hs6, trade.base.bilateral.temp, sum) }
-          trade.base.bilateral.temp$a.un = country.groups$code[country.groups$country.groups == i]
+          trade.base.bilateral.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == i]
           trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
           rm(trade.base.bilateral.temp)
         }
@@ -1177,24 +1177,24 @@ gta_trade_coverage <- function(
 
       ## group data importer groups, exporter groups and implementer groups
       if (separate.importer.groups) {
-        importer.country.groups = importers[importers %in% country.groups$country.groups]
+        importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
         for (i in importer.country.groups){
-          trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[country.correspondence$name == i])
+          trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])
           if ("year" %in% names(trade.base.bilateral)) {
             trade.base.bilateral.temp <- aggregate(trade.value~a.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~a.un+hs6, trade.base.bilateral.temp, sum) }
-          trade.base.bilateral.temp$i.un = country.groups$code[country.groups$country.groups == i]
+          trade.base.bilateral.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
           trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
           rm(trade.base.bilateral.temp)
         }
       }
 
       if (separate.exporter.groups) {
-        exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+        exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
         for (i in exporter.country.groups){
-          trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[country.correspondence$name == i])
+          trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])
           if ("year" %in% names(trade.base.bilateral)) {
             trade.base.bilateral.temp <- aggregate(trade.value~i.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~i.un+hs6, trade.base.bilateral.temp, sum) }
-          trade.base.bilateral.temp$a.un = country.groups$code[country.groups$country.groups == i]
+          trade.base.bilateral.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == i]
           trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
           rm(trade.base.bilateral.temp)
         }
@@ -1202,15 +1202,15 @@ gta_trade_coverage <- function(
 
 
       if (separate.implementer.groups) {
-        implementer.country.groups = implementers[implementers %in% country.groups$country.groups]
+        implementer.country.groups = tolower(implementers[tolower(implementers) %in% tolower(country.groups$country.groups)])
 
         if(implementer.trade=="import"){
 
           for (i in implementer.country.groups){
-            trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[country.correspondence$name == i])
+            trade.base.bilateral.temp <- subset(trade.base.bilateral, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])
             if ("year" %in% names(trade.base.bilateral)) {
               trade.base.bilateral.temp <- aggregate(trade.value~a.un+year+hs6, trade.base.bilateral.temp, sum) } else { trade.base.bilateral.temp <- aggregate(trade.value~a.un+hs6, trade.base.bilateral.temp, sum) }
-            trade.base.bilateral.temp$i.un = country.groups$code[country.groups$country.groups == i]
+            trade.base.bilateral.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
             trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
             rm(trade.base.bilateral.temp)
           }
@@ -1220,7 +1220,7 @@ gta_trade_coverage <- function(
         if(implementer.trade=="export"){
 
           for (i in implementer.country.groups){
-            trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[country.correspondence$name == i])
+            trade.base.bilateral.temp <- subset(trade.base.bilateral, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])
 
             if ("year" %in% names(trade.base.bilateral)) {
               trade.base.bilateral.temp <- aggregate(trade.value~i.un+year+hs6, trade.base.bilateral.temp, sum)
@@ -1228,7 +1228,7 @@ gta_trade_coverage <- function(
               trade.base.bilateral.temp <- aggregate(trade.value~i.un+hs6, trade.base.bilateral.temp, sum)
             }
 
-            trade.base.bilateral.temp$a.un = country.groups$code[country.groups$country.groups == i]
+            trade.base.bilateral.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == i]
             trade.base.bilateral = rbind(trade.base.bilateral, trade.base.bilateral.temp)
             rm(trade.base.bilateral.temp)
           }
@@ -1527,13 +1527,13 @@ gta_trade_coverage <- function(
 
             if(separate.importer.groups==T & separate.exporter.groups==T){
 
-              importer.country.groups = importers[importers %in% country.groups$country.groups]
-              exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+              importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
+              exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
               for (i in importer.country.groups) {
                 for (e in exporter.country.groups){
-                  final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                  a.un=country.groups$code[country.groups$country.groups == e],
+                  final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[tolower(country.groups$country.groups) == i],
+                                                                  a.un=country.groups$code[tolower(country.groups$country.groups) == e],
                                                                   year=yr,
                                                                   trade.value.affected=0))
                 }
@@ -1542,19 +1542,19 @@ gta_trade_coverage <- function(
 
             if(separate.importer.groups==T) {
 
-              importer.country.groups = importers[importers %in% country.groups$country.groups]
+              importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
 
               for (i in importer.country.groups){
 
                 if(group.exporters==T){
-                  final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
+                  final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[tolower(country.groups$country.groups) == i],
                                                                   a.un=999,
                                                                   year=yr,
                                                                   trade.value.affected=0))
                 } else {
 
-                  final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                  a.un=unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un),
+                  final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[tolower(country.groups$country.groups) == i],
+                                                                  a.un=unique(subset(master.coverage, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])$a.un),
                                                                   year=yr,
                                                                   trade.value.affected=0))
                 }
@@ -1563,19 +1563,19 @@ gta_trade_coverage <- function(
 
             if(separate.exporter.groups==T) {
 
-              exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+              exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
               for (e in exporter.country.groups){
 
                 if(group.importers==T){
                   final.coverage=rbind(final.coverage, data.frame(i.un=999,
-                                                                  a.un=country.groups$code[country.groups$country.groups == e],
+                                                                  a.un=country.groups$code[tolower(country.groups$country.groups) == e],
                                                                   year=yr,
                                                                   trade.value.affected=0))
                 } else {
 
-                  final.coverage=rbind(final.coverage, data.frame(i.un=unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un),
-                                                                  a.un=country.groups$code[country.groups$country.groups == e],
+                  final.coverage=rbind(final.coverage, data.frame(i.un=unique(subset(master.coverage, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e])$i.un),
+                                                                  a.un=country.groups$code[tolower(country.groups$country.groups) == e],
                                                                   year=yr,
                                                                   trade.value.affected=0))
                 }
@@ -1639,15 +1639,15 @@ gta_trade_coverage <- function(
 
             if(separate.importer.groups==T & separate.exporter.groups==T){
 
-              importer.country.groups = importers[importers %in% country.groups$country.groups]
-              exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+              importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
+              exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
               for (i in importer.country.groups) {
                 for (e in exporter.country.groups){
-                  if(nrow(subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]))>0) {
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+                  if(nrow(subset(mc.yr, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i] & a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]))>0) {
+                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i] & a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]), sum)
+                    fc.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
+                    fc.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == e]
 
                     if(share){
                       fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
@@ -1663,13 +1663,13 @@ gta_trade_coverage <- function(
 
             if(separate.importer.groups==T) {
 
-              importer.country.groups = importers[importers %in% country.groups$country.groups]
+              importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
 
               for (i in importer.country.groups){
-                if(nrow(subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]))>0){
+                if(nrow(subset(mc.yr, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i]))>0){
                   if(group.exporters==T){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i]), sum)
+                    fc.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
 
                     if(share){
                       fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
@@ -1681,8 +1681,8 @@ gta_trade_coverage <- function(
                     fc.temp.groups = rbind(fc.temp.groups, fc.temp)
                   } else {
 
-                    fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.yr, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                    fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+                    fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.yr, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i]), sum)
+                    fc.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
 
                     if(share){
                       fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
@@ -1697,13 +1697,13 @@ gta_trade_coverage <- function(
 
             if(separate.exporter.groups==T) {
 
-              exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+              exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
               for (e in exporter.country.groups){
-                if(nrow(subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]))>0){
+                if(nrow(subset(mc.yr, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]))>0){
                   if(group.importers==T){
-                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+                    fc.temp=aggregate(trade.value.affected ~ year, subset(mc.yr, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]), sum)
+                    fc.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == e]
 
                     if(share){
                       fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
@@ -1715,8 +1715,8 @@ gta_trade_coverage <- function(
                     fc.temp.groups = rbind(fc.temp.groups, fc.temp)
                   } else {
 
-                    fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.yr, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                    fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+                    fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.yr, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]), sum)
+                    fc.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == e]
 
                     if(share){
                       fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
@@ -1901,13 +1901,13 @@ gta_trade_coverage <- function(
 
               if(separate.importer.groups==T & separate.exporter.groups==T){
 
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+                importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
+                exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
                 for (i in importer.country.groups) {
                   for (e in exporter.country.groups){
-                    final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[country.groups$country.groups == i],
-                                                                    a.un=country.groups$code[country.groups$country.groups == e],
+                    final.coverage=rbind(final.coverage, data.frame(i.un=country.groups$code[tolower(country.groups$country.groups) == i],
+                                                                    a.un=country.groups$code[tolower(country.groups$country.groups) == e],
                                                                     year=unique(master.coverage$year),
                                                                     instrument=inst,
                                                                     trade.value.affected=0))
@@ -1917,13 +1917,13 @@ gta_trade_coverage <- function(
 
               if(separate.importer.groups==T) {
 
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
+                importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
 
                 for (i in importer.country.groups){
 
                   if(group.exporters==T){
 
-                    fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == i])
+                    fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[tolower(country.groups$country.groups) == i])
                     names(fc.temp)=c("year","i.un")
                     fc.temp$trade.value.affected=0
                     fc.temp$instrument=inst
@@ -1934,11 +1934,11 @@ gta_trade_coverage <- function(
 
                   } else {
 
-                    fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, i.un %in% country.correspondence$un_code[country.correspondence$name == i])$a.un))
+                    fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i])$a.un))
                     names(fc.temp)=c("year","a.un")
                     fc.temp$trade.value.affected=0
                     fc.temp$instrument=inst
-                    fc.temp$i.un=country.groups$code[country.groups$country.groups == i]
+                    fc.temp$i.un=country.groups$code[tolower(country.groups$country.groups) == i]
 
                     final.coverage=rbind(final.coverage,
                                          fc.temp)
@@ -1949,13 +1949,13 @@ gta_trade_coverage <- function(
 
               if(separate.exporter.groups==T) {
 
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+                exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
                 for (e in exporter.country.groups){
 
                   if(group.importers==T){
 
-                    fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[country.groups$country.groups == e])
+                    fc.temp=expand.grid(unique(master.coverage$year), country.groups$code[tolower(country.groups$country.groups) == e])
                     names(fc.temp)=c("year","a.un")
                     fc.temp$trade.value.affected=0
                     fc.temp$instrument=inst
@@ -1965,11 +1965,11 @@ gta_trade_coverage <- function(
                                          fc.temp)
                   } else {
 
-                    fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, a.un %in% country.correspondence$un_code[country.correspondence$name == e])$i.un))
+                    fc.temp=expand.grid(unique(master.coverage$year), unique(subset(master.coverage, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e])$i.un))
                     names(fc.temp)=c("year","i.un")
                     fc.temp$trade.value.affected=0
                     fc.temp$instrument=inst
-                    fc.temp$a.un=country.groups$code[country.groups$country.groups == e]
+                    fc.temp$a.un=country.groups$code[tolower(country.groups$country.groups) == e]
 
                     final.coverage=rbind(final.coverage,
                                          fc.temp)
@@ -1984,15 +1984,15 @@ gta_trade_coverage <- function(
 
               if(separate.importer.groups==T & separate.exporter.groups==T){
 
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+                importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
+                exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(country.groups$country.groups)])
 
                 for (i in importer.country.groups) {
                   for (e in exporter.country.groups){
-                    if(nrow(subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]))>0) {
-                      fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i] & a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                      fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
-                      fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+                    if(nrow(subset(mc.inst, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i] & a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]))>0) {
+                      fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i] & a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]), sum)
+                      fc.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
+                      fc.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == e]
 
                       if(share){
                         fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
@@ -2007,13 +2007,13 @@ gta_trade_coverage <- function(
 
               if(separate.importer.groups==T) {
 
-                importer.country.groups = importers[importers %in% country.groups$country.groups]
+                importer.country.groups = tolower(importers[tolower(importers) %in% tolower(country.groups$country.groups)])
 
                 for (i in importer.country.groups){
-                  if(nrow(subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]))>0) {
+                  if(nrow(subset(mc.inst, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i]))>0) {
                     if(group.exporters==T){
-                      fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                      fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+                      fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i]), sum)
+                      fc.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
 
                       if(share){
                         fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un, subset(tbb.yr, ! a.un %in% country.groups$code), sum), by=c("i.un"), all.x=T)
@@ -2025,8 +2025,8 @@ gta_trade_coverage <- function(
                       fc.temp.groups = rbind(fc.temp.groups, fc.temp)
                     } else {
 
-                      fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.inst, i.un %in% country.correspondence$un_code[country.correspondence$name == i]), sum)
-                      fc.temp$i.un = country.groups$code[country.groups$country.groups == i]
+                      fc.temp=aggregate(trade.value.affected ~ a.un + year, subset(mc.inst, i.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == i]), sum)
+                      fc.temp$i.un = country.groups$code[tolower(country.groups$country.groups) == i]
 
                       if(share){
                         fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
@@ -2041,14 +2041,14 @@ gta_trade_coverage <- function(
 
               if(separate.exporter.groups==T) {
 
-                exporter.country.groups = exporters[exporters %in% country.groups$country.groups]
+                exporter.country.groups = tolower(exporters[tolower(exporters) %in% tolower(tolower(country.groups$country.groups))])
 
                 for (e in exporter.country.groups){
-                  if(nrow(subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]))>0) {
+                  if(nrow(subset(mc.inst, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]))>0) {
 
                     if(group.importers==T){
-                      fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                      fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+                      fc.temp=aggregate(trade.value.affected ~ year, subset(mc.inst, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]), sum)
+                      fc.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == e]
 
                       if(share){
                         fc.temp=merge(fc.temp, aggregate(trade.value ~ a.un, subset(tbb.yr, ! i.un %in% country.groups$code), sum), by=c("a.un"), all.x=T)
@@ -2060,8 +2060,8 @@ gta_trade_coverage <- function(
                       fc.temp.groups = rbind(fc.temp.groups, fc.temp)
                     } else {
 
-                      fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.inst, a.un %in% country.correspondence$un_code[country.correspondence$name == e]), sum)
-                      fc.temp$a.un = country.groups$code[country.groups$country.groups == e]
+                      fc.temp=aggregate(trade.value.affected ~ i.un + year, subset(mc.inst, a.un %in% country.correspondence$un_code[tolower(country.correspondence$name) == e]), sum)
+                      fc.temp$a.un = country.groups$code[tolower(country.groups$country.groups) == e]
 
                       if(share){
                         fc.temp=merge(fc.temp, aggregate(trade.value ~ i.un + a.un, tbb.yr, sum), by=c("i.un", "a.un"), all.x=T)
