@@ -37,6 +37,7 @@
 #' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
 #' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
 #' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
+#' @param keep.devaluations Specify whether to include "Competitive devaluation" into your calculations. Default is FALSE.
 #' @param group.type Specify whether to aggregate the statistics for all remaining intervention types into one group (TRUE) or whether create the statistics for every single type (FALSE). Default is TRUE.
 #' @param mast.chapters Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.
 #' @param keep.mast Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated MAST chapter ID.
@@ -108,6 +109,7 @@ gta_trade_coverage <- function(
   in.force.today = NULL,
   intervention.types = NULL,
   keep.type = NULL,
+  keep.devaluations=FALSE,
   group.type=TRUE,
   mast.chapters = NULL,
   keep.mast = NULL,
@@ -183,6 +185,11 @@ gta_trade_coverage <- function(
     ## removing certain problemtic, wide-reaching cases until further investigation
     out=c(20387, 20389, 16408, 16817, 15248, 20098, 56907)
     master.sliced=subset(master.sliced, ! intervention.id %in% out)
+
+    if(keep.devaluations==F){
+      master.sliced=subset(master.sliced, intervention.id!="Competitive devaluation")
+
+    }
 
     if(nrow(master.sliced)==0) {
       stop.print <- "Initial filtering of the GTA dataset yielded no results fitting all specified parameters."
