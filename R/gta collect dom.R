@@ -23,8 +23,7 @@ gta_collect_dom <- function(node=NULL,
   e.type=F
 
   ted.parsed<<-rbind(ted.parsed,
-                     data.frame(file=file,
-                                position=dom.pos,
+                     data.frame(position=dom.pos,
                                 element.name=e.name,
                                 is.attribute=e.type,
                                 element.value=e.value,
@@ -39,8 +38,7 @@ gta_collect_dom <- function(node=NULL,
     e.type=T
 
     ted.parsed<<-rbind(ted.parsed,
-                       data.frame(file=file,
-                                  position=dom.pos,
+                       data.frame(position=dom.pos,
                                   element.name=e.name,
                                   is.attribute=e.type,
                                   element.value=e.value,

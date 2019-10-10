@@ -257,7 +257,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
         }
 
-        ted.value=aggregate(lcu.value ~ file + currency + type + date, ted.value, sum)
+        ted.value=aggregate(lcu.value ~ currency + type + date, ted.value, sum)
       }
 
       if(missing.contract.value){
@@ -521,7 +521,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
 
   ### Parse complete
-  output.list<- list("gta.eligible"=F,
+  output.list<- list("gta.eligible"=T,
                      "parse.successful"=T,
                      "parse.error.msg"=NA,
                      "ted.base"=ted.base,
