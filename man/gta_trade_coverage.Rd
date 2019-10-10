@@ -22,17 +22,18 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
   implementation.period = NULL, revocation.period = NULL,
   keep.revocation.na = NULL, submission.period = NULL,
   in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
-  group.type = TRUE, mast.chapters = NULL, keep.mast = NULL,
-  group.mast = TRUE, implementation.level = NULL, keep.level = NULL,
-  eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
-  keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-  hit.brackets = c(1, 99999), intervention.ids = NULL,
-  keep.interventions = NULL, lag.adjustment = NULL,
-  reporting.period = NULL, intra.year.duration = TRUE,
-  trade.statistic = "share", trade.data = "base",
+  keep.devaluations = FALSE, group.type = TRUE, mast.chapters = NULL,
+  keep.mast = NULL, group.mast = TRUE, implementation.level = NULL,
+  keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
+  cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL,
+  keep.hs = NULL, hit.brackets = c(1, 99999),
+  intervention.ids = NULL, keep.interventions = NULL,
+  lag.adjustment = NULL, reporting.period = NULL,
+  intra.year.duration = TRUE, trade.statistic = "share",
+  trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
   rdata = FALSE, xlsx = FALSE, output.path = NULL,
-  xlsx.interventions = FALSE, out.path.interventions = NULL)
+  xlsx.interventions = FALSE, output.path.interventions = NULL)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -100,6 +101,8 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{intervention.types}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
 
 \item{keep.type}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.}
+
+\item{keep.devaluations}{Specify whether to include "Competitive devaluation" into your calculations. Default is FALSE.}
 
 \item{group.type}{Specify whether to aggregate the statistics for all remaining intervention types into one group (TRUE) or whether create the statistics for every single type (FALSE). Default is TRUE.}
 

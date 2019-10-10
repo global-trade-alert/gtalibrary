@@ -4,16 +4,16 @@
 \alias{gta_plot_wrapper}
 \title{Define plot settings for ggplot.}
 \usage{
-gta_plot_wrapper(data = NULL, value.x = NULL, value.y = NULL,
+gta_plot_wrapper(data = NULL, data.x = NULL, data.y = NULL,
   group = NULL, plot.title = NULL, plot.subtitle = NULL,
   x.data.type = "continuous", x.bottom.name = NULL,
-  x.bottom.breaks = waiver(), x.bottom.limits = c(NA, NA),
+  x.bottom.breaks = waiver(), x.bottom.limits = NULL,
   x.bottom.labels = waiver(), x.bottom.expand = c(0.05, 0.05),
   x.top.enable = F, x.top.transform = 1, x.top.name = x.bottom.name,
   x.top.breaks = x.bottom.breaks, x.top.limits = x.bottom.limits,
   x.top.labels = waiver(), y.data.type = "continuous",
-  y.left.name = NULL, y.left.breaks = waiver(), y.left.limits = c(NA,
-  NA), y.left.labels = waiver(), y.left.expand = c(0.05, 0.05),
+  y.left.name = NULL, y.left.breaks = waiver(), y.left.limits = NULL,
+  y.left.labels = waiver(), y.left.expand = c(0.05, 0.05),
   y.right.enable = T, y.right.transform = 1,
   y.right.name = y.left.name, y.right.breaks = y.left.breaks,
   y.right.limits = y.left.limits, y.right.labels = y.left.labels,
