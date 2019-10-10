@@ -14,8 +14,8 @@ gta_ted_parse <- function(dom.df=NULL,
 
   dom.df$element.value[nchar(dom.df$element.value)==0]=NA
 
-  output.list<- list("gta.relevant"=F,
-                     "parse.successful"=T,
+  output.list<- list("gta.eligible"=F,
+                     "parse.successful"=F,
                      "parse.error.msg"=NA)
 
 
@@ -27,7 +27,7 @@ gta_ted_parse <- function(dom.df=NULL,
   ## no GPA reference
   if(gpa.references==F){
 
-    output.list<- list("gta.relevant"=F,
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="GPA: No reference in the DOM")
 
@@ -36,9 +36,9 @@ gta_ted_parse <- function(dom.df=NULL,
 
   ## Got GPA reference, no classifying it
   ##certainly in b/c not covered by GPA
-  gta.relevant=any(grepl("NO_CONTRACT_COVERED_GPA", dom.df$element.name))
+  gta.eligible=any(grepl("NO_CONTRACT_COVERED_GPA", dom.df$element.name))
 
-  if(gta.relevant==F){
+  if(gta.eligible==F){
 
     ##certainly out b/c covered by GPA or no reference to GPA
     gpa.out=any(dom.df$element.name=="CONTRACT_COVERED_GPA")
@@ -55,7 +55,7 @@ gta_ted_parse <- function(dom.df=NULL,
     }
 
      ## Cannot ascertain GPA status
-     output.list<- list("gta.relevant"=F,
+     output.list<- list("gta.eligible"=F,
                         "parse.successful"=F,
                         "parse.error.msg"="GPA: cannot ascertain participation")
 
@@ -86,7 +86,7 @@ gta_ted_parse <- function(dom.df=NULL,
       cpv.codes=cpv.codes[!is.na(cpv.codes)]
 
       if(length(cpv.codes)==0){
-        output.list<- list("gta.relevant"=F,
+        output.list<- list("gta.eligible"=F,
                            "parse.successful"=F,
                            "parse.error.msg"="CPV: Found standard tag, but all codes were non-numeric or inexistent.")
 
@@ -96,7 +96,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
     } else {
 
-      output.list<- list("gta.relevant"=F,
+      output.list<- list("gta.eligible"=F,
                          "parse.successful"=F,
                          "parse.error.msg"="CPV: Could not find a standard tag.")
 
@@ -109,7 +109,7 @@ gta_ted_parse <- function(dom.df=NULL,
     cpv.codes=cpv.codes[cpv.codes<45000000]
 
     if(length(cpv.codes)==0){
-      output.list<- list("gta.relevant"=F,
+      output.list<- list("gta.eligible"=F,
                          "parse.successful"=T,
                          "parse.error.msg"="CPV: Only service sector codes")
 
@@ -121,7 +121,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
   } else {
 
-    output.list<- list("gta.relevant"=F,
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="CPV: Did not find CPV values in DOM")
 
@@ -249,7 +249,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
         if(nrow(ted.value)==0){
 
-          output.list<- list("gta.relevant"=F,
+          output.list<- list("gta.eligible"=F,
                              "parse.successful"=F,
                              "parse.error.msg"="Contract value: Found currency, value tag but only non-numeric content")
 
@@ -261,7 +261,7 @@ gta_ted_parse <- function(dom.df=NULL,
       }
 
       if(missing.contract.value){
-        output.list<- list("gta.relevant"=F,
+        output.list<- list("gta.eligible"=F,
                            "parse.successful"=F,
                            "parse.error.msg"="Contract value: Found currency, value tag but content.")
 
@@ -273,7 +273,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
     } else {
 
-      output.list<- list("gta.relevant"=F,
+      output.list<- list("gta.eligible"=F,
                          "parse.successful"=F,
                          "parse.error.msg"="Currency: Found currency tag but no value tag.")
 
@@ -286,7 +286,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
   } else {
 
-    output.list<- list("gta.relevant"=F,
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="Currency: No tag with 'currency' string found in the DOM.")
 
@@ -318,7 +318,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
     if(any(is.na(ted.value$lcu.per.usd))){
 
-      output.list<- list("gta.relevant"=F,
+      output.list<- list("gta.eligible"=F,
                          "parse.successful"=F,
                          "parse.error.msg"="Currency: Missing value when merged with FX data.")
 
@@ -336,7 +336,7 @@ gta_ted_parse <- function(dom.df=NULL,
   ## Date (annoucement & implementation).
   d.announce=as.Date(dom.df$element.value[dom.df$element.name=="DATE_PUB"], "%Y%m%d")
   if(length(d.announce)==0){
-    output.list<- list("gta.relevant"=F,
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="No announcement date")
 
@@ -364,10 +364,32 @@ gta_ted_parse <- function(dom.df=NULL,
   if(length(duration)==0){duration=NA}
 
   ## Directive
-  dir.pos=dom.df$position[dom.df$element.name=="LEGAL_BASIS"]
+  if(any(dom.df$element.name=="DIRECTIVE")){
+    dir.pos=dom.df$position[dom.df$element.name=="DIRECTIVE"]
+
+
+  } else {
+
+    if(any(dom.df$element.name=="LEGAL_BASIS")){
+      dir.pos=dom.df$position[dom.df$element.name=="LEGAL_BASIS"]
+
+    } else{
+
+      output.list<- list("gta.eligible"=F,
+                         "parse.successful"=F,
+                         "parse.error.msg"="No directive found")
+
+      return(output.list)
+
+      }
+
+  }
+
+
   directive=paste(unique(dom.df$element.value[dom.df$position %in% dir.pos & dom.df$is.attribute==T]  ), collapse=";")
-  if(length(directive)==0){
-    output.list<- list("gta.relevant"=F,
+
+  if(length(directive)==0|nchar(directive)==0){
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="No directive found")
 
@@ -379,7 +401,7 @@ gta_ted_parse <- function(dom.df=NULL,
   ij=paste(unique(dom.df$element.value[dom.df$position %in% ij.pos & dom.df$is.attribute==T]), collapse=";")
 
   if(length(ij)==0){
-    output.list<- list("gta.relevant"=F,
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="No implementer found")
 
@@ -398,7 +420,7 @@ gta_ted_parse <- function(dom.df=NULL,
   tender.issuer.lang=paste(unique(dom.df$element.value[dom.df$position %in% issuer.pos & dom.df$element.name=="LG"]), collapse=";")
 
   if(length(tender.issuer)==0){
-    output.list<- list("gta.relevant"=F,
+    output.list<- list("gta.eligible"=F,
                        "parse.successful"=F,
                        "parse.error.msg"="No tender issuer found")
 
@@ -480,8 +502,7 @@ gta_ted_parse <- function(dom.df=NULL,
   if(length(contractor.town)==0){contractor.town=NA}
   if(length(contractor.country)==0){contractor.country=NA}
 
-  ted.base=data.frame(batch=parse.now,
-                      directive=directive,
+  ted.base=data.frame(directive=directive,
                       implementing.jurisdiction=ij,
                       date.announced=d.announce,
                       date.implemented=d.implemented,
@@ -500,7 +521,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
 
   ### Parse complete
-  output.list<- list("gta.relevant"=F,
+  output.list<- list("gta.eligible"=F,
                      "parse.successful"=T,
                      "parse.error.msg"=NA,
                      "ted.base"=ted.base,

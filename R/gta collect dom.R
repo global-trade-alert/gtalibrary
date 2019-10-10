@@ -10,60 +10,51 @@
 #' @author Global Trade Alert
 #'
 gta_collect_dom <- function(node=NULL,
-                            dom.position=c()) {
+                            dom.pos=c()) {
 
-  # defining sub-function
-  parse_dom <- function(node=NULL,
-                        dom.position=c()) {
-      if (is.null(node)) {
-        #leaf node reached. Turn back
-        return()
-      }
+  if (is.null(node)) {
+    #leaf node reached. Turn back
+    return()
+  }
+  # print(paste("Node: ", xmlName(node)))
 
-      e.name=xmlName(node)
-      e.value=xmlValue(node)
-      e.type=F
+  e.name=xmlName(node)
+  e.value=xmlValue(node)
+  e.type=F
 
-      complete.dom<-rbind(complete.dom,
-                          data.frame(position=dom.position,
-                                     element.name=e.name,
-                                     is.attribute=e.type,
-                                     element.value=e.value,
-                                     stringsAsFactors = F))
+  ted.parsed<<-rbind(ted.parsed,
+                     data.frame(file=file,
+                                position=dom.pos,
+                                element.name=e.name,
+                                is.attribute=e.type,
+                                element.value=e.value,
+                                stringsAsFactors = F))
 
-      if(length(xmlAttrs(node))>0){
+  if(length(xmlAttrs(node))>0){
 
-        x.attr=xmlAttrs(node)
+    x.attr=xmlAttrs(node)
 
-        e.name=names(x.attr)
-        e.value=x.attr
-        e.type=T
+    e.name=names(x.attr)
+    e.value=x.attr
+    e.type=T
 
-        complete.dom<<-rbind(complete.dom,
-                             data.frame(position=dom.position,
-                                        element.name=e.name,
-                                        is.attribute=e.type,
-                                        element.value=e.value,
-                                        stringsAsFactors = F))
-        rm(x.attr)
-      }
-
-      num.children = xmlSize(node)
-
-      #Go one level deeper
-      if (num.children > 0) {
-        for (i in 1 : num.children) {
-          parse_dom(node[[i]],paste(dom.position, i, sep="")) #the i-th child of node
-        }
-      }
+    ted.parsed<<-rbind(ted.parsed,
+                       data.frame(file=file,
+                                  position=dom.pos,
+                                  element.name=e.name,
+                                  is.attribute=e.type,
+                                  element.value=e.value,
+                                  stringsAsFactors = F))
+    rm(x.attr)
   }
 
-  complete.dom=data.frame()
+  num.children = xmlSize(node)
 
-  parse_dom(node=node,
-            dom.position=dom.position)
-
-
-  return(complete.dom)
-
+  #Go one level deeper
+  if (num.children > 0) {
+    for (i in 1 : num.children) {
+      gta_collect_dom(node[[i]],paste(dom.pos, i, sep="")) #the i-th child of node
+    }
+  }
 }
+
