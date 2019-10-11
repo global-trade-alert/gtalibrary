@@ -28,7 +28,7 @@ gta_ted_parse <- function(dom.df=NULL,
   if(gpa.references==F){
 
     output.list<- list("gta.eligible"=F,
-                       "parse.successful"=F,
+                       "parse.successful"=T,
                        "parse.error.msg"="GPA: No reference in the DOM")
 
     return(output.list)
@@ -66,6 +66,10 @@ gta_ted_parse <- function(dom.df=NULL,
     ## GPA Participation mentioned inside a node
     gpa.participation=any(dom.df$element.name=="RP_REGULATION") & any(grepl("with participation.*?GPA",dom.df$element.value, ignore.case = T))
     if(gpa.participation){
+            output.list<- list("gta.eligible"=F,
+                               "parse.successful"=T,
+                               "parse.error.msg"="GPA: Covered by GPA")
+
            return(output.list)
     }
 
@@ -274,7 +278,7 @@ gta_ted_parse <- function(dom.df=NULL,
   } else {
 
     output.list<- list("gta.eligible"=F,
-                       "parse.successful"=F,
+                       "parse.successful"=T,
                        "parse.error.msg"="Currency: No tag with 'currency' string found in the DOM.")
 
     return(output.list)
