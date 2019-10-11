@@ -38,15 +38,30 @@ gta_ted_parse <- function(dom.df=NULL,
   ##certainly in b/c not covered by GPA
   gta.eligible=any(grepl("NO_CONTRACT_COVERED_GPA", dom.df$element.name))
 
-  if(gta.eligible==F){
+  ##certainly out b/c covered by GPA or no reference to GPA
+  if(any(dom.df$element.name=="CONTRACT_COVERED_GPA")){
 
-    ##certainly out b/c covered by GPA or no reference to GPA
-    gpa.out=any(dom.df$element.name=="CONTRACT_COVERED_GPA")
+    gpa.positions=unique(subset(dom.df, element.name=="CONTRACT_COVERED_GPA")$position)
 
-    if(gpa.out){
+    if("no" %in% tolower(subset(dom.df, position %in% gpa.positions &  is.attribute==T)$element.value)){
+      gta.eligible=T
+    } else {
+
+      output.list<- list("gta.eligible"=F,
+                         "parse.successful"=T,
+                         "parse.error.msg"="GPA: Covered by GPA")
+
+
       return(output.list)
+
     }
 
+
+
+  }
+
+
+  if(gta.eligible==F){
 
     ## GPA Participation mentioned inside a node
     gpa.participation=any(dom.df$element.name=="RP_REGULATION") & any(grepl("with participation.*?GPA",dom.df$element.value, ignore.case = T))
@@ -139,108 +154,60 @@ gta_ted_parse <- function(dom.df=NULL,
 
   if(ted.currency){
 
+    ## finding nodes that have a currency tag/attribute, a value tag/attribute and a numeric value
+    currency.positions=unique(subset(dom.df, element.name %in% "CURRENCY")$position)
+    value.positions=unique(subset(dom.df,
+                                  grepl("VAL_OBJECT|VAL_ESTIMATED_TOTAL", element.name, ignore.case = T) |
+                                  (grepl("VALUE", element.name, ignore.case = T) & is.attribute==F & is.na(element.value)==F))$position)
+    numeric.positions=unique(subset(dom.df, grepl("\\d",element.value))$position)
+
+    ## perfect intersection
+    candidate.nodes=intersect(currency.positions,
+                              intersect(value.positions, numeric.positions))
+
+    if(length(candidate.nodes)==0){
+      ## allowing children positions
+      candidate.nodes=intersect(numeric.positions[grepl(paste(currency.positions, collapse="|"), numeric.positions)],
+                                numeric.positions[grepl(paste(value.positions, collapse="|"), numeric.positions)])
+
+    }
+
+    value.df=subset(dom.df, grepl(paste(gsub("\\d$","",candidate.nodes), collapse="|"),position) & is.na(element.value)==F)
+
     ### Looking for values
-    if(any(grepl("VAL_OBJECT|VAL_ESTIMATED_TOTAL", dom.df$element.name, ignore.case = T),
-           grepl("VALUE", dom.df$element.name[dom.df$is.attribute==F & is.na(dom.df$element.value)==F], ignore.case = T))){
-
-      ted.value=data.frame(date=character(),
-                           lcu.value=character(),
-                           currency=character(),
-                           value.type=character(),
-                           stringsAsFactors = F)
-
+    if(nrow(value.df)>0){
 
       date.temp=as.Date(dom.df$element.value[dom.df$element.name=="DATE_PUB"], "%Y%m%d")
-
-      value.positions=unique(subset(dom.df, element.name %in% "CURRENCY")$position)
-
       missing.contract.value=T
-      found.something=F
 
-      proc.positions=unique(dom.df$position[dom.df$element.value=="PROCUREMENT_TOTAL"])
-      proc.positions=proc.positions[is.na(proc.positions)==F]
+      ted.value=data.frame()
 
-      total.positions=unique(subset(dom.df, element.name %in% c("ESTIMATED_TOTAL","VAL_ESTIMATED_TOTAL"))$position)
-      total.positions=total.positions[is.na(total.positions)==F]
-      total.positions=setdiff(total.positions, proc.positions)
+      top.pos=unique(value.df$position[nchar(value.df$position)==min(nchar(value.df$position))])
 
-      aux.positions=setdiff(value.positions, total.positions)
-      aux.positions=aux.positions[is.na(aux.positions)==F]
+      total.tags=c("PROCUREMENT_TOTAL","ESTIMATED_TOTAL","VAL_ESTIMATED_TOTAL","SINGLE_VALUE")
 
-      if(length(proc.positions)>0){
-        for(pos in proc.positions){
+      if(any(total.tags %in% subset(value.df, position %in% top.pos)$element.name)){
 
-          if(length(dom.df$position[dom.df$element.name=="LOW" & grepl(pos, dom.df$position)])>0){
-            lcu.temp=min(dom.df$element.value[dom.df$element.name=="LOW" & grepl(pos, dom.df$position)], na.rm = T)
-          } else {
-            lcu.temp=dom.df$element.value[dom.df$position==pos & dom.df$is.attribute==F]
-          }
+        top.pos=min(subset(value.df, element.name %in% total.tags)$position)
 
-          ted.value=rbind(ted.value,
-                          data.frame(date=date.temp,
-                                     lcu.value=lcu.temp,
-                                     currency=dom.df$element.value[dom.df$position==pos & dom.df$element.name=="CURRENCY"],
-                                     type="total"))
-
-          missing.contract.value=F
-          rm(lcu.temp)
-
-        }
       }
 
-      if(missing.contract.value){
-        if(length(total.positions)>0){
-          for(pos in total.positions){
+      for(tp in top.pos){
+        cur.temp=unique(subset(value.df, element.name %in% "CURRENCY" & grepl(tp, position))$element.value)
+        lcu.temp=unique(subset(value.df, grepl("VALUE",element.name) & grepl(tp, position))$element.value)
 
-            if(length(dom.df$position[dom.df$element.name=="LOW" & grepl(pos, dom.df$position)])>0){
-              lcu.temp=min(dom.df$element.value[dom.df$element.name=="LOW" & grepl(pos, dom.df$position)], na.rm = T)
-            } else {
-              lcu.temp=dom.df$element.value[dom.df$position==pos & dom.df$is.attribute==F]
-            }
-
-
-            ted.value=rbind(ted.value,
-                            data.frame(date=date.temp,
-                                       lcu.value=lcu.temp,
-                                       currency=dom.df$element.value[dom.df$position==pos & dom.df$element.name=="CURRENCY"],
-                                       type="total"))
-
-            missing.contract.value=F
-            rm(lcu.temp)
-
-          }
-        }
-      }
-
-
-      if(missing.contract.value){
-        if(length(aux.positions)>0){
-          for(pos in aux.positions){
-
-            if(length(dom.df$position[dom.df$element.name=="LOW" & grepl(pos, dom.df$position)])>0){
-              lcu.temp=min(dom.df$element.value[dom.df$element.name=="LOW" & grepl(pos, dom.df$position)], na.rm = T)
-            } else {
-              lcu.temp=dom.df$element.value[dom.df$position==pos & dom.df$is.attribute==F]
-            }
-
-            ted.value=rbind(ted.value,
-                            data.frame(date=date.temp,
-                                       lcu.value=lcu.temp,
-                                       currency=dom.df$element.value[dom.df$position==pos & dom.df$element.name=="CURRENCY"],
-                                       type="aggregated"))
-
-            missing.contract.value=F
-            rm(lcu.temp)
-
-          }
-
-        }
+        ted.value=rbind(ted.value,
+                        data.frame(date=date.temp,
+                                   lcu.value=lcu.temp,
+                                   currency=cur.temp,
+                                   type=paste(value.df$element.name[value.df$position==tp], collapse=";")))
 
       }
 
       if(nrow(ted.value)>0){
 
-        ted.value=subset(ted.value, grepl("\\D+", gsub(",|\\.","",lcu.value))==F)
+        ted.value=subset(ted.value, grepl("\\D+", gsub(",|\\.","",lcu.value))==T)
+        ted.value$lcu.value=gsub(" ","",ted.value$lcu.value)
         ted.value$lcu.value=gsub("\\.\\d{1,2}",";",ted.value$lcu.value)
         ted.value=cSplit(ted.value, which(names(ted.value)=="lcu.value"), sep=";", direction="long")
         ted.value$lcu.value=as.numeric(as.character(ted.value$lcu.value))
@@ -257,18 +224,16 @@ gta_ted_parse <- function(dom.df=NULL,
 
         }
 
-        ted.value=aggregate(lcu.value ~ currency + type + date, ted.value, sum)
+        missing.contract.value=F
       }
 
       if(missing.contract.value){
         output.list<- list("gta.eligible"=F,
                            "parse.successful"=F,
-                           "parse.error.msg"="Contract value: Found currency, value tag but content.")
+                           "parse.error.msg"="Contract value: Found currency, value tag but no numeric content.")
 
         return(output.list)
       }
-
-      rm(value.positions, aux.positions, total.positions)
 
 
     } else {
