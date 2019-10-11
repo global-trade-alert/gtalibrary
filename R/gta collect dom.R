@@ -12,10 +12,10 @@
 gta_collect_dom <- function(node=NULL,
                             dom.pos=c()) {
 
-  if (is.null(node)) {
-    #leaf node reached. Turn back
-    return()
-  }
+  # if (is.null(node)) {
+  #   #leaf node reached. Turn back
+  #   return()
+  # }
   # print(paste("Node: ", xmlName(node)))
 
   e.name=xmlName(node)
@@ -51,7 +51,7 @@ gta_collect_dom <- function(node=NULL,
   #Go one level deeper
   if (num.children > 0) {
     for (i in 1 : num.children) {
-      gta_collect_dom(node[[i]],paste(dom.pos, i, sep="")) #the i-th child of node
+      gta_collect_dom(node[[i]],paste(dom.pos, sprintf("%02i",i), sep="")) #the i-th child of node
     }
   }
 }
