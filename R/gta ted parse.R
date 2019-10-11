@@ -153,6 +153,7 @@ gta_ted_parse <- function(dom.df=NULL,
   ted.currency=nrow(subset(dom.df, element.name=="CURRENCY" & is.attribute==T))>0
 
   if(ted.currency){
+    missing.contract.value=T
 
     ## finding nodes that have a currency tag/attribute, a value tag/attribute and a numeric value
     currency.positions=unique(subset(dom.df, element.name %in% "CURRENCY")$position)
@@ -178,7 +179,6 @@ gta_ted_parse <- function(dom.df=NULL,
     if(nrow(value.df)>0){
 
       date.temp=as.Date(dom.df$element.value[dom.df$element.name=="DATE_PUB"], "%Y%m%d")
-      missing.contract.value=T
 
       ted.value=data.frame()
 
@@ -194,7 +194,29 @@ gta_ted_parse <- function(dom.df=NULL,
 
       for(tp in top.pos){
         cur.temp=unique(subset(value.df, element.name %in% "CURRENCY" & grepl(tp, position))$element.value)
-        lcu.temp=unique(subset(value.df, grepl("VALUE",element.name) & grepl(tp, position))$element.value)
+
+
+        ## finding a value
+        lcu.temp=unique(subset(value.df, grepl("FMTVAL",element.name) & grepl(tp, position))$element.value)
+
+        if(length(lcu.temp)==0){
+          lcu.temp=unique(subset(value.df, grepl("VALUE",element.name) & grepl(tp, position))$element.value)
+
+          if(length(lcu.temp)==0){
+
+            lcu.temp=unique(subset(value.df, grepl("text",element.name, ignore.case=T) & grepl(currency.positions, position))$element.value)
+          }
+
+        }
+
+        if(length(lcu.temp)==0){
+          output.list<- list("gta.eligible"=F,
+                             "parse.successful"=F,
+                             "parse.error.msg"="CURRENCY: Could not find a value tag")
+
+          return(output.list)
+
+        }
 
         ted.value=rbind(ted.value,
                         data.frame(date=date.temp,
