@@ -177,7 +177,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
     }
 
-    value.df=subset(dom.df, grepl(paste(gsub("\\d$","",candidate.nodes), collapse="|"),position) & is.na(element.value)==F)
+    value.df=subset(dom.df, grepl(paste(gsub("\\d{2}$","",candidate.nodes), collapse="|"),position) & is.na(element.value)==F)
 
     ### Looking for values
     if(nrow(value.df)>0){
@@ -188,13 +188,26 @@ gta_ted_parse <- function(dom.df=NULL,
 
       top.pos=unique(value.df$position[nchar(value.df$position)==min(nchar(value.df$position))])
 
-      total.tags=c("PROCUREMENT_TOTAL","ESTIMATED_TOTAL","VAL_ESTIMATED_TOTAL","SINGLE_VALUE")
+      ## finding the total value
 
-      if(any(total.tags %in% subset(value.df, position %in% top.pos)$element.name)){
+      global.types=unique(subset(dom.df, element.value %in% "GLOBAL")$position)
+      if(any(grepl(paste(global.types, collapse="|"), top.pos))){
 
-        top.pos=min(subset(value.df, element.name %in% total.tags)$position)
+        top.pos=min(top.pos[grepl(paste(global.types, collapse="|"), top.pos)])
+
+      } else {
+
+        total.tags=c("PROCUREMENT_TOTAL","ESTIMATED_TOTAL","VAL_ESTIMATED_TOTAL","SINGLE_VALUE")
+
+        if(any(total.tags %in% subset(value.df, position %in% top.pos)$element.name)){
+
+          top.pos=min(subset(value.df, element.name %in% total.tags)$position)
+
+        }
 
       }
+
+
 
       for(tp in top.pos){
         cur.temp=unique(subset(value.df, element.name %in% "CURRENCY" & grepl(tp, position))$element.value)
@@ -235,6 +248,8 @@ gta_ted_parse <- function(dom.df=NULL,
         ted.value=subset(ted.value, grepl("\\D+", gsub(",|\\.","",lcu.value))==T)
         ted.value$lcu.value=gsub(" ","",ted.value$lcu.value)
         ted.value$lcu.value=gsub("\\.\\d{1,2}",";",ted.value$lcu.value)
+        ted.value$lcu.value=gsub(",\\d{1,2}$","",ted.value$lcu.value)
+        ted.value$lcu.value=gsub(",","",ted.value$lcu.value)
         ted.value=cSplit(ted.value, which(names(ted.value)=="lcu.value"), sep=";", direction="long")
         ted.value$lcu.value=as.numeric(as.character(ted.value$lcu.value))
 
