@@ -249,8 +249,8 @@ gta_ted_parse <- function(dom.df=NULL,
 
       if(nrow(ted.value)>0){
 
-        ted.value=subset(ted.value, grepl("\\D+", gsub(",|\\.","",lcu.value))==T)
         ted.value$lcu.value=gsub(" ","",ted.value$lcu.value)
+        ted.value=subset(ted.value, grepl("\\D+", gsub(",|\\.","",lcu.value))==F)
         ted.value$lcu.value=gsub("\\.\\d{1,2}",";",ted.value$lcu.value)
         ted.value$lcu.value=gsub(",\\d{1,2}$","",ted.value$lcu.value)
         ted.value$lcu.value=gsub(",","",ted.value$lcu.value)
