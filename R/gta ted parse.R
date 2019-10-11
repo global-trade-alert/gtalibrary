@@ -199,7 +199,7 @@ gta_ted_parse <- function(dom.df=NULL,
 
         total.tags=c("PROCUREMENT_TOTAL","ESTIMATED_TOTAL","VAL_ESTIMATED_TOTAL","SINGLE_VALUE")
 
-        if(any(total.tags %in% subset(value.df, position %in% top.pos)$element.name)){
+        if(any(total.tags %in% subset(value.df, grepl(paste(top.pos, collapse="|"),position))$element.name)){
 
           top.pos=min(subset(value.df, element.name %in% total.tags)$position)
 
@@ -210,21 +210,25 @@ gta_ted_parse <- function(dom.df=NULL,
 
 
       for(tp in top.pos){
-        cur.temp=unique(subset(value.df, element.name %in% "CURRENCY" & grepl(tp, position))$element.value)
+
+        tp.temp=subset(value.df, grepl(tp, position))
+        cur.temp=unique(subset(tp.temp, element.name %in% "CURRENCY" & grepl(tp, position))$element.value)
 
 
         ## finding a value
-        lcu.temp=unique(subset(value.df, grepl("FMTVAL",element.name) & grepl(tp, position))$element.value)
+        lcu.temp=unique(subset(tp.temp, grepl("FMTVAL",element.name) & grepl(tp, position))$element.value)
 
         if(length(lcu.temp)==0){
-          lcu.temp=unique(subset(value.df, grepl("VALUE",element.name) & grepl(tp, position))$element.value)
+          lcu.temp=unique(subset(tp.temp, grepl("VALUE",element.name) & grepl(tp, position))$element.value)
 
           if(length(lcu.temp)==0){
 
-            lcu.temp=unique(subset(value.df, grepl("text",element.name, ignore.case=T) & grepl(currency.positions, position))$element.value)
+            lcu.temp=unique(subset(tp.temp, grepl("text",element.name, ignore.case=T) & grepl(paste(currency.positions, collapse="|"), position))$element.value)
           }
 
         }
+
+        rm(tp.temp)
 
         if(length(lcu.temp)==0){
           output.list<- list("gta.eligible"=F,
