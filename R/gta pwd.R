@@ -23,6 +23,7 @@ gta_pwd <- function(type=NULL) {
       stop("Credentials type not found")
     } else {
       eval(parse(text=paste0("creds <- ",credentials[tolower(credentials) == tolower(type)])))
+      eval(parse(text=paste0("rm(credentials,",paste(credentials[tolower(credentials) != tolower(type)], collapse=","),")")))
       return(creds)
     }
   }
