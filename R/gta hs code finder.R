@@ -88,9 +88,15 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning = function(c) {
 
+          print(paste("Eurostat: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -147,9 +153,15 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning = function(c) {
 
+          print(paste("Eximguru: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -187,7 +199,15 @@ gta_hs_code_finder=function(products,
             findings.thusfar<<-find.hs
           }
 
+        },
+        warning = function(c) {
 
+          print(paste("EU customs: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
+
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
 
         }
         )
@@ -228,9 +248,14 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning=function(c) {
+          print(paste("Google: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -282,9 +307,15 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning = function(c) {
 
+          print(paste("Zauba: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -337,9 +368,15 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning = function(c) {
 
+          print(paste("HS e-t-n: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -391,9 +428,15 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning = function(c) {
 
+          print(paste("hsbianma: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -444,9 +487,15 @@ gta_hs_code_finder=function(products,
           if(nrow(find.hs)>0){
             findings.thusfar<<-find.hs
           }
+        },
+        warning = function(c) {
 
+          print(paste("Cybex: Error for '",prd,"'. Please try it separately later.", sep=""))
+          check.errors<<-c(check.errors, prd)
 
-
+          if(nrow(find.hs)>0){
+            findings.thusfar<<-find.hs
+          }
         }
         )
 
@@ -490,9 +539,15 @@ gta_hs_code_finder=function(products,
       if(nrow(find.hs)>0){
         findings.thusfar<<-find.hs
       }
+    },
+    warning = function(c) {
 
+      print(paste("Error for '",prd,"'. Please try it separately later.", sep=""))
+      check.errors<<-c(check.errors, prd)
 
-
+      if(nrow(find.hs)>0){
+        findings.thusfar<<-find.hs
+      }
     }
     )
 
