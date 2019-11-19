@@ -8,20 +8,23 @@ gta_plot_wrapper(data = NULL, data.x = NULL, data.y = NULL,
   group = NULL, plot.title = NULL, plot.subtitle = NULL,
   x.data.type = "continuous", x.bottom.name = NULL,
   x.bottom.breaks = waiver(), x.bottom.limits = NULL,
-  x.bottom.labels = waiver(), x.bottom.expand = c(0.05, 0.05),
+  x.bottom.labels = waiver(), x.bottom.expand = c(0.02, 0.02),
   x.top.enable = F, x.top.transform = 1, x.top.name = x.bottom.name,
   x.top.breaks = x.bottom.breaks, x.top.limits = x.bottom.limits,
   x.top.labels = waiver(), y.data.type = "continuous",
   y.left.name = NULL, y.left.breaks = waiver(), y.left.limits = NULL,
-  y.left.labels = waiver(), y.left.expand = c(0.05, 0.05),
+  y.left.labels = waiver(), y.left.expand = c(0.02, 0.02),
   y.right.enable = T, y.right.transform = 1,
   y.right.name = y.left.name, y.right.breaks = y.left.breaks,
   y.right.limits = y.left.limits, y.right.labels = y.left.labels,
   colour.palette = gta_colour$qualitative, colour.labels = waiver(),
   colour.legend.title = waiver(), colour.legend.col = 1,
-  fill.palette = gta_colour$qualitative, fill.labels = waiver(),
-  fill.legend.title = waiver(), fill.legend.col = 1, flip.plot = F,
-  facet.var = NULL, facet.ncol = 1, facet.nrow = 1)
+  colour.legend.enable = T, fill.palette = gta_colour$qualitative,
+  fill.labels = waiver(), fill.legend.title = waiver(),
+  fill.legend.col = 1, fill.legend.enable = T, flip.plot = F,
+  facet.var = NULL, facet.ncol = 1, facet.nrow = 1,
+  x.highlight.range = NULL, x.highlight.colour = gta_colour$grey[1],
+  x.highlight.title = NULL)
 }
 \arguments{
 \item{plot.title}{Define the plot title as string. Default: emtpy.}
@@ -99,6 +102,12 @@ gta_plot_wrapper(data = NULL, data.x = NULL, data.y = NULL,
 \item{facet.ncol}{Takes in the number of facet columns as integer. Default: 1.}
 
 \item{facet.nrow}{Takes in the number of facet rows as integer. Default: 1.}
+
+\item{x.highlight.range}{Define a range as a vector 'c(start, end)'}
+
+\item{x.highlight.colour}{Define the color as a HEX code or use the gta_colour_palette}
+
+\item{x.highlight.title}{Define the title for the highlighted x range.}
 }
 \description{
 This function wraps ggplot settings in a wrapper function.

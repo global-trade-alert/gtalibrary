@@ -4,19 +4,25 @@
 \alias{gta_theme}
 \title{Define plot theme settings for ggplot.}
 \usage{
-gta_theme(base.size = 14, aspect.ratio = NULL,
-  font.colour = "#333333", base.family = "",
-  legend.box.align = "horizontal", legend.title.align = 0.5,
-  x.bottom.angle = 0, x.top.angle = x.bottom.angle,
-  x.bottom.align = 0.5, y.left.angle = 0,
-  y.right.angle = y.left.angle)
+gta_theme(base.size = 12, aspect.ratio = NULL,
+  background.color = "#EEEEEE", font.colour = "#555555",
+  font.colour.bold = "#555555", base.family = "Open Sans",
+  base.family.bold = "Open Sans Bold", legend.box.align = "horizontal",
+  legend.title.align = 0, x.bottom.angle = 0,
+  x.top.angle = x.bottom.angle, x.bottom.align = 0.5,
+  y.left.angle = 0, y.right.angle = y.left.angle,
+  legend.position = "top")
 }
 \arguments{
 \item{base.size}{Takes in the value for the font base size as integer. All font are scaled relative to this value. Default is optimized for plots saved with default width of 21cm and relative height. Default: 11.}
 
 \item{aspect.ratio}{Takes in the value of the relative plot height as integer. Width = 1, height = aspect.ratio. Do not use for plots being saved to file. Rather define aspect ratio on save process. Default: NULL.}
 
+\item{background.color}{Define the background-color of the plot, default is #EEEEEE (light gray), choose #FFFFFF for white.}
+
 \item{base.family}{Takes in the name of the font family. Default: "Open Sans".}
+
+\item{base.family.bold}{Takes in the name of the font family for the bold face. Default: "Open Sans Bold".}
 
 \item{legend.box.align}{If more than legend existing, define the alignment. Either "horizontal" or "vertical". Default: "horizontal".}
 
@@ -31,6 +37,8 @@ gta_theme(base.size = 14, aspect.ratio = NULL,
 \item{y.left.angle}{Define the labels angle for the left y-axis as integer. Default: 0.}
 
 \item{y.right.angle}{Define the labels angle for the right y-axis as integer. If undefined, value will be taken from left y-axis.}
+
+\item{legend.position}{Define the position of the legend. Choices are "top" or "bottom".}
 }
 \description{
 This function defines the gta theme for ggplot. Add it at the end of a ggplot object.

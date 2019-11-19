@@ -42,6 +42,9 @@
 #' @param facet.var Takes in the column (e.g. dataframe$col) to make facets of.
 #' @param facet.ncol Takes in the number of facet columns as integer. Default: 1.
 #' @param facet.nrow Takes in the number of facet rows as integer. Default: 1.
+#' @param x.highlight.range Define a range as a vector 'c(start, end)'
+#' @param x.highlight.colour Define the color as a HEX code or use the gta_colour_palette
+#' @param x.highlight.title Define the title for the highlighted x range.
 #'
 #'
 #'
@@ -61,7 +64,7 @@ gta_plot_wrapper <- function(
   x.bottom.breaks = waiver(),
   x.bottom.limits = NULL,
   x.bottom.labels = waiver(),
-  x.bottom.expand = c(0.05,0.05),
+  x.bottom.expand = c(0.02,0.02),
   x.top.enable = F,
   x.top.transform = 1,
   x.top.name = x.bottom.name,
@@ -73,7 +76,7 @@ gta_plot_wrapper <- function(
   y.left.breaks = waiver(),
   y.left.limits = NULL,
   y.left.labels = waiver(),
-  y.left.expand = c(0.05,0.05),
+  y.left.expand = c(0.02,0.02),
   y.right.enable = T,
   y.right.transform = 1,
   y.right.name = y.left.name,
@@ -84,14 +87,19 @@ gta_plot_wrapper <- function(
   colour.labels = waiver(),
   colour.legend.title = waiver(),
   colour.legend.col = 1,
+  colour.legend.enable = T,
   fill.palette = gta_colour$qualitative,
   fill.labels = waiver(),
   fill.legend.title = waiver(),
   fill.legend.col = 1,
+  fill.legend.enable = T,
   flip.plot = F,
   facet.var = NULL,
   facet.ncol = 1,
-  facet.nrow = 1
+  facet.nrow = 1,
+  x.highlight.range = NULL,
+  x.highlight.colour = gta_colour$grey[1],
+  x.highlight.title = NULL
 ){
   library("scales")
 
@@ -179,14 +187,21 @@ gta_plot_wrapper <- function(
                          labels = x.bottom.labels)}},
 
 
-    scale_color_manual(values=colour.palette, labels=colour.labels),
+    if (colour.legend.enable) {
+      scale_color_manual(values=colour.palette, labels=colour.labels)
+    },
+    if (fill.legend.enable) {
+      scale_fill_manual(values=fill.palette, labels = fill.labels)
+    },
+    guides(color = guide_legend(title = colour.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = colour.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right"),
+           fill = guide_legend(title = fill.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = fill.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right")),
 
-
-    scale_fill_manual(values=fill.palette, labels = fill.labels),
-
-    guides(color = guide_legend(title = colour.legend.title, title.position = "top", ncol = colour.legend.col),
-           fill = guide_legend(title = fill.legend.title, title.position = "top", ncol = fill.legend.col)),
-
+    if(is.null(x.highlight.range)==F) {
+      geom_rect(aes(xmin = x.highlight.range[1], xmax = x.highlight.range[2], ymin = -Inf, ymax = Inf), fill=x.highlight.colour, colour="transparent", alpha = 0.005)
+    },
+    if(is.null(x.highlight.title)==F) {
+      geom_text(aes(x=x.highlight.range[1], y=Inf, label=x.highlight.title), hjust=-0.1, vjust=1.6, color = x.highlight.colour)
+    },
 
     if (flip.plot == T) {coord_flip()},
 
