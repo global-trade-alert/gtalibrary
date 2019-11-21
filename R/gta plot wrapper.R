@@ -45,9 +45,12 @@
 #' @param x.highlight.range Define a range as a vector 'c(start, end)'
 #' @param x.highlight.colour Define the color as a HEX code or use the gta_colour_palette
 #' @param x.highlight.title Define the title for the highlighted x range.
+#' @param x.highlight.alpha Define the transparency for the highlight from 0 to 1. Default is 0.2.
 #' @param y.highlight.range Define a range as a vector 'c(start, end)'
 #' @param y.highlight.colour Define the color as a HEX code or use the gta_colour_palette
 #' @param y.highlight.title Define the title for the highlighted y range.
+#' @param y.highlight.alpha Define the transparency for the highlight from 0 to 1. Default is 0.2.
+
 #'
 #'
 #'
@@ -103,9 +106,11 @@ gta_plot_wrapper <- function(
   x.highlight.range = NULL,
   x.highlight.colour = gta_colour$grey[1],
   x.highlight.title = NULL,
+  x.highlight.alpha = 0.2,
   y.highlight.range = NULL,
   y.highlight.colour = gta_colour$grey[1],
-  y.highlight.title = NULL
+  y.highlight.title = NULL,
+  y.highlight.alpha = 0.2
 
 ){
   library("scales")
@@ -204,16 +209,16 @@ gta_plot_wrapper <- function(
            fill = guide_legend(title = fill.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = fill.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right")),
 
     if(is.null(x.highlight.range)==F) {
-      geom_rect(aes(xmin = x.highlight.range[1], xmax = x.highlight.range[2], ymin = -Inf, ymax = Inf), fill=x.highlight.colour, colour="transparent", alpha = 0.2)
+      geom_rect(aes(xmin = x.highlight.range[1], xmax = x.highlight.range[2], ymin = -Inf, ymax = Inf), fill=x.highlight.colour, colour="transparent", alpha = x.highlight.alpha)
     },
     if(is.null(x.highlight.title)==F) {
-      geom_text(aes(x=x.highlight.range[1], y=Inf, label=x.highlight.title), hjust=-0.1, vjust=1.6, color = x.highlight.colour)
+      geom_text(aes(x=x.highlight.range[1], y=Inf, label=x.highlight.title), hjust=-0.1, vjust=1.6, color = x.highlight.colour, lineheight = 1)
     },
     if(is.null(y.highlight.range)==F) {
-      geom_rect(aes(ymin = y.highlight.range[1], ymax = y.highlight.range[2], xmin = -Inf, xmax = Inf), fill=y.highlight.colour, colour="transparent", alpha = 0.2)
+      geom_rect(aes(ymin = y.highlight.range[1], ymax = y.highlight.range[2], xmin = -Inf, xmax = Inf), fill=y.highlight.colour, colour="transparent", alpha = y.highlight.alpha)
     },
     if(is.null(y.highlight.title)==F) {
-      geom_text(aes(y=y.highlight.range[2], x=-Inf, label=y.highlight.title), hjust=-0.1, vjust=1.5, color = y.highlight.colour)
+      geom_text(aes(y=y.highlight.range[2], x=-Inf, label=y.highlight.title), hjust=-0.1, vjust=1.5, color = y.highlight.colour, lineheight = 1)
     },
 
     if (flip.plot == T) {coord_flip()},
