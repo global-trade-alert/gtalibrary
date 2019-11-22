@@ -26,7 +26,8 @@ gta_plot_saver <- function(plot = NULL,
                            width = 21,
                            height = NULL,
                            png = T,
-                           eps = T,
+                           eps = F,
+                           pdf = T,
                            cairo_ps = F,
                            aspect.ratio = 21/29.7) {
   if (is.null(height)) {
@@ -48,6 +49,15 @@ gta_plot_saver <- function(plot = NULL,
     ggsave(filename=paste0(name,".eps"),
            plot=plot,
            device = "eps",
+           path=path,
+           width=width,
+           height = height,
+           units = "cm")
+  }
+  if (pdf == T) {
+    ggsave(filename=paste0(name,".pdf"),
+           plot=plot,
+           device = "pdf",
            path=path,
            width=width,
            height = height,
