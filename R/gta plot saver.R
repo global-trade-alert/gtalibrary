@@ -27,7 +27,7 @@ gta_plot_saver <- function(plot = NULL,
                            height = NULL,
                            png = T,
                            eps = F,
-                           pdf = T,
+                           pdf = F,
                            cairo_ps = F,
                            aspect.ratio = 21/29.7) {
   if (is.null(height)) {
