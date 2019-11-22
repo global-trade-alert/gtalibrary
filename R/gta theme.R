@@ -39,6 +39,8 @@ gta_theme <- function(base.size=12,
                       legend.position = "top"
 ){
 
+  gtalibrary::gta_colour_palette()
+
   if (base.family != "Open Sans") {
     if (base.family.bold == "Open Sans Bold") {
       base.family.bold = base.family
