@@ -92,24 +92,26 @@ gta_intervention_duration <- function(
   # durations for cases that start/end within the given year
   intra.year=subset(duration, is.na(share))
 
-  for(i in 1:nrow(intra.year)){
+  if (nrow(intra.year) > 0) {
 
-    if(intra.year$year[i]<year(Sys.Date())){
-      intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
-    }else{
+    for(i in 1:nrow(intra.year)){
 
-      ## correcting current year duration (if required)
-      if(current.year.todate){
-        intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):Sys.Date())))/(as.numeric(Sys.Date()-as.Date(paste(year(Sys.Date()),"-01-01",sep="")))+1)
-      } else{
+      if(intra.year$year[i]<year(Sys.Date())){
         intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
+      }else{
+
+        ## correcting current year duration (if required)
+        if(current.year.todate){
+          intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):Sys.Date())))/(as.numeric(Sys.Date()-as.Date(paste(year(Sys.Date()),"-01-01",sep="")))+1)
+        } else{
+          intra.year$share[i]=sum(as.numeric(c(intra.year$date.implemented[i]:intra.year$date.removed[i]) %in% c(as.Date(paste(intra.year$year[i], "-01-01", sep=""), "%Y-%m-%d"):as.Date(paste(intra.year$year[i], "-12-31", sep=""), "%Y-%m-%d"))))/yr.length$days[yr.length$year==intra.year$year[i]]
+        }
+
       }
 
     }
-
-  }
-
-  duration=rbind(subset(duration, is.na(share)==F), intra.year)
+    duration=rbind(subset(duration, is.na(share)==F), intra.year)
+}
   duration=unique(duration[,c("intervention.id","year","share")])
 
   eval(parse(text=paste(df.name, "<<-duration", sep="")))
