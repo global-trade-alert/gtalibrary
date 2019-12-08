@@ -57,7 +57,7 @@
 #' @param reporting.period Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).
 #' @param intra.year.duration Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.
 #' @param trade.statistic Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.
-#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2018, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2018, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
@@ -1078,8 +1078,8 @@ gta_trade_coverage <- function(
     ##### multiply in base values
     print("Importing trade base values ...")
 
-    if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2007:2018))){
-      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2018, 'prior year' or 'current year')."
+    if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2018))){
+      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2018, 'prior year' or 'current year')."
       error.message <<- c(T, stop.print)
       stop(stop.print)
     } else{
@@ -1270,7 +1270,7 @@ gta_trade_coverage <- function(
     }
 
 
-    if(trade.data %in% c("base", paste(2007:2018))){
+    if(trade.data %in% c("base", paste(2005:2018))){
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
 
       dm.split <- split(duration.max, sample(1:nr.splits, nrow(duration.max), replace=T))

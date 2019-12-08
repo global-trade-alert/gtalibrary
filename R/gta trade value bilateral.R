@@ -43,8 +43,8 @@ gta_trade_value_bilateral <- function(
   library(data.table)
   parameter.choices=data.frame(parameter=character(), choice=character())
 
-  if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2007:2018))){
-    stop("Please specify proper trade data choice (i.e. 'base', a year between 2007 and 2018, 'prior year' or 'current year'.")
+  if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2018))){
+    stop("Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2018, 'prior year' or 'current year'.")
   }
 
   if(trade.data=="base"){
@@ -52,7 +52,7 @@ gta_trade_value_bilateral <- function(
   } else{
     load(trade.data.path)
 
-    if(trade.data %in% paste(2007:2018)){
+    if(trade.data %in% paste(2005:2018)){
       yr=as.numeric(trade.data)
       trade.base=subset(trade.annual, year==yr)
       trade.base$year=NULL
