@@ -150,7 +150,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
       } else {
         check=gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"))
         if(check!="OK"){
-          stop.print <- paste("Unknown GTA evaluation(s): ", check, ".", sep="")
+          stop.print <- paste("Unknown GTA affected flow(s): ", check, ".", sep="")
           error.message <<- c(T, stop.print)
           stop(stop.print)
 

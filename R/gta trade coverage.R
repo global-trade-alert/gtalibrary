@@ -9,7 +9,7 @@
 #' @param coverage.period The calendar years for which to calculate the trade coverage shares. Default is c(2009,CURRENT.YEAR). Calculation includes interventions based on enforcement status, not implementation date i.e. if you start in 2010, this function will also work with interventions implemneted in 2009 but still in force in 2010. Use implementation.period parameter to change this.
 #' @param current.year.todate Should the coverage statistics for the current year be calculated as 'coverage for year to date' (TRUE) or 'coverage for entire current year' (FALSE). Default is TRUE.
 #' @param gta.evaluation Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.
-#' @param affected.flows Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
+#' @param affected.flows Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is c('inward','outward subsidy'). Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.
 #' @param importers Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.
 #' @param keep.importers Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers.
 #' @param incl.importers.strictness Specify whether to include interventions that affect only one of the selected importers ('ONE'), at least one of the selected importers ('ONEPLUS') or all of the selected importers ('ALL'). Default is 'ONEPLUS'.
