@@ -46,7 +46,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{gta.evaluation}{Specify what GTA evaluations to include. Default is 'any'. Permissible values are 'red', 'amber', 'green' or combinations thereof.}
 
-\item{affected.flows}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is 'any'. Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
+\item{affected.flows}{Specify the direction of the trade flow that is affected. The point of view is from the implementing country. Default is c('inward','outward subsidy'). Permissible values are 'inward', 'outward', 'outward subsidy' or combinations thereof.}
 
 \item{importers}{Takes in a list of country names, UN codes or country groups (g7, g20, eu28, ldc, au) to filter for importers in the sample. Default: All importers.}
 
@@ -142,7 +142,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{trade.statistic}{Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.}
 
-\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2017, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.}
+\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2018, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.}
 
 \item{trade.data.path}{Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),}
 

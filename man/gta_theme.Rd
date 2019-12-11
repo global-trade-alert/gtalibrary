@@ -5,7 +5,7 @@
 \title{Define plot theme settings for ggplot.}
 \usage{
 gta_theme(base.size = 12, aspect.ratio = NULL,
-  background.color = "#EEEEEE", font.colour = "#555555",
+  background.color = "#FFFFFF", font.colour = "#555555",
   font.colour.bold = "#555555", base.family = "Open Sans",
   base.family.bold = "Open Sans Bold", legend.box.align = "horizontal",
   legend.title.align = 0, x.bottom.angle = 0,

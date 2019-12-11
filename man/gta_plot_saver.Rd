@@ -5,7 +5,7 @@
 \title{Save png and eps plots together more easily.}
 \usage{
 gta_plot_saver(plot = NULL, path = "/", name = "plot", width = 21,
-  height = NULL, png = T, eps = T, cairo_ps = F,
+  height = NULL, png = T, eps = F, pdf = F, cairo_ps = F,
   aspect.ratio = 21/29.7)
 }
 \arguments{

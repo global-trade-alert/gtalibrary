@@ -24,7 +24,9 @@ gta_plot_wrapper(data = NULL, data.x = NULL, data.y = NULL,
   fill.legend.col = 1, fill.legend.enable = T, flip.plot = F,
   facet.var = NULL, facet.ncol = 1, facet.nrow = 1,
   x.highlight.range = NULL, x.highlight.colour = gta_colour$grey[1],
-  x.highlight.title = NULL)
+  x.highlight.title = NULL, x.highlight.alpha = 0.2,
+  y.highlight.range = NULL, y.highlight.colour = gta_colour$grey[1],
+  y.highlight.title = NULL, y.highlight.alpha = 0.2)
 }
 \arguments{
 \item{plot.title}{Define the plot title as string. Default: emtpy.}
@@ -108,6 +110,16 @@ gta_plot_wrapper(data = NULL, data.x = NULL, data.y = NULL,
 \item{x.highlight.colour}{Define the color as a HEX code or use the gta_colour_palette}
 
 \item{x.highlight.title}{Define the title for the highlighted x range.}
+
+\item{x.highlight.alpha}{Define the transparency for the highlight from 0 to 1. Default is 0.2.}
+
+\item{y.highlight.range}{Define a range as a vector 'c(start, end)'}
+
+\item{y.highlight.colour}{Define the color as a HEX code or use the gta_colour_palette}
+
+\item{y.highlight.title}{Define the title for the highlighted y range.}
+
+\item{y.highlight.alpha}{Define the transparency for the highlight from 0 to 1. Default is 0.2.}
 }
 \description{
 This function wraps ggplot settings in a wrapper function.
