@@ -24,7 +24,7 @@
 
 gta_theme <- function(base.size=12,
                       aspect.ratio = NULL,
-                      background.color="#FFFFFF",
+                      background.color="#F9F9F9",
                       font.colour = "#555555",
                       font.colour.bold = "#555555",
                       base.family = "Open Sans",
