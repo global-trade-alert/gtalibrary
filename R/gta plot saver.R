@@ -57,7 +57,7 @@ gta_plot_saver <- function(plot = NULL,
   if (pdf == T) {
     ggsave(filename=paste0(name,".pdf"),
            plot=plot,
-           device = "pdf",
+           device = grDevices::cairo_pdf,
            path=path,
            width=width,
            height = height,
