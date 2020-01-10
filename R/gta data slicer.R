@@ -741,22 +741,22 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                                 data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Regardless"))
       } else {
 
-        #determine interpretability of in.force.on.date
-        tryCatch({date=format(as.Date(x=in.force.on.date),"%Y-%m-%d")},
-                 error=function(e){
+      #determine interpretability of in.force.on.date
+      tryCatch({date=format(as.Date(x=in.force.on.date),"%Y-%m-%d")},
+               error=function(e){
+                 stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
+                 error.message <<- c(T, stop.print)
+                 stop(stop.print)
+               },
+               finally={
+                 if(is.na(date) | !substr(as.character(date),1,4) %in% as.character(2000:2024) | length(date)!=1){
                    stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
                    error.message <<- c(T, stop.print)
                    stop(stop.print)
-                 },
-                 finally={
-                   if(is.na(date) | !substr(as.character(date),1,4) %in% as.character(2000:2024) | length(date)!=1){
-                     stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
-                     error.message <<- c(T, stop.print)
-                     stop(stop.print)
-                   }
-                   
-                 })
-        
+                 }
+                 
+               })
+      in.force.on.date = as.Date(x=in.force.on.date)
           
       if(tolower(keep.in.force.on.date) %in% c("yes","no","any")){
 
