@@ -12,15 +12,15 @@
 #' @author Global Trade Alert
 
 
-gta_plot_map_df <- function(data = vdma.master,
+gta_plot_map_df <- function(data = NULL,
                          countries = NULL,
                          values = NULL
                          ) {
-  
+
 if (is.null(data) | is.null(countries) | is.null(values)) {
   stop("Please define column names (countries and values) and a dataframe!")
 }
-  
+
 world <- gtalibrary::world.geo
 
 data[,c("UN","value")] <- data[,c(countries,values)]
