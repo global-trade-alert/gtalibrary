@@ -49,6 +49,7 @@ gta_trade_value_bilateral <- function(
 
   if(trade.data=="base"){
     trade.base=gtalibrary::trade.base
+    trade.base$trade.value=trade.base$trade.value/3
   } else{
     load(trade.data.path)
 
