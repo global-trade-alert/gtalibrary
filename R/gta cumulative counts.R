@@ -76,7 +76,7 @@ gta_cumulative_counts=function(
     na.provided=length(coverage.period[is.na(coverage.period)])
     coverage.period=as.numeric(coverage.period)
     if(length(coverage.period)!= 2 | !all(as.numeric(str_sub(coverage.period,1,4)) %in% 2008:(year(Sys.Date())+5) | is.na(coverage.period)) | na.provided!=length(coverage.period[is.na(coverage.period)])){
-      stop.print <- "coverage.period must be given as a year range. To filter implementation dates use the implementation.date parameter instead. NA values are permissible but must be provided, i.e. c(2008,NA). Minimum coverage year is 2008."
+      stop.print <- "coverage.period must be given as a year range. NA values are permissible but must be provided, i.e. c(2008,NA). Minimum coverage year is 2008."
       error.message <<- c(T, stop.print)
       stop(stop.print)
     } else {
@@ -134,8 +134,7 @@ gta_cumulative_counts=function(
   base=unique(subset(master.sliced, select=c('date.implemented','date.removed')))
   
   #considered in force if: 
-  #announcement<cutoff & (removal>cutoff or no removal)
-  #in english: evaluation is done at the end of the year
+  #implementation<=cutoff & (removal>cutoff or no removal)
   
   #counts by month
   if(tolower(counts.by)=='month'){
