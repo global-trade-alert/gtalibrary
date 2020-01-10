@@ -34,7 +34,8 @@
 #' @param implementation.period Specify a period in which the interventions for your analysis have been implemented. Default is 'any' (incl. not implemented to date). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions implemented since 'after.date'.
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param submission.period Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
-#' @param in.force.today Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
+#' @param in.force.on.date Specify the cutoff date to control for in force interventions. Default is the current date (Sys.Date).
+#' @param keep.in.force.on.date Specify whether you want to focus on interventions in force on the specified date ('Yes') or no longer in force on the specified date ('No'). Default is 'any' i.e. regardless of enforcement status on the specified date.
 #' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
 #' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
 #' @param keep.devaluations Specify whether to include "Competitive devaluation" into your calculations. Default is FALSE.
@@ -106,7 +107,8 @@ gta_trade_coverage <- function(
   revocation.period = NULL,
   keep.revocation.na = NULL,
   submission.period = NULL,
-  in.force.today = NULL,
+  in.force.on.date = Sys.Date(),
+  keep.in.force.on.date = 'any',
   intervention.types = NULL,
   keep.type = NULL,
   keep.devaluations=FALSE,
@@ -163,7 +165,8 @@ gta_trade_coverage <- function(
                     revocation.period = revocation.period,
                     keep.revocation.na = keep.revocation.na,
                     submission.period = submission.period,
-                    in.force.today = in.force.today,
+                    in.force.on.date = in.force.on.date,
+                    keep.in.force.on.date = keep.in.force.on.date,
                     intervention.types = intervention.types,
                     keep.type = keep.type,
                     mast.chapters = mast.chapters,
