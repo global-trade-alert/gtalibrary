@@ -21,7 +21,8 @@
 #' @param revocation.period Specify a period in which the interventions for your analysis have been revoked. Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param submission.period Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.
 #' @param keep.revocation.na Specify whether to keep ('TRUE') or remove ('FALSE') interventions with missing revocation.date.
-#' @param in.force.today Specify whether you want to focus on interventions in force today ('Yes') or no longer in force today ('No'). Default is 'any' i.e. regardless of current enforcement status.
+#' @param in.force.on.date Specify the cutoff date to control for in force interventions. Default is the current date (Sys.Date).
+#' @param keep.in.force.on.date Specify whether you want to focus on interventions in force on the specified date ('Yes') or no longer in force on the specified date ('No'). Default is 'any' i.e. regardless of enforcement status on the specified date.
 #' @param intervention.types Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.
 #' @param keep.type Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated intervention type.
 #' @param mast.chapters Specify the MAST chapter IDs for your analysis. Default is 'any'. Permissible values are the MAST chapter letters plus 'tariff', 'fdi', 'migration' and combinations thereof.
@@ -64,7 +65,8 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                          revocation.period = NULL,
                          keep.revocation.na = TRUE,
                          submission.period = NULL,
-                         in.force.today = NULL,
+                         in.force.on.date = Sys.Date(),
+                         keep.in.force.on.date = 'any',
                          intervention.types = NULL,
                          keep.type = NULL,
                          mast.chapters = NULL,
@@ -732,41 +734,58 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
       }
 
 
-      # in.force.today
-      if(is.null(in.force.today)){
-
+      # in.force.on.date
+      if(is.null(in.force.on.date) & keep.in.force.on.date == 'any'){
+        in.force.on.date=Sys.Date()
         parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Currently in force:", choice="Regardless"))
+                                data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Regardless"))
       } else {
 
-      if(tolower(in.force.today) %in% c("yes","no","any")){
+      #determine interpretability of in.force.on.date
+      tryCatch({date=format(as.Date(x=in.force.on.date),"%Y-%m-%d")},
+               error=function(e){
+                 stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
+                 error.message <<- c(T, stop.print)
+                 stop(stop.print)
+               },
+               finally={
+                 if(is.na(date) | !substr(as.character(date),1,4) %in% as.character(2000:2024) | length(date)!=1){
+                   stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
+                   error.message <<- c(T, stop.print)
+                   stop(stop.print)
+                 }
+                 
+               })
+      in.force.on.date = as.Date(x=in.force.on.date)
+          
+      if(tolower(keep.in.force.on.date) %in% c("yes","no","any")){
 
-        if(tolower(in.force.today)=="any"){
+        if(tolower(keep.in.force.on.date)=="any"){
 
           parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Currently in force:", choice="Regardless"))
+                                  data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Regardless"))
         }
 
-        if(tolower(in.force.today)=="yes"){
+        if(tolower(keep.in.force.on.date)=="yes"){
 
-          master=subset(master, date.implemented<=Sys.Date() & (is.na(date.removed)==T|date.removed>=Sys.Date()))
+          master=subset(master, date.implemented<=in.force.on.date & (is.na(date.removed)==T|date.removed>=in.force.on.date))
 
           parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Currently in force:", choice="Yes"))
+                                  data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Yes"))
 
         }
 
-        if(tolower(in.force.today)=='no'){
+        if(tolower(keep.in.force.on.date)=='no'){
 
-          master=subset(master, (date.implemented<Sys.Date() & is.na(date.removed)==F & date.removed<Sys.Date()) | is.na(date.implemented))
+          master=subset(master, (date.implemented<in.force.on.date & is.na(date.removed)==F & date.removed<in.force.on.date) | is.na(date.implemented))
 
           parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Currently in force:", choice="No"))
+                                  data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="No"))
 
         }
 
       } else {
-        stop.print <- "Please specify in.force.today as either 'yes', 'no' or 'any'."
+        stop.print <- "Please specify keep.in.force.on.date as either 'yes', 'no' or 'any'."
         error.message <<- c(T, stop.print)
         stop(stop.print)
       }
@@ -776,8 +795,8 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
       # Check # of rows
       if(nrow(master)==0) {
-        error.message <<- c(T, "Unfortunately no rows remaining after filtering for in.force.today")
-        stop("Unfortunately no rows remaining after filtering for in.force.today")
+        error.message <<- c(T, "Unfortunately no rows remaining after filtering for in.force.on.date")
+        stop("Unfortunately no rows remaining after filtering for in.force.on.date")
       }
 
       # intervention.type
