@@ -10,9 +10,10 @@ gta_setwd = function(x){
 
   split.path=unlist(strsplit(getwd(),"/"))
   cld.position=which(split.path=="GTA root")
-
+  if(length(cld.position)==0) cld.position=which(split.path=="GTA cloud")
   if(cld.position<length(split.path)){
     setwd(paste(rep("..", length(split.path)-cld.position), collapse="/"))
   }
 
 }
+
