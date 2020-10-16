@@ -58,7 +58,7 @@
 #' @param reporting.period Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).
 #' @param intra.year.duration Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.
 #' @param trade.statistic Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.
-#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2018, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2020, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
@@ -67,7 +67,7 @@
 #' @param output.path.interventions Takes the value of the output path for the interventions list file (without the filename) added to the working directory as a string starting with "/". Default: None.
 
 
-#' @return Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
+#' @return Outputs a table with coverage shares ranging from 2009 to 2020 for each importer, exporter, implementer, instrument combination.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
@@ -411,16 +411,16 @@ gta_trade_coverage <- function(
         error.message <<- c(T, stop.print)
         stop(stop.print)}
       if(is.numeric(coverage.period)==F){
-        stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)"
+        stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2020)"
         error.message <<- c(T, stop.print)
         stop(stop.print)}
 
       if(coverage.period[1]%%1==0){year.start=coverage.period[1]}else{
-        stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)"
+        stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2020)"
         error.message <<- c(T, stop.print)
         stop(stop.print)}
       if(coverage.period[2]%%1==0){year.end=coverage.period[2]}else{
-        stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2018)"
+        stop.print <- "Please supply a coverage period vector with two integer entries e.g. c(2008, 2020)"
         error.message <<- c(T, stop.print)
         stop(stop.print)}
     }
@@ -1082,8 +1082,8 @@ gta_trade_coverage <- function(
     ##### multiply in base values
     print("Importing trade base values ...")
 
-    if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2018))){
-      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2018, 'prior year' or 'current year')."
+    if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2020))){
+      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2020, 'prior year' or 'current year')."
       error.message <<- c(T, stop.print)
       stop(stop.print)
     } else{
@@ -1274,7 +1274,7 @@ gta_trade_coverage <- function(
     }
 
 
-    if(trade.data %in% c("base", paste(2005:2018))){
+    if(trade.data %in% c("base", paste(2005:2020))){
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
 
       dm.split <- split(duration.max, sample(1:nr.splits, nrow(duration.max), replace=T))
