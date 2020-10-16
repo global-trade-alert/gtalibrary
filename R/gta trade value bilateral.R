@@ -44,7 +44,7 @@ gta_trade_value_bilateral <- function(
   parameter.choices=data.frame(parameter=character(), choice=character())
 
   if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2020))){
-    stop("Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2018, 'prior year' or 'current year'.")
+    stop("Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2020, 'prior year' or 'current year'.")
   }
 
   if(trade.data=="base"){
