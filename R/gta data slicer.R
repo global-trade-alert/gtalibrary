@@ -127,7 +127,6 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
 
     gta_sql_kill_connections()
-    gta_setwd()
 
     database <<- "gtamain"
 
@@ -273,6 +272,10 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
     master.unpublished=rbind(master.tuple, master.else)
 
+    rm(gta_tariff_line, gta_affected_sector, gta_affected_tariff_line, gta_affected_jurisdiction, cpc.hs, all, my.ints, gta_tuple)
+
+    gta_sql_pool_close()
+    gta_sql_kill_connections()
 
     ## formatting corrections
     master.unpublished$date.announced=as.Date(master.unpublished$date.announced)
@@ -290,10 +293,10 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
     master.unpublished=merge(master.unpublished, mt[,c("intervention.type","mast.id", "mast.chapter")], by="intervention.type", all.x=T)
 
-    country=gtalibrary::country.names
+    country.iso=gtalibrary::country.names
     master.unpublished$i.atleastone.G20=as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, i.un %in% subset(country.iso, is.g20==T)$un_code)$intervention.id )
     master.unpublished$a.atleastone.G20=as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, a.un %in% subset(country.iso, is.g20==T)$un_code)$intervention.id )
-    rm(country)
+    rm(country.iso)
 
 
     ## combining DFs
@@ -301,7 +304,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
     master=rbind(master,
                  subset(master.unpublished, ! intervention.id %in% unique(master$intervention.id)))
 
-
+    rm(mt, master.unpublished, master.tuple, master.else)
   }
 
 
