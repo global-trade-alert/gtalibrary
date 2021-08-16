@@ -39,6 +39,7 @@
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
 #' @param reporting.period Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).
+#' @param add.unpublished Including material that is not published (GTA 28 specifc: dumps & subsidies)
 #' @param df.name Set the name of the generated result data frame. Default is master.sliced.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.slicer.
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
@@ -83,6 +84,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                          keep.interventions = NULL,
                          lag.adjustment=NULL,
                          reporting.period=NULL,
+                         add.unpublished=F,
                          df.name="master.sliced",
                          pc.name="parameter.choice.slicer",
                          xlsx = FALSE,
@@ -109,6 +111,202 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
     parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Local copy from '",data.path,"'.", sep="")))
   }
 
+
+  ### Adding unpublished selection
+  if(add.unpublished){
+
+
+    library(gtasql)
+    library(gtalibrary)
+    library(pool)
+    library(RMariaDB)
+    library(data.table)
+    library(gtabastiat)
+    library(xlsx)
+
+
+
+    gta_sql_kill_connections()
+    gta_setwd()
+
+    database <<- "gtamain"
+
+    gta_sql_pool_open(db.title=database,
+                      db.host = gta_pwd(database)$host,
+                      db.name = gta_pwd(database)$name,
+                      db.user = gta_pwd(database)$user,
+                      db.password = gta_pwd(database)$password,
+                      table.prefix = "gta_")
+
+
+    master.unpublished=gta_sql_get_value("SELECT gm.id as state_act_id, gi.id as intervention_id,
+                                      gm.title as title, ge.label as gta_evaluation,
+                                      gj.name as implementing_jurisdiction, gj.un_code as i_un,
+                                      gm.announcement_date as date_announced, gi.inception_date as date_implemented, gi.removal_date as date_removed, gm.creation_date as date_published,
+                                      gmt.name as intervention_type, gil.frontend_label as implementation_level, gef.label as eligible_firms, gaf.label as affected_flow,
+                                      state_act_status_name as current_status
+                                     FROM (SELECT * FROM gta_measure WHERE status_id NOT IN (4,5)) gm
+                                     JOIN (SELECT * FROM gta_intervention gint LEFT JOIN gta_intervention_dump gid ON gint.id = gid.intervention_id WHERE dump_id IS NOT NULL OR gint.measure_type_id IN (SELECT id FROM gta_measure_type WHERE mast_chapter = 'L') ) gi
+                                     ON gm.id= gi.measure_id
+                                     JOIN gta_state_act_status_list gsasl
+                                     ON gm.status_id = gsasl.state_act_status_id
+                                     JOIN gta_measure_type gmt
+                                     ON gi.measure_type_id = gmt.id
+                                     JOIN gta_evaluation ge
+                                     ON gi.evaluation_id = ge.id
+                                     JOIN gta_affected_flow gaf
+                                     ON gi.affected_flow_id = gaf.id
+                                     JOIN gta_implementation_level gil
+                                     ON gi.implementation_level_id = gil.id
+                                     JOIN gta_eligible_firms gef
+                                     ON gi.eligible_firms_id = gef.id
+                                     JOIN gta_implementing_jurisdiction gij
+                                     ON gi.id = gij.intervention_id
+                                     JOIN gta_jurisdiction gj
+                                     ON gij.jurisdiction_id = gj.id")
+
+
+    ## sectors, products, AJ
+    my.ints=unique(master.unpublished$intervention.id)
+    gta_tuple=gta_sql_get_value(paste0("SELECT DISTINCT intervention_id, sector_code_3 as sector_code, tariff_line_id, gj.un_code as un_code_implementer, gj2.un_code as un_code_affected
+                                    FROM (SELECT *
+                                    FROM gta_it_revised WHERE intervention_id IN (",paste(my.ints, collapse=","),")) git
+                                    JOIN gta_jurisdiction gj
+                                    ON git.implementing_jurisdiction_id = gj.id
+                                    JOIN gta_jurisdiction gj2
+                                    ON git.affected_jurisdiction_id = gj2.id;"))
+
+
+    ## gta_tariff_line
+    gta_tariff_line=gta_sql_get_value(paste0("SELECT * FROM gta_tariff_line;"))
+    data.table::setnames(gta_tariff_line, old="id", new="tariff.line.id")
+    data.table::setnames(gta_tariff_line, old="code", new="affected.products")
+
+    gta_tuple=merge(gta_tuple, gta_tariff_line[,c("tariff.line.id", "affected.products")], by="tariff.line.id", all.x=T)
+    gta_tuple$tariff_line_id=NULL
+
+    ## gta_affected_tariff_line
+    gta_affected_tariff_line=gta_sql_get_value(paste0("SELECT * FROM gta_affected_tariff_line WHERE intervention_id IN (",paste(my.ints, collapse=","),");"))
+    setnames(gta_affected_tariff_line, old="tariff.line.code", "affected.products")
+
+
+
+    ## where we have support tables, we have it in gta_tuple
+    master.tuple=subset(master.unpublished, intervention.id %in% gta_tuple$intervention.id)
+    master.else=subset(master.unpublished,! intervention.id %in% gta_tuple$intervention.id)
+
+    ## correcting for zeroes at the start of gta_tuple
+    gta_tuple$l.hs=nchar(gta_tuple$affected.products)
+    gta_tuple$l.cpc=nchar(gta_tuple$sector.code)
+
+    gta_tuple$affected.products=as.character(gta_tuple$affected.products)
+    gta_tuple$sector.code=as.character(gta_tuple$sector.code)
+
+    gta_tuple$sector_code[gta_tuple$l.cpc==2 & is.na(gta_tuple$l.cpc)==F]=paste("0", gta_tuple$sector.code[gta_tuple$l.cpc==2 & is.na(gta_tuple$l.cpc)==F], sep="")
+    gta_tuple$affected_products[gta_tuple$l.hs==5 & is.na(gta_tuple$l.hs)==F]=paste("0", gta_tuple$affected.products[gta_tuple$l.hs==5  & is.na(gta_tuple$l.hs)==F], sep="")
+
+    gta_tuple$l.hs=NULL
+    gta_tuple$l.cpc=NULL
+
+
+    ## the rest goes through the other gta_ tables.
+    ## First line creates a table of all combinations, 2nd adds sectors (where available), and last products (where available).
+    all=unique(gta_tuple[,c("intervention.id","un.code.implementer","un.code.affected")])
+
+    cpc.hs=merge(aggregate(sector.code ~ intervention.id + un.code.implementer + un.code.affected, gta_tuple, function(x) paste(unique(x), collapse=", ")),
+                 aggregate(affected.products ~ intervention.id + un.code.implementer + un.code.affected, gta_tuple, function(x) paste(unique(x), collapse=", ")),
+                 by=c("intervention.id","un.code.implementer","un.code.affected"), all.x=T)
+    cpc.hs=merge(all, cpc.hs, by=c("intervention.id","un.code.implementer","un.code.affected"), all.x=T)
+
+    ## should be =1
+    length(unique(cpc.hs$intervention.id))/length(unique(master.tuple$intervention.id))
+
+    setnames(cpc.hs, old="affected.products", "affected.product")
+    setnames(cpc.hs, old="sector.code", "affected.sector")
+    setnames(cpc.hs, old="un.code.affected", "a.un")
+    setnames(cpc.hs, old="un.code.implementer", "i.un")
+    setnames(cpc.hs, old="intervention.id", "intervention.id")
+
+    master.tuple=merge(master.tuple, cpc.hs, by=c("intervention.id","i.un"), all.x=T)
+
+    ## the non-tuple cases
+    gta_affected_sector=gta_sql_get_value(paste0("SELECT * FROM gta_affected_sector WHERE intervention_id IN (",paste(my.ints, collapse=","),");"))
+    gta_affected_sector$type=NULL
+    setnames(gta_affected_sector,old="sector.code","affected.sector")
+
+    setnames(gta_affected_tariff_line,old="affected.products","affected.product")
+
+    gta_affected_jurisdiction=gta_sql_get_value(paste0("SELECT gaj.intervention_id, un_code as a_un, name as affected_jurisdiction
+                                                   FROM (SELECT * FROM gta_affected_jurisdiction WHERE type != 'D' AND intervention_id IN (",paste(my.ints, collapse=","),")) gaj
+                                                   JOIN gta_jurisdiction gj
+                                                   ON gaj.jurisdiction_id = gj.id;"))
+
+
+
+    ## correcting for zeroes at the start of gta_tuple
+    gta_affected_tariff_line$l.hs=nchar(gta_affected_tariff_line$affected.product)
+    gta_affected_tariff_line$affected.product=as.character(gta_affected_tariff_line$affected.product)
+    gta_affected_tariff_line$affected.product[gta_affected_tariff_line$l.hs==5 & is.na(gta_affected_tariff_line$l.hs)==F]=paste("0", gta_affected_tariff_line$affected.product[gta_affected_tariff_line$l.hs==5  & is.na(gta_affected_tariff_line$l.hs)==F], sep="")
+    gta_affected_tariff_line$l.hs=NULL
+
+
+    gta_affected_sector$l.cpc=nchar(gta_affected_sector$affected.sector)
+    gta_affected_sector$affected.sector=as.character(gta_affected_sector$affected.sector)
+    gta_affected_sector$affected.sector[gta_affected_sector$l.cpc==2 & is.na(gta_affected_sector$l.cpc)==F]=paste("0", gta_affected_sector$affected.sector[gta_affected_sector$l.cpc==2 & is.na(gta_affected_sector$l.cpc)==F], sep="")
+    gta_affected_sector$l.cpc=NULL
+
+
+    master.else=merge(master.else,
+                      aggregate(affected.sector ~ intervention.id, gta_affected_sector, function(x) paste(unique(x), collapse=", ")),
+                      by="intervention.id", all.x=T)
+
+    master.else=merge(master.else,
+                      aggregate(affected.product ~ intervention.id, gta_affected_tariff_line, function(x) paste(unique(x), collapse=", ")),
+                      by="intervention.id", all.x=T)
+
+    master.else=merge(master.else,
+                      gta_affected_jurisdiction,
+                      by="intervention.id", all.x=T)
+
+    master.tuple=merge(master.tuple, unique(gta_affected_jurisdiction[,c("a.un","affected.jurisdiction")]), by="a.un", all.x=T)
+    length(unique(rbind(master.tuple, master.else)$intervention.id))/length(unique(master.unpublished$intervention.id))
+
+    master.unpublished=rbind(master.tuple, master.else)
+
+
+    ## formatting corrections
+    master.unpublished$date.announced=as.Date(master.unpublished$date.announced)
+    master.unpublished$date.implemented=as.Date(master.unpublished$date.implemented)
+    master.unpublished$date.removed=as.Date(master.unpublished$date.removed)
+    master.unpublished$affected.flow=tolower(master.unpublished$affected.flow)
+
+    today=Sys.Date()
+    master.unpublished$currently.in.force="No"
+    master.unpublished$currently.in.force[master.unpublished$date.implemented<=today & (master.unpublished$date.removed>today | is.na(master.unpublished$date.removed)==T)]="Yes"
+
+    mt=gtalibrary::int.mast.types[,c("intervention.type","mast.chapter.id","mast.subchapter.id")]
+    names(mt)=c("intervention.type", "mast.chapter", "mast.id")
+    mt$intervention.type=as.character(mt$intervention.type)
+
+    master.unpublished=merge(master.unpublished, mt[,c("intervention.type","mast.id", "mast.chapter")], by="intervention.type", all.x=T)
+
+    country=gtalibrary::country.names
+    master.unpublished$i.atleastone.G20=as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, i.un %in% subset(country.iso, is.g20==T)$un_code)$intervention.id )
+    master.unpublished$a.atleastone.G20=as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, a.un %in% subset(country.iso, is.g20==T)$un_code)$intervention.id )
+    rm(country)
+
+
+    ## combining DFs
+    master$current.status="published"
+    master=rbind(master,
+                 subset(master.unpublished, ! intervention.id %in% unique(master$intervention.id)))
+
+
+  }
+
+
+
+  ### begin processing
   tryCatch({
       # gta.evaluation
       if(is.null(gta.evaluation)){
@@ -754,10 +952,10 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                    error.message <<- c(T, stop.print)
                    stop(stop.print)
                  }
-                 
+
                })
       in.force.on.date = as.Date(x=in.force.on.date)
-          
+
       if(tolower(keep.in.force.on.date) %in% c("yes","no","any")){
 
         if(tolower(keep.in.force.on.date)=="any"){
