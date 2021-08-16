@@ -129,6 +129,7 @@ gta_trade_coverage <- function(
   keep.interventions = NULL,
   lag.adjustment=NULL,
   reporting.period=NULL,
+  add.unpublished=F,
   intra.year.duration=TRUE,
   trade.statistic="share",
   trade.data="base",
@@ -182,7 +183,8 @@ gta_trade_coverage <- function(
                     intervention.ids = intervention.ids,
                     keep.interventions = keep.interventions,
                     lag.adjustment=lag.adjustment,
-                    reporting.period=reporting.period)
+                    reporting.period=reporting.period,
+                    add.unpublished=add.unpublished)
 
 
     ## removing certain problemtic, wide-reaching cases until further investigation
