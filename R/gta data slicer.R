@@ -301,8 +301,8 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
 
     ## combining DFs
     master$current.status="published"
-    master=rbind(master,
-                 subset(master.unpublished, ! intervention.id %in% unique(master$intervention.id)))
+    master=unique(rbind(master,
+                        subset(master.unpublished, ! intervention.id %in% unique(master$intervention.id))))
 
     rm(mt, master.unpublished, master.tuple, master.else)
   }
