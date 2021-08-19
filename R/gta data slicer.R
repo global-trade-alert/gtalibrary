@@ -305,6 +305,11 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                         subset(master.unpublished, ! intervention.id %in% unique(master$intervention.id))))
 
     rm(mt, master.unpublished, master.tuple, master.else)
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Unpublished:", choice="Included"))
+  } else {
+    parameter.choices=rbind(parameter.choices,
+                            data.frame(parameter="Unpublished:", choice="Excluded"))
   }
 
 
