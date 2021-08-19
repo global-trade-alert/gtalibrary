@@ -145,7 +145,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                                       gmt.name as intervention_type, gil.frontend_label as implementation_level, gef.label as eligible_firms, gaf.label as affected_flow,
                                       state_act_status_name as current_status
                                      FROM (SELECT * FROM gta_measure WHERE status_id NOT IN (4,5)) gm
-                                     JOIN (SELECT * FROM gta_intervention gint LEFT JOIN gta_intervention_dump gid ON gint.id = gid.intervention_id WHERE dump_id IS NOT NULL OR gint.measure_type_id IN (SELECT id FROM gta_measure_type WHERE mast_chapter = 'L') ) gi
+                                     JOIN (SELECT * FROM gta_intervention gint LEFT JOIN gta_intervention_dump gid ON gint.id = gid.intervention_id WHERE dump_id IS NOT NULL) gi
                                      ON gm.id= gi.measure_id
                                      JOIN gta_state_act_status_list gsasl
                                      ON gm.status_id = gsasl.state_act_status_id
