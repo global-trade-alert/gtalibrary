@@ -740,8 +740,12 @@ gta_trade_coverage <- function(
     if (xlsx.interventions) {
       ## writing to disk
       print("Saving Interventions list ...")
+      cols <- c("intervention.id", "implementing.jurisdiction", "title", "intervention.type", "gta.evaluation", "date.announced", "date.implemented", "date.removed")
+      if (add.unpublished) {
+        cols = c(cols, "current.status")
+      }
       interventions.list <- subset(master.sliced, intervention.id %in% master.tuple$intervention.id)
-      interventions.list <- unique(interventions.list[,c("intervention.id", "implementing.jurisdiction", "title", "intervention.type", "gta.evaluation", "date.announced", "date.implemented", "date.removed")])
+      interventions.list <- unique(interventions.list[,cols])
       interventions.list$url <- paste0("http://www.globaltradealert.org/intervention/",interventions.list$intervention.id)
 
       if(is.null(output.path.interventions)){
