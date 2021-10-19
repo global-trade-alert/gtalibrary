@@ -48,6 +48,7 @@
 #' @param eligible.firms Concentrate the analysis on interventions that are targeted at certain subsets. Default is 'any'. Permissible values are 'all', 'firm-specific', 'SMEs', 'state-controlled','state trading enterprise' or combinations thereof.
 #' @param keep.firms Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated firm subsets.
 #' @param keep.firm.trade.finance Specify whether you want to keep firm-specific trade finance interventions inside the data set (Default: 'FALSE').
+#' @param keep.firm.financial.assistance.ifm Specify whether you want to keep firm-specific 'financial assistance in a foreign market' interventions inside the data set (Default: 'FALSE').
 #' @param cpc.sectors Provide a vector of CPC codes that you are interested in (version 2.1, 3-digit level).
 #' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
@@ -122,6 +123,7 @@ gta_trade_coverage <- function(
   eligible.firms = NULL,
   keep.firms = NULL,
   keep.firm.trade.finance=FALSE,
+  keep.firm.financial.assistance.ifm=FALSE,
   cpc.sectors = NULL,
   keep.cpc = NULL,
   hs.codes = NULL,
@@ -207,9 +209,17 @@ gta_trade_coverage <- function(
 
     if(keep.firm.trade.finance==F){
 
-      master.sliced=subset(master.sliced, ! intervention.id %in% subset(master.sliced, intervention.type=="Trade finance" & eligible.firms=="firm-specific")$intervention.id)
+      master.sliced=subset(master.sliced, ! intervention.id %in% subset(master.sliced, intervention.type %in% c("Trade finance") & eligible.firms=="firm-specific")$intervention.id)
 
     }
+
+    if(keep.firm.financial.assistance.ifm==F){
+
+      master.sliced=subset(master.sliced, ! intervention.id %in% subset(master.sliced, intervention.type %in% c("Financial assistance in foreign market") & eligible.firms=="firm-specific")$intervention.id)
+
+    }
+
+
 
     if(keep.devaluations==F){
       master.sliced=subset(master.sliced, intervention.id!="Competitive devaluation")
