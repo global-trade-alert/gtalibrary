@@ -19,7 +19,17 @@ gta_setwd = function(gdrive=NA){
 
   } else {
 
-    setwd(paste0(gdrive, ":/.shortcut-targets-by-id/17FRvsAcpS6vSAA-JfUUBOS0ixF9FSuio/GTA cloud"))
+    gdrive.gta_cloud <- "/.shortcut-targets-by-id/17FRvsAcpS6vSAA-JfUUBOS0ixF9FSuio/GTA cloud"
+
+    if(!is.null(Sys.info())) {
+      if(Sys.info()['sysname'] == "Darwin") {  # set wd for mac osx
+        setwd(paste0(gdrive, gdrive.gta_cloud))
+      } else {  # set wd for windows
+        setwd(paste0(gdrive, ":", gdrive.gta_cloud))
+      }
+    } else {  # fallback to windows
+      setwd(paste0(gdrive, ":", gdrive.gta_cloud))
+    }
 
   }
 
