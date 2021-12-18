@@ -24,6 +24,8 @@ gta_setwd = function(gdrive=NA){
     if(!is.null(Sys.info())) {
       if(Sys.info()['sysname'] == "Darwin") {  # set wd for mac osx
         setwd(paste0(gdrive, gdrive.gta_cloud))
+      } else if (Sys.info()['sysname'] == "Linux") {
+        setwd(gdrive)
       } else {  # set wd for windows
         setwd(paste0(gdrive, ":", gdrive.gta_cloud))
       }
