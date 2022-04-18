@@ -137,6 +137,7 @@ gta_trade_coverage <- function(
   reporting.period=NULL,
   add.unpublished=F,
   intra.year.duration=TRUE,
+  get.raw.data=FALSE,
   trade.statistic="share",
   trade.data="base",
   trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
@@ -2254,6 +2255,10 @@ gta_trade_coverage <- function(
 
       final.coverage[is.na(final.coverage)]=0
       trade.coverage.estimates<<-final.coverage[,column.order]
+    }
+
+    if(get.raw.data){
+      coverage.by.hs.tp.yr.tuple<<-master.coverage
     }
 
     print("Oooh that's pretty ...")
