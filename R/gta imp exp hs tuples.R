@@ -6,7 +6,7 @@
 #'
 #' @param master.path Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.
 #' @param master.data.frame Specify if the master.path is a data frame in the current environment. Default is FALSE.
-#' @param replica.path Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.
+#' @param replica.path.tuple Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.
 #' @param df.name Set the name of the generated result data frame. Default is 'master.tuple'.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is 'parameter.tuple'.
 #'
@@ -20,7 +20,7 @@
 gta_imp_exp_hs_tuples <- function(
   master.path="data/master_plus.Rdata",
   master.data.frame=FALSE,
-  replica.path="data/database replica/database replica - parts - base.Rdata",
+  replica.path.tuple="data/database replica/gta_tuple.Rdata",
   df.name="master.tuple",
   pc.name="parameter.tuple"
 ) {
@@ -49,13 +49,15 @@ gta_imp_exp_hs_tuples <- function(
   }
 
   ## loading tuple file
-  keep.inv=ls()
-  load(replica.path)
-  rm(list = setdiff(ls(), c(keep.inv, "gta_tuple")))
-  gta_tuple=gta_tuple[,c("intervention_id","un_code_implementer","un_code_distorted","un_code_affected", "affected_products")]
+  # keep.inv=ls()
+  # load(replica.path)
+  # rm(list = setdiff(ls(), c(keep.inv, "gta_tuple")))
+  # gta_tuple=gta_tuple[,c("intervention_id","un_code_implementer","un_code_distorted","un_code_affected", "affected_products")]
+
+  load(replica.path.tuple)
   names(gta_tuple)=c("intervention.id","un.ij","un.dm","un.aj", "affected.product")
   gta_tuple=subset(gta_tuple, intervention.id %in% master$intervention.id)
-  parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path,"'.", sep="")))
+  parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path.tuple,"'.", sep="")))
 
 
   ## transform IJ/DM/AJ so that we have i.un and a.un as importers and exporters
