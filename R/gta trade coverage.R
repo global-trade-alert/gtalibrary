@@ -79,6 +79,7 @@
 gta_trade_coverage <- function(
   data.path="data/master_plus.Rdata",
   replica.path="data/database replica/database replica - parts - base.Rdata",
+  replica.path.atl="data/database replica/gta_affected_tariff_line.Rdata",
   coverage.period=NULL,
   current.year.todate=TRUE,
   gta.evaluation= NULL,
@@ -454,10 +455,10 @@ gta_trade_coverage <- function(
 
 
     ## adding HS code-specific durations
-    keep.environment=ls()
-    load(replica.path)
-    rm(list = setdiff(ls(), c(keep.environment, "gta_affected_tariff_line")))
-
+    # keep.environment=ls()
+    # load(replica.path)
+    # rm(list = setdiff(ls(), c(keep.environment, "gta_affected_tariff_line")))
+    load(replica.path.atl)
 
     gta_affected_tariff_line$inception_date=as.Date(gta_affected_tariff_line$inception_date, "%Y-%m-%d")
     gta_affected_tariff_line$removal_date=as.Date(gta_affected_tariff_line$removal_date, "%Y-%m-%d")
