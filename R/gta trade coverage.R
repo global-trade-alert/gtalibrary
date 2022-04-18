@@ -80,6 +80,7 @@ gta_trade_coverage <- function(
   data.path="data/master_plus.Rdata",
   replica.path="data/database replica/database replica - parts - base.Rdata",
   replica.path.atl="data/database replica/gta_affected_tariff_line.Rdata",
+  replica.path.tuple="data/database replica/gta_tuple.Rdata",
   coverage.period=NULL,
   current.year.todate=TRUE,
   gta.evaluation= NULL,
@@ -521,7 +522,7 @@ gta_trade_coverage <- function(
     master.sliced <<- master.sliced
     gta_imp_exp_hs_tuples(master.path='master.sliced',
                           master.data.frame=TRUE,
-                          replica.path=replica.path)
+                          replica.path.tuple=replica.path.tuple)
     print("Building intervention-importer-exporter-product tuples ... complete.")
     # rm(parameter.tuple)
 
