@@ -6,7 +6,7 @@
 #'
 #' @param dataframes Specify any optional data frame you wish to use. Default FALSE.
 #'
-#' @returns Dataframe with the necessary information for a given data dump.
+#' @return Dataframe with the necessary information for a given data dump.
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
