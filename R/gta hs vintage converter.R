@@ -7,10 +7,11 @@
 #' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
 #' @param origin State the origin vintage, if you know it (options: '2002','2007','2012','2017','best', 'any'). Where 'best' selects the HS vintage with the most matches and 'any' selects HS codes from multiple origin vintages. Default is 'best'.
 #' @param as_list returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version
+#' @param message Prints conversion results if TRUE
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-gta_hs_vintage_converter <- function(codes, origin = "best", as_list = FALSE) {
+gta_hs_vintage_converter <- function(codes, origin = "best", as_list = FALSE, message = TRUE) {
     # return error if codes cannot be converted to numeric without NA coercion (NAs are allowed)
     tryCatch(
         codes <- as.numeric(codes),
@@ -65,28 +66,24 @@ gta_hs_vintage_converter <- function(codes, origin = "best", as_list = FALSE) {
         )
     }
 
-    # only print information if as_list = FALSE
-    if (!as_list) {
+    # only print information if message = TRUE
+    if (message) {
         not.converted <- sapply(codes.converted, \(x) all(x == 0))
 
         if (!any(not.converted)) {
             cli::cli_alert_success(cli::style_bold("All supplied codes were matched."))
-            return(unlist(codes.converted))
-        } else if (!all(not.converted)) {
-            cli::cli_alert_warning(paste0(
-                cli::style_bold("Could not match the following codes: "),
-                paste0(as.numeric(codes[not.converted]), collapse = ", ")
-            ))
-            print("Converted Codes:")
-            return(unlist(codes.converted))
         } else {
             cli::cli_alert_warning(paste0(
                 cli::style_bold("Could not match the following codes: "),
                 paste0(as.numeric(codes[not.converted]), collapse = ", ")
             ))
         }
-    } else {
-        # returns the converted codes as a list
+    }
+
+    # return values
+    if (as_list) {
         return(codes.converted)
+    } else {
+        return(unlist(codes.converted))
     }
 }

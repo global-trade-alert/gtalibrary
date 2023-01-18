@@ -5,11 +5,12 @@
 #' This function checks whether a vector of HS codes is consistent with HS 2012 and returns it as a vector of 6-digit level HS codes.
 #'
 #' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
+#' @param message prints conversion results if TRUE
 #' @param as_list Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-gta_hs_code_check <- function(codes, as_list = FALSE) {
+gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
     # Load HS names
     hs.names <- gtalibrary::hs.names
 
@@ -29,7 +30,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE) {
     )
 
     # transform input codes with uneven number of charaters to even by adding leading 0
-    codes[!is.na(codes) & nchar(codes) %% 2 != 0] <- paste0("0", codes[!is.nan(codes) & nchar(codes) %% 2 != 0])
+    codes[!is.na(codes) & nchar(codes) %% 2 != 0] <- paste0("0", codes[!is.na(codes) & nchar(codes) %% 2 != 0])
 
     # shorten codes which were longer than 6 characters & store truncated codes for warning output
     truncated.codes <- codes[nchar(codes) > 6 & !is.na(codes)]
@@ -38,11 +39,17 @@ gta_hs_code_check <- function(codes, as_list = FALSE) {
     # convert codes to 6 digit hs codes
     converted.codes <- lapply(
         codes,
-        \(x) hs.codes[(x == substr(hs.codes, 1, 2) | x == substr(hs.codes, 1, 4) | x == hs.codes)]
+        \(x) {
+            if (is.na(x)) {
+                integer(0)
+            } else {
+                hs.codes[(x == substr(hs.codes, 1, 2) | x == substr(hs.codes, 1, 4) | x == hs.codes)]
+            }
+        }
     )
 
-    # is not as_list, return vector of converted codes and supply info messages
-    if (!as_list) {
+    # print message if message = TRUE
+    if (message) {
         # retreive unconverted codes as those with empty list entries
         unconverted.codes <- sapply(
             converted.codes,
@@ -50,29 +57,26 @@ gta_hs_code_check <- function(codes, as_list = FALSE) {
         )
 
         if (length(truncated.codes > 0)) {
-            cli::cli_alert_warning(paste0(
+            cli::cli_alert_info(paste0(
                 cli::style_bold("Codes with more than 6 figures provided. These will be reduced: "),
                 paste0(as.numeric(truncated.codes), collapse = ", ")
             ))
         }
-
-        if (!any(unconverted.codes)) {
+        if (!any(unconverted.codes) && all(!is.na(unconverted.codes))) {
             cli::cli_alert_success(cli::style_bold("Conversion successful. Returning vector of 6-digit HS codes."))
-            return(unlist(converted.codes))
-        } else if (!all(unconverted.codes)) {
-            cli::cli_alert_warning(paste0(
-                cli::style_bold("Non existing values provided: "),
-                paste0(as.numeric(codes[unconverted.codes]), collapse = ", ")
-            ))
-            print("Converted Codes:")
-            return(unlist(converted.codes))
         } else {
             cli::cli_alert_warning(paste0(
                 cli::style_bold("Non existing values provided: "),
                 paste0(as.numeric(codes[unconverted.codes]), collapse = ", ")
             ))
         }
+    }
+
+    # return all values as numeric
+    if (as_list) {
+        return(lapply(converted.codes, as.numeric))
     } else {
-        return(converted.codes)
+        # return only unique values if not within list
+        return(unique(as.numeric(unlist(converted.codes))))
     }
 }
