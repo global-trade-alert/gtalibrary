@@ -11,7 +11,16 @@
 #' @author Global Trade Alert
 
 gta_hs_vintage_converter <- function(codes, origin = "best", as_list = FALSE) {
-    codes <- as.numeric(as.character(codes))
+    # return error if codes cannot be converted to numeric without NA coercion (NAs are allowed)
+    tryCatch(
+        codes <- as.numeric(codes),
+        warning = \(w) {
+            cli::cli_abort("{.var codes} must be numeric vector", call = NULL)
+        },
+        error = \(e){
+            cli::cli_abort("{.var codes} must be convertible to a numeric vector", call = NULL)
+        }
+    )
 
     # Load HS vintages
     hs.vintages <- gtalibrary::hs.vintages
@@ -33,21 +42,19 @@ gta_hs_vintage_converter <- function(codes, origin = "best", as_list = FALSE) {
         hs.12 <- subset(hs.vintages, origin.vintage == "HS 2012")
         hs.17 <- subset(hs.vintages, origin.vintage == "HS 2017")
 
-        # is only done once for the entire vector --> If check needs to be done per code, move inside sapply()
-        # --> Could result in different results as to when function is run within loop on a vector (regarding multiple outputs
-        matches <- c(
-            length(intersect(codes, hs.02$origin.code)),
-            length(intersect(codes, hs.07$origin.code)),
-            length(intersect(codes, hs.12$origin.code)),
-            length(intersect(codes, hs.17$origin.code))
-        )
-
-        use.hs <- c(2002, 2007, 2012, 2017)[matches == max(matches)]
-        hs.vintages <- subset(hs.vintages, origin.vintage == paste("HS ", max(use.hs), sep = ""))
-
         codes.converted <- lapply(
             codes,
-            \(x) unique(hs.vintages$hs.2012[hs.vintages$origin.code %in% x])
+            \(x) {
+                matches <- c(
+                    length(intersect(codes, hs.02$origin.code)),
+                    length(intersect(codes, hs.07$origin.code)),
+                    length(intersect(codes, hs.12$origin.code)),
+                    length(intersect(codes, hs.17$origin.code))
+                )
+                use.hs <- c(2002, 2007, 2012, 2017)[matches == max(matches)]
+                hs.vintages <- subset(hs.vintages, origin.vintage == paste("HS ", max(use.hs), sep = ""))
+                unique(hs.vintages$hs.2012[hs.vintages$origin.code %in% x])
+            }
         )
     }
 
@@ -58,17 +65,26 @@ gta_hs_vintage_converter <- function(codes, origin = "best", as_list = FALSE) {
         )
     }
 
-    # only print information for non-vectorized code
+    # only print information if as_list = FALSE
     if (!as_list) {
         not.converted <- sapply(codes.converted, \(x) all(x == 0))
-        if (length(not.converted) > 0) {
-            print(paste("Could not match the following codes: ", paste(codes[not.converted], collapse = ", "), sep = ""))
-        } else {
-            print("All supplied codes were matched.")
-        }
 
-        # returns the converted codes as a vector
-        return(unlist(codes.converted))
+        if (!any(not.converted)) {
+            cli::cli_alert_success(cli::style_bold("All supplied codes were matched."))
+            return(unlist(codes.converted))
+        } else if (!all(not.converted)) {
+            cli::cli_alert_warning(paste0(
+                cli::style_bold("Could not match the following codes: "),
+                paste0(as.numeric(codes[not.converted]), collapse = ", ")
+            ))
+            print("Converted Codes:")
+            return(unlist(codes.converted))
+        } else {
+            cli::cli_alert_warning(paste0(
+                cli::style_bold("Could not match the following codes: "),
+                paste0(as.numeric(codes[not.converted]), collapse = ", ")
+            ))
+        }
     } else {
         # returns the converted codes as a list
         return(codes.converted)
