@@ -5,69 +5,74 @@
 #' This function checks whether a vector of HS codes is consistent with HS 2012 and returns it as a vector of 6-digit level HS codes.
 #'
 #' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
-#'
+#' @param as_list Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
-gta_hs_code_check = function(codes) {
-
-    # Load HS names, create 4 and 2 digits columns
+gta_hs_code_check <- function(codes, as_list = FALSE) {
+    # Load HS names
     hs.names <- gtalibrary::hs.names
 
-    hs.codes=c(unique(hs.names$HS12code),
-                unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)==0],1,2)),
-                unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)!=0],1,1)),
-                unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)==0],1,4)),
-                unique(substr(hs.names$HS12code[(nchar(hs.names$HS12code)%%2)!=0],1,3)))
+    # transform all hs codes to 6 digit strings
+    hs.codes <- unique(hs.names$HS12code)
+    hs.codes[nchar(hs.codes) %% 2 != 0] <- paste0("0", hs.codes[nchar(hs.codes) %% 2 != 0])
 
-    tibble(code = hs.codes) |>
-    mutate(code = as.numeric(code)) |>
-    arrange(code)
+    # return error if codes cannot be converted to numeric without NA coercion (NAs are allowed)
+    tryCatch(
+        codes <- as.character(as.numeric(codes)),
+        warning = \(w) {
+            cli::cli_abort("{.var codes} must be numeric vector", call = NULL)
+        },
+        error = \(e){
+            cli::cli_abort("{.var codes} must be convertible to a numeric vector", call = NULL)
+        }
+    )
 
-    # convert all to numeic
-    codes <- as.numeric(codes)
+    # transform input codes with uneven number of charaters to even by adding leading 0
+    codes[!is.na(codes) & nchar(codes) %% 2 != 0] <- paste0("0", codes[!is.nan(codes) & nchar(codes) %% 2 != 0])
 
-    if (max(nchar(codes)) >= 7) {
-        print(paste0("Codes with more than 6 figures provided. These will be reduced: ", paste0(codes[nchar(codes)>=7], collapse=", ")))
-        
-        # cannot paste like this as it changes the order!
-        # taking the first 6 digits from numbers with even digit count, and only the first 5 digits of the others.
-        codes <- unique(c(as.numeric(substr(codes[(nchar(codes)%%2)==0], 1,6)), as.numeric(substr(codes[(nchar(codes)%%2)!=0], 1,5))))
+    # shorten codes which were longer than 6 characters & store truncated codes for warning output
+    truncated.codes <- codes[nchar(codes) > 6 & !is.na(codes)]
+    codes[nchar(codes) > 6 & !is.na(codes)] <- substr(codes[nchar(codes) > 6 & !is.na(codes)], 1, 6)
+
+    # convert codes to 6 digit hs codes
+    converted.codes <- lapply(
+        codes,
+        \(x) hs.codes[(x == substr(hs.codes, 1, 2) | x == substr(hs.codes, 1, 4) | x == hs.codes)]
+    )
+
+    # is not as_list, return vector of converted codes and supply info messages
+    if (!as_list) {
+        # retreive unconverted codes as those with empty list entries
+        unconverted.codes <- sapply(
+            converted.codes,
+            \(x) all(x == 0)
+        )
+
+        if (length(truncated.codes > 0)) {
+            cli::cli_alert_warning(paste0(
+                cli::style_bold("Codes with more than 6 figures provided. These will be reduced: "),
+                paste0(as.numeric(truncated.codes), collapse = ", ")
+            ))
         }
 
-        if (sum(as.numeric((codes %in% hs.codes)==F))>0){
-        print(paste0("Non existing values provided: ", paste0(codes[(codes %in% hs.codes)==F], collapse = ", ")))
-
-
+        if (!any(unconverted.codes)) {
+            cli::cli_alert_success(cli::style_bold("Conversion successful. Returning vector of 6-digit HS codes."))
+            return(unlist(converted.codes))
+        } else if (!all(unconverted.codes)) {
+            cli::cli_alert_warning(paste0(
+                cli::style_bold("Non existing values provided: "),
+                paste0(as.numeric(codes[unconverted.codes]), collapse = ", ")
+            ))
+            print("Converted Codes:")
+            return(unlist(converted.codes))
         } else {
-
-        print("Conversion successful. Returning vector of 6-digit HS codes.")
-
-        ## creating a vector of all 6-digit codes
-
-        if(length(codes[nchar(codes)%%2==0])>0 & length(codes[nchar(codes)%%2!=0])>0){
-            codes=c(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0]),1,nchar(codes[nchar(codes)%%2==0])) %in% codes[nchar(codes)%%2==0]],
-                    unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2!=0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2!=0]),1,nchar(codes[nchar(codes)%%2!=0])) %in% codes[nchar(codes)%%2!=0]])
-
-        } else {
-
-            if(length(codes[nchar(codes)%%2==0])>0 & length(codes[nchar(codes)%%2!=0])==0){
-            codes=c(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2==0]),1,nchar(codes[nchar(codes)%%2==0])) %in% codes[nchar(codes)%%2==0]])
-
-            } else {
-            codes=c(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2!=0])[substr(unique(hs.names$HS12code[nchar(hs.names$HS12code)%%2!=0]),1,nchar(codes[nchar(codes)%%2!=0])) %in% codes[nchar(codes)%%2!=0]])
-
-            }
-
+            cli::cli_alert_warning(paste0(
+                cli::style_bold("Non existing values provided: "),
+                paste0(as.numeric(codes[unconverted.codes]), collapse = ", ")
+            ))
         }
-
-        return(codes)
-
-        }
-    } else if (is.numeric(codes)==F) {
-        stop("Please input all codes as integer!")
+    } else {
+        return(converted.codes)
     }
-
-    rm(codes)
 }
