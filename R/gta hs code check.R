@@ -22,7 +22,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
     tryCatch(
         codes <- as.character(as.numeric(codes)),
         warning = \(w) {
-            cli::cli_abort("{.var codes} must be numeric vector", call = NULL)
+            cli::cli_abort("{.var codes} must be convertible to a numeric vector", call = NULL)
         },
         error = \(e){
             cli::cli_abort("{.var codes} must be convertible to a numeric vector", call = NULL)
@@ -67,7 +67,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
         } else {
             cli::cli_alert_warning(paste0(
                 cli::style_bold("Non existing values provided: "),
-                paste0(as.numeric(codes[unconverted.codes]), collapse = ", ")
+                paste0(unique(as.numeric(codes[unconverted.codes])), collapse = ", ")
             ))
         }
     }
@@ -80,3 +80,5 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
         return(unique(as.numeric(unlist(converted.codes))))
     }
 }
+
+gta_hs_code_check(01012111)

@@ -5,7 +5,7 @@
 #' Returns it as a vector of 6-digit level HS 2012 codes.
 #'
 #' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
-#' @param years State the origin vintage or the vintages which should be tested. Options inclue 1992, 1996, 2002, 2007, 2012, 2017, 2022. Default is (2002, 2007, 2012, 2017)
+#' @param years State the origin vintage or the vintages which should be tested. Options inclue 2002, 2007, 2012, 2017, 2022. Default is (2002, 2007, 2012, 2017)
 #' @param origin State whether codes shold be converted based on the year where most matches exist (best) or codes can be converted from multiple years (any). Default = "best"
 #' @param as_list returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version
 #' @param message Prints conversion results if TRUE
@@ -25,7 +25,7 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
     )
 
     # make sure that supplied years are valid
-    if (!all(years %in% c(1992, 1996, 2002, 2007, 2012, 2017, 2022))) {
+    if (!all(years %in% c(2002, 2007, 2012, 2017, 2022))) {
         cli::cli_abort(cli::style_bold("Invalid year provided. Make sure that year is in (1992, 1996, 2002, 2007, 2012, 2017, 2022)"))
     }
 
@@ -42,15 +42,13 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
     # hs.conversion.table <- gtalibrary::hs.conversion.table
 
     # assumption: the entire codes vector is from the same HS year
-    # matches (for all years which should be tested)
-
     # calculate the number of maches of the codes in each HS year that is to be tested
     if (origin == "best") {
         matches <- vector()
         for (i in seq_len(length(years))) {
             year <- paste0("HS", years[i])
             matches[i] <-
-                sum((substr(hs.vintages[[year]], 1, 2) %in% codes | substr(hs.vintages[[year]], 1, 4) %in% codes | hs.vintages[[year]] %in% codes), na.rm = TRUE)
+                sum(unique(codes) %in% substr(hs.vintages[[year]], 1, 2) | unique(codes) %in% substr(hs.vintages[[year]], 1, 4) | unique(codes) %in% hs.vintages[[year]], na.rm = TRUE)
         }
 
         # select the hs year (max year with the highest number of matches)
@@ -98,7 +96,7 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
         if (length(truncated.codes) != 0) {
             cli::cli_alert_warning(paste0(
                 cli::style_bold("The following codes were cut to 6 characters: "),
-                paste0(as.numeric(truncated.codes), collapse = ", ")
+                paste0(unique(as.numeric(truncated.codes)), collapse = ", ")
             ))
         }
         if (!any(not.converted)) {
@@ -106,8 +104,12 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
         } else {
             cli::cli_alert_warning(paste0(
                 cli::style_bold("Could not match the following codes: "),
-                paste0(as.numeric(codes[not.converted]), collapse = ", ")
+                paste0(unique(as.numeric(codes[not.converted])), collapse = ", ")
             ))
+        }
+
+        if (!all(not.converted)) {
+            cli::cli_alert_info(paste("Year used for conversion:", use.hs))
         }
     }
 
