@@ -8,7 +8,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_rbind=function(list){
 
   diff = c()

@@ -9,7 +9,7 @@
 
 # Function infos and parameters  --------------------------------------------
 
-
+#' @export
 gta_collect_url = function(url=NULL,
                           file.name=NULL,
                           store.path=NULL,

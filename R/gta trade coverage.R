@@ -75,7 +75,7 @@
 
 
 # Function infos and parameters  --------------------------------------------
-
+#' @export
 gta_trade_coverage <- function(
   data.path="data/master_plus.Rdata",
   replica.path="data/database replica/database replica - parts - base.Rdata",

@@ -50,7 +50,7 @@
 #' @return Be up to date with our latest functions.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_bulk_prep = function(
   dump.name="data dump",
   master.frame="master",

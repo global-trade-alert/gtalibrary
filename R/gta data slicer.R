@@ -48,7 +48,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                          gta.evaluation= NULL,
                          affected.flows = NULL,

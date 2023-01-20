@@ -7,7 +7,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_parameter_check=function(check.vector = NULL, permissible.values=NULL){
 
   if(sum(as.numeric((check.vector %in% permissible.values)==F))>0){

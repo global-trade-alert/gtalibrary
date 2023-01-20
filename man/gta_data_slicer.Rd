@@ -4,24 +4,48 @@
 \alias{gta_data_slicer}
 \title{This function allows you to extract a tailored subset of the GTA database.}
 \usage{
-gta_data_slicer(data.path = "data/master_plus.Rdata",
-  gta.evaluation = NULL, affected.flows = NULL,
-  implementing.country = NULL, keep.implementer = TRUE,
-  affected.country = NULL, keep.affected = NULL,
-  incl.affected.strictness = "ONEPLUS", keep.others = TRUE,
-  nr.affected = c(0, 999), nr.affected.incl = "ALL",
-  announcement.period = NULL, implementation.period = NULL,
-  keep.implementation.na = NULL, revocation.period = NULL,
-  keep.revocation.na = TRUE, submission.period = NULL,
-  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
-  mast.chapters = NULL, keep.mast = NULL,
-  implementation.level = NULL, keep.level = NULL,
-  eligible.firms = NULL, keep.firms = NULL, cpc.sectors = NULL,
-  keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-  intervention.ids = NULL, keep.interventions = NULL,
-  lag.adjustment = NULL, reporting.period = NULL,
-  df.name = "master.sliced", pc.name = "parameter.choice.slicer",
-  xlsx = FALSE, output.path = NULL)
+gta_data_slicer(
+  data.path = "data/master_plus.Rdata",
+  gta.evaluation = NULL,
+  affected.flows = NULL,
+  implementing.country = NULL,
+  keep.implementer = TRUE,
+  affected.country = NULL,
+  keep.affected = NULL,
+  incl.affected.strictness = "ONEPLUS",
+  keep.others = TRUE,
+  nr.affected = c(0, 999),
+  nr.affected.incl = "ALL",
+  announcement.period = NULL,
+  implementation.period = NULL,
+  keep.implementation.na = NULL,
+  revocation.period = NULL,
+  keep.revocation.na = TRUE,
+  submission.period = NULL,
+  in.force.on.date = Sys.Date(),
+  keep.in.force.on.date = "any",
+  intervention.types = NULL,
+  keep.type = NULL,
+  mast.chapters = NULL,
+  keep.mast = NULL,
+  implementation.level = NULL,
+  keep.level = NULL,
+  eligible.firms = NULL,
+  keep.firms = NULL,
+  cpc.sectors = NULL,
+  keep.cpc = NULL,
+  hs.codes = NULL,
+  keep.hs = NULL,
+  intervention.ids = NULL,
+  keep.interventions = NULL,
+  lag.adjustment = NULL,
+  reporting.period = NULL,
+  add.unpublished = F,
+  df.name = "master.sliced",
+  pc.name = "parameter.choice.slicer",
+  xlsx = FALSE,
+  output.path = NULL
+)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -58,7 +82,9 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 
 \item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 
-\item{in.force.today}{Specify whether you want to focus on interventions in force today ('Yes') or no longer in force today ('No'). Default is 'any' i.e. regardless of current enforcement status.}
+\item{in.force.on.date}{Specify the cutoff date to control for in force interventions. Default is the current date (Sys.Date).}
+
+\item{keep.in.force.on.date}{Specify whether you want to focus on interventions in force on the specified date ('Yes') or no longer in force on the specified date ('No'). Default is 'any' i.e. regardless of enforcement status on the specified date.}
 
 \item{intervention.types}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
 
@@ -91,6 +117,8 @@ gta_data_slicer(data.path = "data/master_plus.Rdata",
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
 
 \item{reporting.period}{Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).}
+
+\item{add.unpublished}{Including material that is not published (GTA 28 specifc: dumps & subsidies)}
 
 \item{df.name}{Set the name of the generated result data frame. Default is master.sliced.}
 

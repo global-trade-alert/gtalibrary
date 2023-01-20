@@ -4,14 +4,27 @@
 \alias{gta_plot_3d_map}
 \title{Create 3D world map.}
 \usage{
-gta_plot_3d_map(data = NULL, countries = NULL, value.x = NULL,
-  value.y = NULL, value.x.breaks = 4, value.y.breaks = 4,
+gta_plot_3d_map(
+  data = NULL,
+  countries = NULL,
+  value.x = NULL,
+  value.y = NULL,
+  value.x.breaks = 4,
+  value.y.breaks = 4,
   x.high.y.low = gta_colour$blue[1],
-  x.high.y.high = gta_colour$blue[4], x.low.y.high = gta_colour$red[4],
-  x.low.y.low = gta_colour$red[1], x.axis.title = NULL,
-  y.axis.title = NULL, x.axis.labels = NULL, y.axis.labels = NULL,
-  legend.title = NULL, save.eps = FALSE, save.png = FALSE,
-  save.path = "/", save.name = "3D-Map")
+  x.high.y.high = gta_colour$blue[4],
+  x.low.y.high = gta_colour$red[4],
+  x.low.y.low = gta_colour$red[1],
+  x.axis.title = NULL,
+  y.axis.title = NULL,
+  x.axis.labels = NULL,
+  y.axis.labels = NULL,
+  legend.title = NULL,
+  save.eps = FALSE,
+  save.png = FALSE,
+  save.path = "/",
+  save.name = "3D-Map"
+)
 }
 \arguments{
 \item{data}{Specify which dataset contains the data. The dataset must have a column with UN codes, and a column for x and y values each.}

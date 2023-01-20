@@ -4,13 +4,22 @@
 \alias{gta_hs_code_check}
 \title{Check whether your HS codes are consistent with HS 2012.}
 \usage{
-gta_hs_code_check(codes)
+gta_hs_code_check(codes, as_list = FALSE, message = TRUE)
 }
 \arguments{
 \item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.}
+
+\item{as_list}{Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code}
+
+\item{message}{prints conversion results if TRUE}
 }
 \description{
 This function checks whether a vector of HS codes is consistent with HS 2012 and returns it as a vector of 6-digit level HS codes.
+}
+\examples{
+converting a vector of HS codes:
+codes = c(1, 2, 3)
+gta_hs:code_check(codes)
 }
 \references{
 www.globaltradealert.org

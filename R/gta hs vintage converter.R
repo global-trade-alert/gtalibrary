@@ -9,10 +9,25 @@
 #' @param origin State whether codes shold be converted based on the year where most matches exist (best) or codes can be converted from multiple years (any). Default = "best"
 #' @param as_list returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version
 #' @param message Prints conversion results if TRUE
+#' @examples
+#' If you wish to convert every HS code into HS_2012 and append the result to an
+#' existing data frame, the as_list comes in handy. Use the mutate statement to
+#' add a new row with the converted codes, and then use the unnest function.
+#' df <- tibble(
+#'     HS_2007 = c(1, 2, 3, 4),
+#'     Exporter = c("USA", "CH", "DE")
+#' )
+#' df |>
+#'     mutate(HS_2012 = gta_hs_vintage_converter(codes = HS_2007, as_list = TRUE, years = 2007)) |>
+#'     unnest(cols = HS_2012, keep_empty = TRUE)
+#' @import cli
+#' @import tidyr
+#' @references Conversion Matrix obtained from: https://unstats.un.org/unsd/classifications/Econ
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
-gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), as_list = FALSE, message = TRUE, origin = "best") {
+#' @export
+gta_hs_vintage_converter <-
+    function(codes, years = c(2002, 2007, 2012, 2017), as_list = FALSE, message = TRUE, origin = "best") {
     # return error if codes cannot be converted to numeric without NA coercion (NAs are allowed)
     tryCatch(
         codes <- as.numeric(codes),
@@ -36,10 +51,8 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
     truncated.codes <- codes[nchar(codes) > 6 & !is.na(codes)]
     codes[nchar(codes) > 6 & !is.na(codes)] <- substr(codes[nchar(codes) > 6 & !is.na(codes)], 1, 6)
 
-    # Load HS vintages"C:\Users\sveng\Downloads\hs_conversion_table.xlsx"
-    hs.vintages <- readr::read_csv("C:/Users/sveng/Downloads/hs_conversion_table.csv")
-
-    # hs.conversion.table <- gtalibrary::hs.conversion.table
+    # Load HS vintages
+    hs.vintages <- gtalibrary::hs.conversion.table
 
     # assumption: the entire codes vector is from the same HS year
     # calculate the number of maches of the codes in each HS year that is to be tested
@@ -57,7 +70,7 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
 
         # convert the codes
         codes.converted <- lapply(
-            codes,
+            cli::cli_progress_along(codes),
             \(x) {
                 matches <- (x == substr(hs.origin, 1, 2) | x == substr(hs.origin, 1, 4) | x == hs.origin)
                 converted <- unique(hs.vintages[["HS2012"]][matches])
@@ -79,7 +92,7 @@ gta_hs_vintage_converter <- function(codes, years = c(2002, 2007, 2012, 2017), a
 
         # convert the codes
         codes.converted <- lapply(
-            codes,
+            cli::cli_progress_along(codes),
             \(x) {
                 matches <- (x == substr(hs.origin, 1, 2) | x == substr(hs.origin, 1, 4) | x == hs.origin)
                 converted <- unique(hs.vintages[["BASE"]][matches])

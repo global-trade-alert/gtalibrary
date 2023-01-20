@@ -9,7 +9,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_hs_names = function(codes){
 
   # Load cpc names

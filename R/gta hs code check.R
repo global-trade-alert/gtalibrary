@@ -6,10 +6,15 @@
 #'
 #' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
 #' @param message prints conversion results if TRUE
+#' @import cli
 #' @param as_list Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code
+#' @examples
+#' converting a vector of HS codes:
+#' codes = c(1, 2, 3)
+#' gta_hs:code_check(codes)
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
     # Load HS names
     hs.names <- gtalibrary::hs.names
@@ -38,7 +43,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
 
     # convert codes to 6 digit hs codes
     converted.codes <- lapply(
-        codes,
+        cli::cli_progress_along(codes),
         \(x) {
             if (is.na(x)) {
                 integer(0)
@@ -80,5 +85,3 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
         return(unique(as.numeric(unlist(converted.codes))))
     }
 }
-
-gta_hs_code_check(01012111)

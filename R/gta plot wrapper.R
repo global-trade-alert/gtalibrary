@@ -57,7 +57,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_plot_wrapper <- function(
   data=NULL,
   data.x=NULL,

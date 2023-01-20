@@ -4,14 +4,23 @@
 \alias{gta_theme}
 \title{Define plot theme settings for ggplot.}
 \usage{
-gta_theme(base.size = 12, aspect.ratio = NULL,
-  background.color = "#FFFFFF", font.colour = "#555555",
-  font.colour.bold = "#555555", base.family = "Open Sans",
-  base.family.bold = "Open Sans Bold", legend.box.align = "horizontal",
-  legend.title.align = 0, x.bottom.angle = 0,
-  x.top.angle = x.bottom.angle, x.bottom.align = 0.5,
-  y.left.angle = 0, y.right.angle = y.left.angle,
-  legend.position = "top")
+gta_theme(
+  base.size = 12,
+  aspect.ratio = NULL,
+  background.color = "#F9F9F9",
+  font.colour = "#555555",
+  font.colour.bold = "#555555",
+  base.family = "Open Sans",
+  base.family.bold = "Open Sans Bold",
+  legend.box.align = "horizontal",
+  legend.title.align = 0,
+  x.bottom.angle = 0,
+  x.top.angle = x.bottom.angle,
+  x.bottom.align = 0.5,
+  y.left.angle = 0,
+  y.right.angle = y.left.angle,
+  legend.position = "top"
+)
 }
 \arguments{
 \item{base.size}{Takes in the value for the font base size as integer. All font are scaled relative to this value. Default is optimized for plots saved with default width of 21cm and relative height. Default: 11.}

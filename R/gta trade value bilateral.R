@@ -23,7 +23,7 @@
 
 
 # Function infos and parameters  --------------------------------------------
-
+#' @export
 gta_trade_value_bilateral <- function(
   importing.country = NULL,
   keep.importer = NULL,

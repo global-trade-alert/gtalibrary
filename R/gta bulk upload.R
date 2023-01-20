@@ -48,7 +48,7 @@
 #' @return Only status and error messages..
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_bulk_upload = function(  dump.name="data dump",
                              master.path=NULL,
                              test.size=5,

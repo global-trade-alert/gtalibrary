@@ -19,7 +19,7 @@
 #' @author Global Trade Alert
 
 
-
+#' @export
 gta_plot_saver <- function(plot = NULL,
                            path = "/",
                            name = "plot",

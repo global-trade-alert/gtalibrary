@@ -8,7 +8,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_cpc_to_hs=function(codes){
   code.correspondence <- gtalibrary::cpc.to.hs
 

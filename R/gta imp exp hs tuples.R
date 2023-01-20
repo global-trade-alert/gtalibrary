@@ -16,7 +16,7 @@
 
 
 # Function infos and parameters  --------------------------------------------
-
+#' @export
 gta_imp_exp_hs_tuples <- function(
   master.path="data/master_plus.Rdata",
   master.data.frame=FALSE,

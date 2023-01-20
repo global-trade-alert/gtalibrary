@@ -9,7 +9,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_data_download=function(download.folder=NULL,
                            load.data=FALSE){
 

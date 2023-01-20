@@ -9,7 +9,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_cpc_code_check = function(codes){
 
   # Load cpc names

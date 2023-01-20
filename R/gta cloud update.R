@@ -5,7 +5,7 @@
 #' @return Be up to date with our latest data.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_cloud_update = function(){
   library(httr)
   zip.file.name="cloud update.zip"

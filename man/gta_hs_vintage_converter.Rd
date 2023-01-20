@@ -4,17 +4,43 @@
 \alias{gta_hs_vintage_converter}
 \title{Convert HS codes of unkown vintage into HS 2012.}
 \usage{
-gta_hs_vintage_converter(codes, origin = "best")
+gta_hs_vintage_converter(
+  codes,
+  years = c(2002, 2007, 2012, 2017),
+  as_list = FALSE,
+  message = TRUE,
+  origin = "best"
+)
 }
 \arguments{
 \item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.}
 
-\item{origin}{State the origin vintage, if you know it (options: '2002','2007','2012','2017','best', 'any'). Where 'best' selects the HS vintage with the most matches and 'any' selects HS codes from multiple origin vintages. Default is 'best'.}
+\item{years}{State the origin vintage or the vintages which should be tested. Options inclue 2002, 2007, 2012, 2017, 2022. Default is (2002, 2007, 2012, 2017)}
+
+\item{as_list}{returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version}
+
+\item{message}{Prints conversion results if TRUE}
+
+\item{origin}{State whether codes shold be converted based on the year where most matches exist (best) or codes can be converted from multiple years (any). Default = "best"}
 }
 \description{
 Returns it as a vector of 6-digit level HS 2012 codes.
 }
+\examples{
+If you wish to convert every HS code into HS_2012 and append the result to an
+existing data frame, the as_list comes in handy. Use the mutate statement to
+add a new row with the converted codes, and then use the unnest function.
+df <- tibble(
+    HS_2007 = c(1, 2, 3, 4),
+    Exporter = c("USA", "CH", "DE")
+)
+df |>
+    mutate(HS_2012 = gta_hs_vintage_converter(codes = HS_2007, as_list = TRUE, years = 2007)) |>
+    unnest(cols = HS_2012, keep_empty = TRUE)
+}
 \references{
+Conversion Matrix obtained from: https://unstats.un.org/unsd/classifications/Econ
+
 www.globaltradealert.org
 }
 \author{

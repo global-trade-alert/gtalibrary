@@ -21,7 +21,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_theme <- function(base.size=12,
                       aspect.ratio = NULL,
                       background.color="#F9F9F9",

@@ -14,7 +14,7 @@
 
 
 # Function infos and parameters  --------------------------------------------
-
+#' @export
 gta_cumulative_counts=function(
   counts.by = 'quarter',
   coverage.period = NULL,

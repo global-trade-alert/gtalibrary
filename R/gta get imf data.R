@@ -11,7 +11,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-#'
+#' @export
 gta_get_imf_data <- function(start.date=NULL,
                              end.date=NULL,
                              frequency=NULL,

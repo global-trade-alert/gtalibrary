@@ -28,7 +28,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_plot_3d_map <- function(data = NULL,
                             countries = NULL,
                             value.x = NULL,
