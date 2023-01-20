@@ -3,15 +3,17 @@
 #' Convert ICS codes to 4 digit HS codes
 #'
 #' @param codes Supply the ICS codes you want to check. Only codes in 5 digit format are converted (eg. 67120 / 67.120). Shorter codes are ignored, longer codes are truncated to 5 digits
-#' @param as_list returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version
+#' @param as_list returns the results as a list with the same length as the codes input vector, FALSE by default
 #' @param message Prints conversion results if TRUE
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @import cli
 #' @export
 gta_ics_to_hs <- function(codes, as_list = FALSE, message = TRUE) {
-    # Load HS names
+    # Load conversion table
     ics.to.hs <- gtalibrary::ics.to.hs
+
+    # remove potential peridods in the supplied codes and in the conversion table
     codes <- gsub(pattern = "\\.", replacement = "", codes)
     ics.to.hs$ics <- sapply(ics.to.hs[["ics"]], \(x) gsub(pattern = "\\.", replacement = "", x))
 

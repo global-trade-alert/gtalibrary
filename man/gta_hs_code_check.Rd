@@ -7,9 +7,11 @@
 gta_hs_code_check(codes, as_list = FALSE, message = TRUE)
 }
 \arguments{
-\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.}
+\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6.
+All values must be convertible to numeric}
 
-\item{as_list}{Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code}
+\item{as_list}{Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code
+FALSE per default. This returns a vector of unique converted codes}
 
 \item{message}{prints conversion results if TRUE}
 }
@@ -17,8 +19,9 @@ gta_hs_code_check(codes, as_list = FALSE, message = TRUE)
 This function checks whether a vector of HS codes is consistent with HS 2012 and returns it as a vector of 6-digit level HS codes.
 }
 \examples{
-converting a vector of HS codes:
-codes = c(1, 2, 3)
+converting a vector of HS codes
+codes <- c("0101", "0101", "0109") #OR
+codes <- c(101, 101, 109)
 gta_hs:code_check(codes)
 }
 \references{

@@ -4,13 +4,16 @@
 #'
 #' This function checks whether a vector of HS codes is consistent with HS 2012 and returns it as a vector of 6-digit level HS codes.
 #'
-#' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
+#' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6.
+#' All values must be convertible to numeric
 #' @param message prints conversion results if TRUE
 #' @import cli
 #' @param as_list Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code
+#' FALSE per default. This returns a vector of unique converted codes
 #' @examples
-#' converting a vector of HS codes:
-#' codes = c(1, 2, 3)
+#' converting a vector of HS codes
+#' codes <- c("0101", "0101", "0109") #OR
+#' codes <- c(101, 101, 109)
 #' gta_hs:code_check(codes)
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
@@ -43,7 +46,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
 
     # convert codes to 6 digit hs codes
     converted.codes <- lapply(
-        cli::cli_progress_along(codes),
+        codes,
         \(x) {
             if (is.na(x)) {
                 integer(0)
@@ -64,7 +67,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
         if (length(truncated.codes > 0)) {
             cli::cli_alert_info(paste0(
                 cli::style_bold("Codes with more than 6 figures provided. These will be reduced: "),
-                paste0(as.numeric(truncated.codes), collapse = ", ")
+                paste0(unique(as.numeric(truncated.codes)), collapse = ", ")
             ))
         }
         if (!any(unconverted.codes) && all(!is.na(unconverted.codes))) {

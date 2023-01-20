@@ -1,13 +1,13 @@
 # Roxygen documentation
 
 #' Convert HS codes of unkown vintage into HS 2012.
-#'
 #' Returns it as a vector of 6-digit level HS 2012 codes.
 #'
-#' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.
+#' @param codes Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6.
+#' Input must be convertible to numeric
 #' @param years State the origin vintage or the vintages which should be tested. Options inclue 2002, 2007, 2012, 2017, 2022. Default is (2002, 2007, 2012, 2017)
 #' @param origin State whether codes shold be converted based on the year where most matches exist (best) or codes can be converted from multiple years (any). Default = "best"
-#' @param as_list returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version
+#' @param as_list returns the results as a list with the same length as the codes input vector. FALSE returns a vector of uniue converted codes
 #' @param message Prints conversion results if TRUE
 #' @examples
 #' If you wish to convert every HS code into HS_2012 and append the result to an
@@ -41,7 +41,7 @@ gta_hs_vintage_converter <-
 
     # make sure that supplied years are valid
     if (!all(years %in% c(2002, 2007, 2012, 2017, 2022))) {
-        cli::cli_abort(cli::style_bold("Invalid year provided. Make sure that year is in (1992, 1996, 2002, 2007, 2012, 2017, 2022)"))
+        cli::cli_abort(cli::style_bold("Invalid year provided. Make sure that year is in (2002, 2007, 2012, 2017, 2022)"))
     }
 
     # pad codes that do not have an even character length
@@ -70,7 +70,7 @@ gta_hs_vintage_converter <-
 
         # convert the codes
         codes.converted <- lapply(
-            cli::cli_progress_along(codes),
+            codes,
             \(x) {
                 matches <- (x == substr(hs.origin, 1, 2) | x == substr(hs.origin, 1, 4) | x == hs.origin)
                 converted <- unique(hs.vintages[["HS2012"]][matches])
@@ -92,7 +92,7 @@ gta_hs_vintage_converter <-
 
         # convert the codes
         codes.converted <- lapply(
-            cli::cli_progress_along(codes),
+            codes,
             \(x) {
                 matches <- (x == substr(hs.origin, 1, 2) | x == substr(hs.origin, 1, 4) | x == hs.origin)
                 converted <- unique(hs.vintages[["BASE"]][matches])

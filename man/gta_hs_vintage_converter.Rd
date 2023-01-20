@@ -2,7 +2,8 @@
 % Please edit documentation in R/gta hs vintage converter.R
 \name{gta_hs_vintage_converter}
 \alias{gta_hs_vintage_converter}
-\title{Convert HS codes of unkown vintage into HS 2012.}
+\title{Convert HS codes of unkown vintage into HS 2012.
+Returns it as a vector of 6-digit level HS 2012 codes.}
 \usage{
 gta_hs_vintage_converter(
   codes,
@@ -13,17 +14,19 @@ gta_hs_vintage_converter(
 )
 }
 \arguments{
-\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.}
+\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6.
+Input must be convertible to numeric}
 
 \item{years}{State the origin vintage or the vintages which should be tested. Options inclue 2002, 2007, 2012, 2017, 2022. Default is (2002, 2007, 2012, 2017)}
 
-\item{as_list}{returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version}
+\item{as_list}{returns the results as a list with the same length as the codes input vector. FALSE returns a vector of uniue converted codes}
 
 \item{message}{Prints conversion results if TRUE}
 
 \item{origin}{State whether codes shold be converted based on the year where most matches exist (best) or codes can be converted from multiple years (any). Default = "best"}
 }
 \description{
+Convert HS codes of unkown vintage into HS 2012.
 Returns it as a vector of 6-digit level HS 2012 codes.
 }
 \examples{

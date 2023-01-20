@@ -9,7 +9,7 @@ gta_ics_to_hs(codes, as_list = FALSE, message = TRUE)
 \arguments{
 \item{codes}{Supply the ICS codes you want to check. Only codes in 5 digit format are converted (eg. 67120 / 67.120). Shorter codes are ignored, longer codes are truncated to 5 digits}
 
-\item{as_list}{returns the results as a list with the same length as the codes input vector, FALSE by default to ensure compatability with earlier version}
+\item{as_list}{returns the results as a list with the same length as the codes input vector, FALSE by default}
 
 \item{message}{Prints conversion results if TRUE}
 }
