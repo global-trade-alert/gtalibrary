@@ -392,7 +392,7 @@ filter_statement <- vector(mode = "character")
             filter_hs <- "!hs.codes %in% hs.codes"
         }
 
-        dtplyr::lazy_dt(data) |>
+        data <- dtplyr::lazy_dt(data) |>
             mutate(
                 ids = seq_len(nrow(data)),
                 hs_codes = str_split(string = affected.product, pattern = ", ")
@@ -400,20 +400,33 @@ filter_statement <- vector(mode = "character")
             tibble::as_tibble() |>
             tidyr::unnest(cols = hs_codes) |>
             dplyr::filter(hs_codes = eval(parse(text = filter_hs)))
+            group_by(ids) |> #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            summarize(...) ###### collapse values again by IDs!!!!
     }
 
-    # what if cpc and hs sectors are selected ? ?? 
+    # what if cpc and hs sectors are selected ? ??
     # cpc.sectors
-    if (!is.null(cpc.sectors)){
-
+    if (!is.null(cpc.sectors)) {
         # do from filtered --> merged
         gtalibrary::gta_type_check(keep.cpc, is.logical)
         cpc.sectors <- gtalibrary::gta_cpc_code_check(codes = cpc.sectors)
-        admissible.values <- unique(gtalibrary::cpc.names$cpc)
+        filter_cpc <- "affected.sector %in% cpc.sectors"
 
-        if (!keep.cpc){
-            cpc.sectors <- admissible.values[!admissible.values %in% cpc.sectors]
+        if (!keep.cpc) {
+            filter_cpc <- "!affected.sector %in% cpc.sectors"
         }
+
+        data <- dtplyr::lazy_dt(data) |>
+            mutate(
+                ids = seq_len(nrow(data)),
+                cpc_codes = str_split(string = affected.sector, pattern = ", ")
+            ) |>
+            tibble::as_tibble() |>
+            tidyr::unnest(cols = cpc_codes) |>
+            dplyr::filter(cpc_codes = eval(parse(text = filter_cpc))) |> 
+            group_by(ids) |> 
+            summarize(...) ###### collapse values again by IDs!!!!
+    }
 
     # check nr.affected.incl
     gtalibrary::gta_parameter_check(check.name = "nr.affected.incl", tolower(nr.affected.incl)), permissible.values = c("all", "selected", "unselected")
@@ -985,11 +998,6 @@ filter_statement <- vector(mode = "character")
 
                 master <- subset(master, date.published >= report.start & date.published <= report.end)
 
-
-                parameter.choices <- rbind(
-                    parameter.choices,
-                    data.frame(parameter = "Reporting period:", choice = "Complete GTA monitoring period")
-                )
             }
 
             ## writing to disk
@@ -1005,4 +1013,7 @@ filter_statement <- vector(mode = "character")
                     print("Saving XLSX ... completed in output path")
                 }
             }
+
+# must both be valid at the same time ? --> Yes!
+gtalibrary::gta_data_slicer(hs.codes = c(871200), keep.hs = TRUE, cpc.sectors = 268, keep.cpc = TRUE, intervention.ids = c(57647, 58547, 60142, 101832, 58547, 87241))
 
