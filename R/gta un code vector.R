@@ -12,43 +12,31 @@
 #' @author Global Trade Alert
 
 #' @export
-gta_un_code_vector=function(countries, role=NULL){
+gta_un_code_vector <- function(countries = NULL) {
+  ## preparation: a correspondence between country/group names and UN codes
+  country.correspondence <- gtalibrary::country.correspondence
 
-  if(is.null(countries)){
-    country.un.codes=c(1:9999)
+  # if countries are not specified, return all the un codes
+  if (is.null(countries)) {
+    countries <- unique(country.correspondence$un_code)
   }
 
-  if(is.null(countries)==F){ ## I know this could have been the "else" of the preceding "if", but find this easier readable
+  # check if either (all numeric (un codes) or all string (country names))
+  if (is.numeric(countries)) { # if the vector contains un codes
 
-
-    ## preparation: a correspondence between country/group names and UN codes
-    country.correspondence=gtalibrary::country.correspondence
-    country.names=gtalibrary::country.names
-
-    ## Checking parameters
-
-    if (all(tolower(countries) %in% c(tolower(unique(country.correspondence$name)), unique(country.correspondence$un_code)))==F) {
-      cty.error = countries[(tolower(countries) %in% c(tolower(unique(country.correspondence$name)), unique(country.correspondence$un_code)))==F]
-      stop(paste("Unkown ",role," country value(s): ", paste(cty.error, collapse =", ")))
-    }
-
-    ## Checking & converting codes
-    country.un.codes=NULL
-    if(grepl("[A-Za-z]+",paste(countries, collapse=";"))){
-
-        country.un.codes=c(country.un.codes, unique(country.correspondence$un_code[tolower(country.correspondence$name) %in% tolower(countries)]))
-
-    }
-
-    if(sum(as.numeric((tolower(countries) %in% tolower(country.correspondence$name))==F))>0){
-
-      country.un.codes = unique(c(country.un.codes, countries[(countries %in% country.correspondence$un_code)==T]))
-
-    }
-
-    return(country.un.codes)
-
-    rm(countries, role, country.un.codes, cty.error)
-
+    permissible.values <- unique(country.correspondence$un_code)
+    gta_parameter_check(check.name = "countries", countries, permissible.values = permissible.values)
+    un.codes <- countries # un codes are simply the checked un codes
+  } else if (is.character(countries)) { # if the vector contains countries
+    countries <- tolower(countries)
+    permissible.values <- tolower(unique(country.correspondence$name))
+    gta_parameter_check(check.name = "countries", countries, permissible.values = permissible.values)
+    un.codes <- country.correspondence$un_code[tolower(country.correspondence$name) %in% countries]
+  } else {
+    cli::cli_abort("countries must either be vector of type character (names) or numeric (un codes)")
   }
+
+  return(un.codes)
 }
+
+gta_un_code_vector()
