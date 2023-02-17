@@ -49,1559 +49,960 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_data_slicer=function(data.path = "data/master_plus.Rdata",
-                         gta.evaluation= NULL,
-                         affected.flows = NULL,
-                         implementing.country = NULL,
-                         keep.implementer = TRUE,
-                         affected.country = NULL,
-                         keep.affected = NULL,
-                         incl.affected.strictness="ONEPLUS",
-                         keep.others=TRUE,
-                         nr.affected=c(0,999),
-                         nr.affected.incl="ALL",
-                         announcement.period = NULL,
-                         implementation.period = NULL,
-                         keep.implementation.na = NULL,
-                         revocation.period = NULL,
-                         keep.revocation.na = TRUE,
-                         submission.period = NULL,
-                         in.force.on.date = Sys.Date(),
-                         keep.in.force.on.date = 'any',
-                         intervention.types = NULL,
-                         keep.type = NULL,
-                         mast.chapters = NULL,
-                         keep.mast = NULL,
-                         implementation.level = NULL,
-                         keep.level = NULL,
-                         eligible.firms = NULL,
-                         keep.firms = NULL,
-                         cpc.sectors = NULL,
-                         keep.cpc = NULL,
-                         hs.codes = NULL,
-                         keep.hs = NULL,
-                         intervention.ids = NULL,
-                         keep.interventions = NULL,
-                         lag.adjustment=NULL,
-                         reporting.period=NULL,
-                         add.unpublished=F,
-                         df.name="master.sliced",
-                         pc.name="parameter.choice.slicer",
-                         xlsx = FALSE,
-                         output.path = NULL
-){
+gta_data_slicer <- function(data = NULL, data.path = "data/master_plus.Rds",
+    gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
+    keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
+    incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
+    nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
+    keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
+    submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
+    intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
+    implementation.level = NULL, keep.level = NULL, eligible.firms = NULL,keep.firms = NULL,
+    cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
+    intervention.ids = NULL,keep.interventions = NULL,lag.adjustment = NULL,
+    reporting.period = NULL, add.unpublished = FALSE, df.name = "master.sliced",
+    pc.name = "parameter.choice.slicer", xlsx = FALSE,output.path = NULL) {
 
-  library("httr")
-  library("splitstackshape")
-  library("lubridate")
-  library("data.table")
+    # data set to NULL --> full data frame can be passed with matriggr or native pipe --> 
+    # prevents the function from loading the entire data path every time if it is used in a loop or multiple 
+    # times during a session
+    if (is.null(data)) data <- load(data.path)
 
-  ## Collecting parameter values
-  parameter.choices=data.frame(parameter=character(), choice=character(),stringsAsFactors = F)
+    ### Adding unpublished selection
+    if (add.unpublished) {
+        library(gtasql)
+        library(gtalibrary)
+        library(pool)
+        library(RMariaDB)
+        library(data.table)
+        library(gtabastiat)
+        library(xlsx)
 
-  ## data path
-  if(tolower(data.path)=="online"){
-    print("Downloading the latest copy of the GTA dataset.The file is deleted after loading the data into your environment.")
-    download.file("https://www.dropbox.com/s/78kpe232p2b36ze/GTA%20full%20data%20export.Rdata?dl=1","GTA data.Rdata")
-    load("GTA data.Rdata")
-    unlink("GTA data.Rdata")
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice="Downloaded latest copy"))
-  } else{
-    load(data.path)
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data source:", choice=paste("Local copy from '",data.path,"'.", sep="")))
-  }
+        gta_sql_kill_connections()
+
+        database <<- "gtamain"
+
+        gta_sql_pool_open(
+            db.title = database,
+            db.host = gta_pwd(database)$host,
+            db.name = gta_pwd(database)$name,
+            db.user = gta_pwd(database)$user,
+            db.password = gta_pwd(database)$password,
+            table.prefix = "gta_"
+        )
 
 
-  ### Adding unpublished selection
-  if(add.unpublished){
+        master.unpublished <- gta_sql_get_value(
+        "SELECT gm.id as state_act_id, gi.id as intervention_id,
+        gm.title as title, ge.label as gta_evaluation,
+        gj.name as implementing_jurisdiction, gj.un_code as i_un,
+        gm.announcement_date as date_announced, gi.inception_date as date_implemented, gi.removal_date as date_removed, gm.creation_date as date_published,
+        gmt.name as intervention_type, gil.frontend_label as implementation_level, gef.label as eligible_firms, gaf.label as affected_flow,
+        state_act_status_name as current_status
+        FROM (SELECT * FROM gta_measure WHERE status_id NOT IN (4,5)) gm
+        JOIN (SELECT * FROM gta_intervention gint LEFT JOIN gta_intervention_dump gid ON gint.id = gid.intervention_id WHERE dump_id IS NOT NULL) gi
+        ON gm.id= gi.measure_id
+        JOIN gta_state_act_status_list gsasl
+        ON gm.status_id = gsasl.state_act_status_id
+        JOIN gta_measure_type gmt
+        ON gi.measure_type_id = gmt.id
+        JOIN gta_evaluation ge
+        ON gi.evaluation_id = ge.id
+        JOIN gta_affected_flow gaf
+        ON gi.affected_flow_id = gaf.id
+        JOIN gta_implementation_level gil
+        ON gi.implementation_level_id = gil.id
+        JOIN gta_eligible_firms gef
+        ON gi.eligible_firms_id = gef.id
+        JOIN gta_implementing_jurisdiction gij
+        ON gi.id = gij.intervention_id
+        JOIN gta_jurisdiction gj
+        ON gij.jurisdiction_id = gj.id")
 
-
-    library(gtasql)
-    library(gtalibrary)
-    library(pool)
-    library(RMariaDB)
-    library(data.table)
-    library(gtabastiat)
-    library(xlsx)
-
-
-
-    gta_sql_kill_connections()
-
-    database <<- "gtamain"
-
-    gta_sql_pool_open(db.title=database,
-                      db.host = gta_pwd(database)$host,
-                      db.name = gta_pwd(database)$name,
-                      db.user = gta_pwd(database)$user,
-                      db.password = gta_pwd(database)$password,
-                      table.prefix = "gta_")
-
-
-    master.unpublished=gta_sql_get_value("SELECT gm.id as state_act_id, gi.id as intervention_id,
-                                      gm.title as title, ge.label as gta_evaluation,
-                                      gj.name as implementing_jurisdiction, gj.un_code as i_un,
-                                      gm.announcement_date as date_announced, gi.inception_date as date_implemented, gi.removal_date as date_removed, gm.creation_date as date_published,
-                                      gmt.name as intervention_type, gil.frontend_label as implementation_level, gef.label as eligible_firms, gaf.label as affected_flow,
-                                      state_act_status_name as current_status
-                                     FROM (SELECT * FROM gta_measure WHERE status_id NOT IN (4,5)) gm
-                                     JOIN (SELECT * FROM gta_intervention gint LEFT JOIN gta_intervention_dump gid ON gint.id = gid.intervention_id WHERE dump_id IS NOT NULL) gi
-                                     ON gm.id= gi.measure_id
-                                     JOIN gta_state_act_status_list gsasl
-                                     ON gm.status_id = gsasl.state_act_status_id
-                                     JOIN gta_measure_type gmt
-                                     ON gi.measure_type_id = gmt.id
-                                     JOIN gta_evaluation ge
-                                     ON gi.evaluation_id = ge.id
-                                     JOIN gta_affected_flow gaf
-                                     ON gi.affected_flow_id = gaf.id
-                                     JOIN gta_implementation_level gil
-                                     ON gi.implementation_level_id = gil.id
-                                     JOIN gta_eligible_firms gef
-                                     ON gi.eligible_firms_id = gef.id
-                                     JOIN gta_implementing_jurisdiction gij
-                                     ON gi.id = gij.intervention_id
-                                     JOIN gta_jurisdiction gj
-                                     ON gij.jurisdiction_id = gj.id")
-
-
-    ## sectors, products, AJ
-    my.ints=unique(master.unpublished$intervention.id)
-    gta_tuple=gta_sql_get_value(paste0("SELECT DISTINCT intervention_id, sector_code_3 as sector_code, tariff_line_id, gj.un_code as un_code_implementer, gj2.un_code as un_code_affected
+        ## sectors, products, AJ
+        my.ints <- unique(master.unpublished$intervention.id)
+        gta_tuple <- gta_sql_get_value(paste0("SELECT DISTINCT intervention_id, sector_code_3 as sector_code, tariff_line_id, gj.un_code as un_code_implementer, gj2.un_code as un_code_affected
                                     FROM (SELECT *
-                                    FROM gta_it_revised WHERE intervention_id IN (",paste(my.ints, collapse=","),")) git
+                                    FROM gta_it_revised WHERE intervention_id IN (", paste(my.ints, collapse = ","), ")) git
                                     JOIN gta_jurisdiction gj
                                     ON git.implementing_jurisdiction_id = gj.id
                                     JOIN gta_jurisdiction gj2
                                     ON git.affected_jurisdiction_id = gj2.id;"))
 
+        ## gta_tariff_line
+        gta_tariff_line <- gta_sql_get_value(paste0("SELECT * FROM gta_tariff_line;"))
+        data.table::setnames(gta_tariff_line, old = "id", new = "tariff.line.id")
+        data.table::setnames(gta_tariff_line, old = "code", new = "affected.products")
 
-    ## gta_tariff_line
-    gta_tariff_line=gta_sql_get_value(paste0("SELECT * FROM gta_tariff_line;"))
-    data.table::setnames(gta_tariff_line, old="id", new="tariff.line.id")
-    data.table::setnames(gta_tariff_line, old="code", new="affected.products")
+        gta_tuple <- merge(gta_tuple, gta_tariff_line[, c("tariff.line.id", "affected.products")], by = "tariff.line.id", all.x = T)
+        gta_tuple$tariff_line_id <- NULL
 
-    gta_tuple=merge(gta_tuple, gta_tariff_line[,c("tariff.line.id", "affected.products")], by="tariff.line.id", all.x=T)
-    gta_tuple$tariff_line_id=NULL
+        ## gta_affected_tariff_line
+        gta_affected_tariff_line <- gta_sql_get_value(paste0("SELECT * FROM gta_affected_tariff_line WHERE intervention_id IN (", paste(my.ints, collapse = ","), ");"))
+        setnames(gta_affected_tariff_line, old = "tariff.line.code", "affected.products")
 
-    ## gta_affected_tariff_line
-    gta_affected_tariff_line=gta_sql_get_value(paste0("SELECT * FROM gta_affected_tariff_line WHERE intervention_id IN (",paste(my.ints, collapse=","),");"))
-    setnames(gta_affected_tariff_line, old="tariff.line.code", "affected.products")
+        ## where we have support tables, we have it in gta_tuple
+        master.tuple <- subset(master.unpublished, intervention.id %in% gta_tuple$intervention.id)
+        master.else <- subset(master.unpublished, !intervention.id %in% gta_tuple$intervention.id)
 
+        ## correcting for zeroes at the start of gta_tuple
+        gta_tuple$l.hs <- nchar(gta_tuple$affected.products)
+        gta_tuple$l.cpc <- nchar(gta_tuple$sector.code)
 
+        gta_tuple$affected.products <- as.character(gta_tuple$affected.products)
+        gta_tuple$sector.code <- as.character(gta_tuple$sector.code)
 
-    ## where we have support tables, we have it in gta_tuple
-    master.tuple=subset(master.unpublished, intervention.id %in% gta_tuple$intervention.id)
-    master.else=subset(master.unpublished,! intervention.id %in% gta_tuple$intervention.id)
+        gta_tuple$sector_code[gta_tuple$l.cpc == 2 & is.na(gta_tuple$l.cpc) == F] <- paste("0", gta_tuple$sector.code[gta_tuple$l.cpc == 2 & is.na(gta_tuple$l.cpc) == F], sep = "")
+        gta_tuple$affected_products[gta_tuple$l.hs == 5 & is.na(gta_tuple$l.hs) == F] <- paste("0", gta_tuple$affected.products[gta_tuple$l.hs == 5 & is.na(gta_tuple$l.hs) == F], sep = "")
 
-    ## correcting for zeroes at the start of gta_tuple
-    gta_tuple$l.hs=nchar(gta_tuple$affected.products)
-    gta_tuple$l.cpc=nchar(gta_tuple$sector.code)
+        gta_tuple$l.hs <- NULL
+        gta_tuple$l.cpc <- NULL
 
-    gta_tuple$affected.products=as.character(gta_tuple$affected.products)
-    gta_tuple$sector.code=as.character(gta_tuple$sector.code)
+        ## the rest goes through the other gta_ tables.
+        ## First line creates a table of all combinations, 2nd adds sectors (where available), and last products (where available).
+        all <- unique(gta_tuple[, c("intervention.id", "un.code.implementer", "un.code.affected")])
 
-    gta_tuple$sector_code[gta_tuple$l.cpc==2 & is.na(gta_tuple$l.cpc)==F]=paste("0", gta_tuple$sector.code[gta_tuple$l.cpc==2 & is.na(gta_tuple$l.cpc)==F], sep="")
-    gta_tuple$affected_products[gta_tuple$l.hs==5 & is.na(gta_tuple$l.hs)==F]=paste("0", gta_tuple$affected.products[gta_tuple$l.hs==5  & is.na(gta_tuple$l.hs)==F], sep="")
+        cpc.hs <- merge(aggregate(sector.code ~ intervention.id + un.code.implementer + un.code.affected, gta_tuple, function(x) paste(unique(x), collapse = ", ")),
+            aggregate(affected.products ~ intervention.id + un.code.implementer + un.code.affected, gta_tuple, function(x) paste(unique(x), collapse = ", ")),
+            by = c("intervention.id", "un.code.implementer", "un.code.affected"), all.x = T
+        )
+        cpc.hs <- merge(all, cpc.hs, by = c("intervention.id", "un.code.implementer", "un.code.affected"), all.x = TRUE)
 
-    gta_tuple$l.hs=NULL
-    gta_tuple$l.cpc=NULL
+        ## should be =1
+        length(unique(cpc.hs$intervention.id)) / length(unique(master.tuple$intervention.id))
 
+        setnames(cpc.hs, old = "affected.products", "affected.product")
+        setnames(cpc.hs, old = "sector.code", "affected.sector")
+        setnames(cpc.hs, old = "un.code.affected", "a.un")
+        setnames(cpc.hs, old = "un.code.implementer", "i.un")
+        setnames(cpc.hs, old = "intervention.id", "intervention.id")
 
-    ## the rest goes through the other gta_ tables.
-    ## First line creates a table of all combinations, 2nd adds sectors (where available), and last products (where available).
-    all=unique(gta_tuple[,c("intervention.id","un.code.implementer","un.code.affected")])
+        master.tuple <- merge(master.tuple, cpc.hs, by = c("intervention.id", "i.un"), all.x = TRUE)
 
-    cpc.hs=merge(aggregate(sector.code ~ intervention.id + un.code.implementer + un.code.affected, gta_tuple, function(x) paste(unique(x), collapse=", ")),
-                 aggregate(affected.products ~ intervention.id + un.code.implementer + un.code.affected, gta_tuple, function(x) paste(unique(x), collapse=", ")),
-                 by=c("intervention.id","un.code.implementer","un.code.affected"), all.x=T)
-    cpc.hs=merge(all, cpc.hs, by=c("intervention.id","un.code.implementer","un.code.affected"), all.x=T)
+        ## the non-tuple cases
+        gta_affected_sector <- gta_sql_get_value(paste0("SELECT * FROM gta_affected_sector WHERE intervention_id IN (", paste(my.ints, collapse = ","), ");"))
+        gta_affected_sector$type <- NULL
+        setnames(gta_affected_sector, old = "sector.code", "affected.sector")
 
-    ## should be =1
-    length(unique(cpc.hs$intervention.id))/length(unique(master.tuple$intervention.id))
+        setnames(gta_affected_tariff_line, old = "affected.products", "affected.product")
 
-    setnames(cpc.hs, old="affected.products", "affected.product")
-    setnames(cpc.hs, old="sector.code", "affected.sector")
-    setnames(cpc.hs, old="un.code.affected", "a.un")
-    setnames(cpc.hs, old="un.code.implementer", "i.un")
-    setnames(cpc.hs, old="intervention.id", "intervention.id")
-
-    master.tuple=merge(master.tuple, cpc.hs, by=c("intervention.id","i.un"), all.x=T)
-
-    ## the non-tuple cases
-    gta_affected_sector=gta_sql_get_value(paste0("SELECT * FROM gta_affected_sector WHERE intervention_id IN (",paste(my.ints, collapse=","),");"))
-    gta_affected_sector$type=NULL
-    setnames(gta_affected_sector,old="sector.code","affected.sector")
-
-    setnames(gta_affected_tariff_line,old="affected.products","affected.product")
-
-    gta_affected_jurisdiction=gta_sql_get_value(paste0("SELECT gaj.intervention_id, un_code as a_un, name as affected_jurisdiction
-                                                   FROM (SELECT * FROM gta_affected_jurisdiction WHERE type != 'D' AND intervention_id IN (",paste(my.ints, collapse=","),")) gaj
+        gta_affected_jurisdiction <- gta_sql_get_value(paste0("SELECT gaj.intervention_id, un_code as a_un, name as affected_jurisdiction
+                                                   FROM (SELECT * FROM gta_affected_jurisdiction WHERE type != 'D' AND intervention_id IN (", paste(my.ints, collapse = ","), ")) gaj
                                                    JOIN gta_jurisdiction gj
                                                    ON gaj.jurisdiction_id = gj.id;"))
 
-
-
-    ## correcting for zeroes at the start of gta_tuple
-    gta_affected_tariff_line$l.hs=nchar(gta_affected_tariff_line$affected.product)
-    gta_affected_tariff_line$affected.product=as.character(gta_affected_tariff_line$affected.product)
-    gta_affected_tariff_line$affected.product[gta_affected_tariff_line$l.hs==5 & is.na(gta_affected_tariff_line$l.hs)==F]=paste("0", gta_affected_tariff_line$affected.product[gta_affected_tariff_line$l.hs==5  & is.na(gta_affected_tariff_line$l.hs)==F], sep="")
-    gta_affected_tariff_line$l.hs=NULL
-
-
-    gta_affected_sector$l.cpc=nchar(gta_affected_sector$affected.sector)
-    gta_affected_sector$affected.sector=as.character(gta_affected_sector$affected.sector)
-    gta_affected_sector$affected.sector[gta_affected_sector$l.cpc==2 & is.na(gta_affected_sector$l.cpc)==F]=paste("0", gta_affected_sector$affected.sector[gta_affected_sector$l.cpc==2 & is.na(gta_affected_sector$l.cpc)==F], sep="")
-    gta_affected_sector$l.cpc=NULL
-
-
-    master.else=merge(master.else,
-                      aggregate(affected.sector ~ intervention.id, gta_affected_sector, function(x) paste(unique(x), collapse=", ")),
-                      by="intervention.id", all.x=T)
-
-    master.else=merge(master.else,
-                      aggregate(affected.product ~ intervention.id, gta_affected_tariff_line, function(x) paste(unique(x), collapse=", ")),
-                      by="intervention.id", all.x=T)
-
-    master.else=merge(master.else,
-                      gta_affected_jurisdiction,
-                      by="intervention.id", all.x=T)
-
-    master.tuple=merge(master.tuple, unique(gta_affected_jurisdiction[,c("a.un","affected.jurisdiction")]), by="a.un", all.x=T)
-    length(unique(rbind(master.tuple, master.else)$intervention.id))/length(unique(master.unpublished$intervention.id))
-
-    master.unpublished=rbind(master.tuple, master.else)
-
-    rm(gta_tariff_line, gta_affected_sector, gta_affected_tariff_line, gta_affected_jurisdiction, cpc.hs, all, my.ints, gta_tuple)
-
-    gta_sql_pool_close()
-    gta_sql_kill_connections()
-
-    ## formatting corrections
-    master.unpublished$date.announced=as.Date(master.unpublished$date.announced)
-    master.unpublished$date.implemented=as.Date(master.unpublished$date.implemented)
-    master.unpublished$date.removed=as.Date(master.unpublished$date.removed)
-    master.unpublished$affected.flow=tolower(master.unpublished$affected.flow)
-
-    today=Sys.Date()
-    master.unpublished$currently.in.force="No"
-    master.unpublished$currently.in.force[master.unpublished$date.implemented<=today & (master.unpublished$date.removed>today | is.na(master.unpublished$date.removed)==T)]="Yes"
-
-    mt=gtalibrary::int.mast.types[,c("intervention.type","mast.chapter.id","mast.subchapter.id")]
-    names(mt)=c("intervention.type", "mast.chapter", "mast.id")
-    mt$intervention.type=as.character(mt$intervention.type)
-
-    master.unpublished=merge(master.unpublished, mt[,c("intervention.type","mast.id", "mast.chapter")], by="intervention.type", all.x=T)
-
-    country.iso=gtalibrary::country.names
-    master.unpublished$i.atleastone.G20=as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, i.un %in% subset(country.iso, is.g20==T)$un_code)$intervention.id )
-    master.unpublished$a.atleastone.G20=as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, a.un %in% subset(country.iso, is.g20==T)$un_code)$intervention.id )
-    rm(country.iso)
-
-
-    ## combining DFs
-    master$current.status="published"
-    master=unique(rbind(master,
-                        subset(master.unpublished, ! intervention.id %in% unique(master$intervention.id))))
-
-    rm(mt, master.unpublished, master.tuple, master.else)
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Unpublished:", choice="Included"))
-  } else {
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Unpublished:", choice="Excluded"))
-  }
-
-
-
-  ### begin processing
-  tryCatch({
-      # gta.evaluation
-      if(is.null(gta.evaluation)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="GTA evaluations included:", choice="red, amber, green"))
-
-      } else {
-        check=gta_parameter_check(tolower(gta.evaluation), c("red", "amber", "green"))
-        if(check!="OK"){
-          stop.print <- paste("Unknown GTA evaluation(s): ", check, ".", sep="")
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else {
-          eval=tolower(gta.evaluation)
-          master=subset(master, tolower(gta.evaluation) %in% eval)
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="GTA evaluations included:", choice=paste(eval, collapse=", ")))
-
-        }
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for gta.evaluation"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
-
-
-      # affected.flows
-
-      if(is.null(affected.flows)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Affected flows included:", choice="inward, outward, outward subsidy"))
-
-      } else {
-        check=gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"))
-        if(check!="OK"){
-          stop.print <- paste("Unknown GTA affected flow(s): ", check, ".", sep="")
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else {
-          flow=tolower(affected.flows)
-          master=subset(master, tolower(affected.flow) %in% flow)
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Affected flows included:", choice=paste(flow, collapse=", ")))
-
-        }
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for affected.flow"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-
-      # implementing.country
-      # keep.implementer
-      if(is.null(implementing.country)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Implementing countries included:", choice="All"))
-
-      } else {
-
-        if(is.null(keep.implementer) | !is.logical(keep.implementer)){
-          stop.print <- "Please specify whether you want to focus on the specified implementing countries or exclude them (keep.implementer=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          implementers=gta_un_code_vector(implementing.country, role="implementing")
-
-          if(keep.implementer==T){
-            master=subset(master, i.un %in% implementers)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Implementing countries included:", choice=paste(implementing.country, collapse = ", ")))
-
-          } else if (keep.implementer==F){
-            master=subset(master, ! i.un %in% implementers)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Implementing countries included:", choice=paste("All except ", paste(implementing.country, collapse = ", "), sep="")))
-
-          }
-        }
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for implementing.country"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-    }
-
-
-      # affected.country
-      # keep.affected
-      # additional targets
-      # due to the interdependece of these filters, we will only generate vectors of intervention IDs before subetting the result at the very end of this section.
-
-      if(is.null(affected.country)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Affected countries included:", choice="All"))
-        affected.interventions=master$intervention.id
-
-      } else {
-
-        if(is.null(keep.affected) | !is.logical(keep.affected)){
-          stop.print <- "Please specify whether you want to focus on the specified affected countries or exclude them (keep.affected=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else {
-
-          affected=gta_un_code_vector(affected.country, role="affected")
-
-          if(keep.affected==T){
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Affected countries included:", choice=paste(affected.country, collapse = ", ")))
-
-          } else if (keep.affected == F){
-            affected=setdiff(gtalibrary::country.correspondence$un_code, affected)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Affected countries included:", choice=paste("All except ", paste(affected.country, collapse = ", "), sep="")))
-
-          }
-
-          affected.interventions=subset(master, a.un %in% affected)$intervention.id
-
-
-        }
-      }
-
-      # Check # of rows
-      if(length(affected.interventions)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for affected.country"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-
-    ## restrict data to the combination of selected affected jurisdictions
-    if(! incl.affected.strictness %in% c("ALL","ONE","ONEPLUS")){
-
-      stop.print <- "Please choose how to include the chosen affected jurisdictions (ONE/ALL/ONEPLUS)."
-      error.message <<- c(T, stop.print)
-      stop(stop.print)
-
+        ## correcting for zeroes at the start of gta_tuple
+        gta_affected_tariff_line$l.hs <- nchar(gta_affected_tariff_line$affected.product)
+        gta_affected_tariff_line$affected.product <- as.character(gta_affected_tariff_line$affected.product)
+        gta_affected_tariff_line$affected.product[gta_affected_tariff_line$l.hs == 5 & is.na(gta_affected_tariff_line$l.hs) == F] <- paste("0", gta_affected_tariff_line$affected.product[gta_affected_tariff_line$l.hs == 5 & is.na(gta_affected_tariff_line$l.hs) == F], sep = "")
+        gta_affected_tariff_line$l.hs <- NULL
+
+        gta_affected_sector$l.cpc <- nchar(gta_affected_sector$affected.sector)
+        gta_affected_sector$affected.sector <- as.character(gta_affected_sector$affected.sector)
+        gta_affected_sector$affected.sector[gta_affected_sector$l.cpc == 2 & is.na(gta_affected_sector$l.cpc) == F] <- paste("0", gta_affected_sector$affected.sector[gta_affected_sector$l.cpc == 2 & is.na(gta_affected_sector$l.cpc) == F], sep = "")
+        gta_affected_sector$l.cpc <- NULL
+
+        master.else <- merge(master.else,
+            aggregate(affected.sector ~ intervention.id, gta_affected_sector, function(x) paste(unique(x), collapse = ", ")),
+            by = "intervention.id", all.x = TRUE
+        )
+
+        master.else <- merge(master.else,
+            aggregate(affected.product ~ intervention.id, gta_affected_tariff_line, function(x) paste(unique(x), collapse = ", ")),
+            by = "intervention.id", all.x = TRUE
+        )
+
+        master.else <- merge(master.else,
+            gta_affected_jurisdiction,
+            by = "intervention.id", all.x = TRUE
+        )
+
+        master.tuple <- merge(master.tuple, unique(gta_affected_jurisdiction[, c("a.un", "affected.jurisdiction")]), by = "a.un", all.x = T)
+        length(unique(rbind(master.tuple, master.else)$intervention.id)) / length(unique(master.unpublished$intervention.id))
+
+        master.unpublished <- rbind(master.tuple, master.else)
+
+        rm(gta_tariff_line, gta_affected_sector, gta_affected_tariff_line, gta_affected_jurisdiction, cpc.hs, all, my.ints, gta_tuple)
+
+        gta_sql_pool_close()
+        gta_sql_kill_connections()
+
+        ## formatting corrections
+        master.unpublished$date.announced <- as.Date(master.unpublished$date.announced)
+        master.unpublished$date.implemented <- as.Date(master.unpublished$date.implemented)
+        master.unpublished$date.removed <- as.Date(master.unpublished$date.removed)
+        master.unpublished$affected.flow <- tolower(master.unpublished$affected.flow)
+
+        today <- Sys.Date()
+        master.unpublished$currently.in.force <- "No"
+        master.unpublished$currently.in.force[master.unpublished$date.implemented <= today & (master.unpublished$date.removed > today | is.na(master.unpublished$date.removed) == T)] <- "Yes"
+
+        mt <- gtalibrary::int.mast.types[, c("intervention.type", "mast.chapter.id", "mast.subchapter.id")]
+        names(mt) <- c("intervention.type", "mast.chapter", "mast.id")
+        mt$intervention.type <- as.character(mt$intervention.type)
+
+        master.unpublished <- merge(master.unpublished, mt[, c("intervention.type", "mast.id", "mast.chapter")], by = "intervention.type", all.x = T)
+
+        country.iso <- gtalibrary::country.names
+        master.unpublished$i.atleastone.G20 <- as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, i.un %in% subset(country.iso, is.g20 == T)$un_code)$intervention.id)
+        master.unpublished$a.atleastone.G20 <- as.numeric(master.unpublished$intervention.id %in% subset(master.unpublished, a.un %in% subset(country.iso, is.g20 == T)$un_code)$intervention.id)
+        rm(country.iso)
+
+        ## combining DFs
+        master$current.status <- "published"
+        master <- unique(rbind(
+            master,
+            subset(master.unpublished, !intervention.id %in% unique(master$intervention.id))
+        ))
+
+        rm(mt, master.unpublished, master.tuple, master.else)
+        parameter.choices <- rbind(
+            parameter.choices,
+            data.frame(parameter = "Unpublished:", choice = "Included")
+        )
     } else {
-
-      ## this is the 'ONEPLUS' case.
-      affected.combinations=unique(master$intervention.id)
-
-      if(incl.affected.strictness=="ALL"){
-
-        for(cty in affected){
-
-          a.c.temp=unique(subset(master, a.un==cty)$intervention.id)
-
-          affected.combinations=intersect(affected.combinations,
-                                          a.c.temp)
-          rm(a.c.temp)
-        }
-
-      }
-
-
-      if(incl.affected.strictness=="ONE"){
-
-        one.aj=subset(master, a.un %in% affected)
-
-        one.aj=aggregate(a.un ~intervention.id, one.aj, function(x) length(unique(x)))
-
-        affected.combinations=subset(one.aj, a.un==1)$intervention.id
-
-        rm(one.aj)
-
-      }
-
-
-      if(length(affected.combinations)==0){
-
-        stop.print <- "No rows left for the selected affected jurisdiction combination (parameter incl.affected.strictness)."
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-    }
-    affected.interventions=intersect(affected.interventions, affected.combinations)
-
-  ### applying the restrictions on the number of affected trading partners per intervention
-
-    ## min/max nr of affected jurisdictions
-    nr.affected.min=nr.affected[1]
-    nr.affected.max=nr.affected[2]
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Nr. of affected jurisdictions: ", choice=paste(nr.affected.min, nr.affected.max, sep=" - ")))
-
-
-    ## Calculation form
-    if(! nr.affected.incl %in% c("ALL","SELECTED","UNSELECTED")){
-
-      stop.print <- "Please choose which imports to include into the calculation for the number of affected jurisdictions (ALL/SELECTED/UNSELECTED)."
-      error.message <<- c(T, stop.print)
-      stop(stop.print)
-
-    }else {
-
-      if(nr.affected.incl=="ALL"){
-
-        imp.count=aggregate(a.un ~ intervention.id, master ,function(x) length(unique(x)))
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of affected jurisdictions calculated based on: ", choice="All affected jurisdictions"))
-
-
-      }
-
-      if(nr.affected.incl=="SELECTED"){
-
-        imp.count=aggregate(a.un ~ intervention.id,subset(master, a.un %in% affected),function(x) length(unique(x)))
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of affected jurisdictions calculated based on: ", choice="Selected affected jurisdictions"))
-
-      }
-
-      if(nr.affected.incl=="UNSELECTED"){
-
-        imp.count=aggregate(a.un ~ intervention.id,subset(master, ! a.un %in% affected),function(x) length(unique(x)))
-
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of affected jurisdictions calculated based on: ", choice="Unselected affected jurisdictions"))
-
-      }
-
-      # ensuring zero-AJ interventions are counted
-      imp.count=rbind(imp.count,
-                      data.frame(intervention.id=unique(master$intervention.id[is.na(master$a.un)]),
-                                 a.un=0))
-
-
-      affected.interventions=intersect(affected.interventions,
-                                       subset(imp.count, a.un>=nr.affected.min &
-                                                a.un<=nr.affected.max)$intervention.id)
-
+        parameter.choices <- rbind(
+            parameter.choices,
+            data.frame(parameter = "Unpublished:", choice = "Excluded")
+        )
     }
 
 
 
-    if(length(affected.interventions)==0){
-      stop.print <- "There are no interventions that satisfy your choices for nr.affected, nr.affected.incl and incl.affected.strictness simultaneously."
-      error.message <<- c(T, stop.print)
-      stop(stop.print)}
+##################################################################
+# REWRITTEN PART OF THE FUNCTION!!!
+##################################################################
 
+##################################################################
+##### Check validity of input arguments (no filtering of data frame yet --> can all be done in one pipe!!! )
+##################################################################
+filter_statement <- vector(mode = "character")
+# first & in filter statement must be cut out first!!!!
 
-    ## applying all these conditions
-      master=subset(master, intervention.id %in% affected.interventions)
+    # gta.evaluation
+    if (!is.null(gta.evaluation)) {
+        gta_parameter_check(check.name = "gta.evaluation", tolower(gta.evaluation), c("red", "amber", "green"))
+        gta_evaluatioan <- str_to_title(gta.evaluation)
+        filter_statement <- append(filter_statement, "gta.evaluation %in% gta_evaluation")
+    }
 
+    # affected flows
+    if (!is.null(affected.flows)) {
+        gta_parameter_check(check.name = "affected.flows", tolower(affected.flows), c("inward", "outward", "outward subsidy"))
+        filter_statement <- append(filter_statement, "affected.flow %in% affected.flows")
+    }
 
-    ## keep.others
-      if(keep.others==FALSE & is.null(affected.country) == F){
-          master=subset(master, a.un %in% affected)
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Keep data for other jurisdictions affected alongside those specified:",
-                                           choice="No"))
+    # check implementing country
+    if (!is.null(implementing_country)){
+        implementing.country <- gtalibrary::gta_un_code_vector(countries = implementing.country)
+        filter_statement <- append(filter_statement, "i.un %in% implementing_country")
+        if (!keep.implementer){
+            filter_statement <- append(filter_statement, "!i.un %in% implementing_country")
+        }
+    }
 
+    # check affected.country
+    if (!is.null(affected.country)) {
+        gtalibrary::gta_type_check(keep.affected, is.logical)
+        affected.country <- gtalibrary::gta_un_code_vector(countries = affected.country)
+        filter_statement <- append(filter_statement, "a.un %in% affected_country")
 
-      } else {
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Keep data for other jurisdictions affected alongside those specified:",
-                                           choice="Yes"))
-      }
+        if (!keep.affected){
+            filter_statement <- append(filter_statement, "!a.un %in% affected_country")
+        }
+    }
 
+    # intervention.types
+    if (!is.null(intervention.types)) {
+        # if intervention.types are specified, the parameter keep.type must also be specified
+        gtalibrary::gta_type_check(keep.type, is.logical)
+        admissible.values <- tolower(gtalibrary::int.mast.types$intervention.type)
+        gtalibrary::gta_parameter_check(check.name = "intervention.types", intervention.types, permissible.values = admissible.values)
+        filter_statement <- append(filter_statement, "intervention.type %in% intervention.types")
+        
+        if (!keep.type) {
+            filter_statement <- append(filter_statement, "!intervention.type %in% intervention.types")
+        }
+    }
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for affected.also.nr and keep.others"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
+    # mast.chapters
+    if (!is.null(mast.chapters)) {
+        gtalibrary::gta_type_check(keep.mast, is.logical)
+        mast.chapters <- stringr::str_remove_all(pattern = "[0-9]+", string = mast.chapters)
+        admissible.values <- tolower(gtalibrary::int.mast.types$mast.chapter.id)
+        filter_statement <- append(filter_statement, "mast.id %in% mast.chapters")
+        
+        if (!keep.mast) {
+            filter_statement <- append(filter_statement, "!mast.id %in% mast.chapters")
+        }
+    }
 
+   # eligible.firms
+    if (!is.null(eligible.firms)) {
+        # check if keep.affected is specified
+        gtalibrary::gta_type_check(keep.firms, is.logical)
+        admissible.values <- tolower(gtalibrary::elig.firms$eligible.firms)
+        gtalibrary::gta_parameter_check(check.name = "eligible.firms", tolower(eligible.firms), admissible.values)
+        filter_statement <- append(filter_statement, "eligible.firms %in% eligible_firms")
+        
+        if (!keep.firms) {
+            filter_statement <- append(filter_statement, "eligible.firms %in% eligible_firms")
+        }
+    }
 
-      # announcement.period
-      date.period=announcement.period
+    # implementation.level
+    if (!is.null(implementation.level)) {
+        # check if keep.affected is specified
+        gtalibrary::gta_type_check(keep.level, is.logical)
 
-      if(is.null(date.period)){
+        admissible.values <- tolower(gtalibrary::imp.levels$implementation.level)
+        gtalibrary::gta_parameter_check(check.name = "implementation.level", tolower(implementation.level), admissible.values)
+        filter_impleentationlevel <- "implementation.level %in% implementation.level"
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Announcement period:", choice="Full GTA monitoring period"))
+        if (!keep.level) {
+            filter_implementationlevel <- "!implementation.level %in% implementation.level"
+        }
+    }
 
-      } else {
+    # intervention.ids
+    if (!is.null(intervention.ids)) {
+        # if intervention.types are specified, the parameter keep.interventions must also be specified
+        gta_type_check(keep.interventions, is.logical)
+        admissible.values <- unique(master$intervention.id)
+        gta_parameter_check(check.name = "intervention.id", nr.affected.incl, permissible.values = admissible.values)
+        filter_statement <- append(filter_statement, "intervention.id %in% intervention.ids")
+        if (!keep.interventions) {
+        filter_statement <- append(filter_statement, "!intervention.id %in% intervention.ids")
+        }
+    }
 
-        if(length(date.period)!=2){
-          stop.print <- "Please specify the date pair (after.date, before.date) for the announcement period. 'NA' is permissible, but has to be specified in case you only want one of the two."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
+# filter the data frame for the first time
+    filter_statement <- paste(filter_statement, collapse = " & ")
+    data <- dtplyr::lazy_dt(master) |>
+        dplyr::filter(eval(parse(text = filter_statement))) |>
+        tibble::as_tibble()
 
-        } else{
-          dates=sum(as.numeric(is.na(date.period))==F)
+    # hs codes
+    if (!is.null(hs.codes)) {
+        gtalibrary::gta_type_check(keep.hs, is.logical)
+        hs.codes  <- gta_hs_code_check(codes = hs.codes)
+        filter_hs <- "hs.codes %in% hs.codes"
 
-          if(dates>0){
-            if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
-              error.message <<- c(T, "At least one of the announcement dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
-              stop("At least one of the announcement dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
-            }
-
-            if(dates==2){
-              master=subset(master, date.announced>=as.Date(date.period[1], "%Y-%m-%d") & date.announced<=as.Date(date.period[2], "%Y-%m-%d"))
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Announcement period:", choice=paste(date.period[1]," - ",date.period[2], sep="")))
-
-            }
-
-            if(dates==1){
-
-              if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
-                master=subset(master, date.announced>=as.Date(date.period[1], "%Y-%m-%d"))
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Announcement period:", choice=paste(date.period[1]," or more recent", sep="")))
-              }
-
-              if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-                master=subset(master, date.announced<=as.Date(date.period[2], "%Y-%m-%d"))
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Announcement period:", choice=paste(date.period[2]," or earlier", sep="")))
-              }
-
-            }
-
-          } else {
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Announcement period:", choice="Full GTA monitoring period"))
-          }
-
-
+        if (!keep.hs) {
+            filter_hs <- "!hs.codes %in% hs.codes"
         }
 
-        remove(date.period)
+        dtplyr::lazy_dt(data) |>
+            mutate(
+                ids = seq_len(nrow(data)),
+                hs_codes = str_split(string = affected.product, pattern = ", ")
+            ) |>
+            tibble::as_tibble() |>
+            tidyr::unnest(cols = hs_codes) |>
+            dplyr::filter(hs_codes = eval(parse(text = filter_hs)))
+    }
 
-      }
+    # what if cpc and hs sectors are selected ? ?? 
+    # cpc.sectors
+    if (!is.null(cpc.sectors)){
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for announcement.period"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
+        # do from filtered --> merged
+        gtalibrary::gta_type_check(keep.cpc, is.logical)
+        cpc.sectors <- gtalibrary::gta_cpc_code_check(codes = cpc.sectors)
+        admissible.values <- unique(gtalibrary::cpc.names$cpc)
 
-      }
-
-
-      # implementation.period
-      date.period=implementation.period
-
-      if(is.null(date.period)){
-
-        if(is.null(keep.implementation.na)==F) {
-          if(keep.implementation.na==F) {
-
-          master=subset(master, is.na(date.implemented)==F)
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Implementation period:", choice="Full GTA monitoring period, and excluding interventions without implementation date"))
-          }
-
-        } else {
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Implementation period:", choice="Full GTA monitoring period"))
+        if (!keep.cpc){
+            cpc.sectors <- admissible.values[!admissible.values %in% cpc.sectors]
         }
 
-      } else {
-
-
-        if(length(date.period)!=2){
-          stop.print <- "Please specify the date pair (after.date, before.date) for the implementation period. 'NA' is permissible, but has to be specified in case you only want one of the two."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          dates=sum(as.numeric(is.na(date.period))==F)
-
-          if(dates>0){
-            if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
-              stop("At least one of the implementation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
-            }
-
-            if(is.null(keep.implementation.na)){
-              stop.print <- "Please specify whether you want to keep interventions with missing implementation date or exclude them (keep.implementation.na=T/F)."
-              error.message <<- c(T, stop.print)
-              stop(stop.print)
-            }
-
-            if(dates==2){
-
-              if(keep.implementation.na==T) {
-                master=subset(master, (date.implemented>=as.Date(date.period[1], "%Y-%m-%d") & date.implemented<=as.Date(date.period[2], "%Y-%m-%d")) | is.na(date.implemented)==T )
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="implementation period:", choice=paste(date.period[1]," - ",date.period[2],", as well as interventions without implementation date", sep="")))
-              }
-
-              if(keep.implementation.na==F) {
-                master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d") & date.implemented<=as.Date(date.period[2], "%Y-%m-%d"))
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="implementation period:", choice=paste(date.period[1]," - ",date.period[2]," and excluding interventions without implementation date", sep="")))
-
-              }
-
-            }
-
-            if(dates==1){
-
-              if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
-                if(keep.implementation.na==T) {master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d") | is.na(date.implemented)==T)}
-                if(keep.implementation.na==F) {master=subset(master, date.implemented>=as.Date(date.period[1], "%Y-%m-%d"))}
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Implementation period:", choice=paste(date.period[1]," or more recent", sep="")))
-              }
-
-              if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-                if(keep.implementation.na==T){master=subset(master, date.implemented<=as.Date(date.period[2], "%Y-%m-%d") | is.na(date.implemented)==T)}
-                if(keep.implementation.na==F){master=subset(master, date.implemented<=as.Date(date.period[2], "%Y-%m-%d"))}
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Implementation period:", choice=paste(date.period[2]," or earlier", sep="")))
-              }
-
-            }
-
-          } else {
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Implementation period:", choice="Full GTA monitoring period"))
-          }
-
-
-        }
-
-        remove(date.period)
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for implementation.period"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
-
-
-      # revocation.period
-      date.period=revocation.period
-
-      if(is.null(date.period)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Revocation period:", choice="None specified"))
-
-      } else {
-
-        if(length(date.period)!=2){
-          stop.print <- "Please specify the date pair (after.date, before.date) for the revocation period. 'NA' is permissible, but has to be specified in case you only want one of the two."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-          dates=sum(as.numeric(is.na(date.period))==F)
-
-          if(dates>0){
-            if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
-              error.message <<- c(T, "At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
-              stop("At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
-            }
-
-            if(is.null(keep.revocation.na)){
-              stop.print <- "Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F)."
-              error.message <<- c(T, stop.print)
-              stop(stop.print)
-            }
-
-            if(dates==2){
-
-              if(keep.revocation.na==T) {
-                master=subset(master, (date.removed>=as.Date(date.period[1], "%Y-%m-%d") & date.removed<=as.Date(date.period[2], "%Y-%m-%d")) | is.na(date.removed)==T )
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Revocation period:", choice=paste(date.period[1]," - ",date.period[2],", as well as interventions without removal date", sep="")))
-              }
-
-              if(keep.revocation.na==F) {
-                master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") & date.removed<=as.Date(date.period[2], "%Y-%m-%d"))
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Revocation period:", choice=paste(date.period[1]," - ",date.period[2]," and excluding interventions without removal date", sep="")))
-
-              }
-
-            }
-
-            if(dates==1){
-
-
-
-              if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
-
-                if(keep.revocation.na==T) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d") | is.na(date.removed)==T)}
-                if(keep.revocation.na==F) {master=subset(master, date.removed>=as.Date(date.period[1], "%Y-%m-%d"))}
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Revocation period:", choice=paste(date.period[1]," or more recent", sep="")))
-              }
-
-              if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-
-                if(keep.revocation.na==T){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d") | is.na(date.removed)==T)}
-                if(keep.revocation.na==F){master=subset(master, date.removed<=as.Date(date.period[2], "%Y-%m-%d"))}
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Revocation period:", choice=paste(date.period[2]," or earlier", sep="")))
-              }
-
-            }
-
-          } else {
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Revocation period:", choice="None specified"))
-          }
-
-
-        }
-
-        remove(date.period)
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for revocation.period"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-
-      # submission.period
-      date.period=submission.period
-
-      if(is.null(date.period)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Submission period:", choice="Full GTA monitoring period"))
-
-      } else {
-
-        if(length(date.period)!=2){
-          stop.print <- "Please specify the date pair (after.date, before.date) for the submission period. 'NA' is permissible, but has to be specified in case you only want one of the two."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-          dates=sum(as.numeric(is.na(date.period))==F)
-
-          if(dates>0){
-            if(sum(is.na(as.Date(date.period[is.na(date.period)==F], "%Y-%m-%d")))>0){
-              stop.print <- "At least one of the submission dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'."
-              error.message <<- c(T, stop.print)
-              stop(stop.print)
-            }
-
-            if(dates==2){
-              master=subset(master, date.published>=as.Date(date.period[1], "%Y-%m-%d") & date.published<=as.Date(date.period[2], "%Y-%m-%d"))
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Submission period:", choice=paste(date.period[1]," - ",date.period[2], sep="")))
-
-            }
-
-            if(dates==1){
-
-              if(is.na(as.Date(date.period[1], "%Y-%m-%d"))==F){
-                master=subset(master, date.published>=as.Date(date.period[1], "%Y-%m-%d"))
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Submission period:", choice=paste(date.period[1]," or more recent", sep="")))
-              }
-
-              if(is.na(as.Date(date.period[2], "%Y-%m-%d"))==F){
-                master=subset(master, date.published<=as.Date(date.period[2], "%Y-%m-%d"))
-                parameter.choices=rbind(parameter.choices,
-                                        data.frame(parameter="Submission period:", choice=paste(date.period[2]," or earlier", sep="")))
-              }
-
-            }
-
-          } else {
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Submission period:", choice="Full GTA monitoring period"))
-          }
-
-
-        }
-
-        remove(date.period)
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for submission.period"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
-
-
-      # in.force.on.date
-      if(is.null(in.force.on.date) & keep.in.force.on.date == 'any'){
-        in.force.on.date=Sys.Date()
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Regardless"))
-      } else {
-
-      #determine interpretability of in.force.on.date
-      tryCatch({date=format(as.Date(x=in.force.on.date),"%Y-%m-%d")},
-               error=function(e){
-                 stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
-                 error.message <<- c(T, stop.print)
-                 stop(stop.print)
-               },
-               finally={
-                 if(is.na(date) | !substr(as.character(date),1,4) %in% as.character(2000:2024) | length(date)!=1){
-                   stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
-                   error.message <<- c(T, stop.print)
-                   stop(stop.print)
-                 }
-
-               })
-      in.force.on.date = as.Date(x=in.force.on.date)
-
-      if(tolower(keep.in.force.on.date) %in% c("yes","no","any")){
-
-        if(tolower(keep.in.force.on.date)=="any"){
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Regardless"))
-        }
-
-        if(tolower(keep.in.force.on.date)=="yes"){
-
-          master=subset(master, date.implemented<=in.force.on.date & (is.na(date.removed)==T|date.removed>=in.force.on.date))
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Yes"))
-
-        }
-
-        if(tolower(keep.in.force.on.date)=='no'){
-
-          master=subset(master, (date.implemented<in.force.on.date & is.na(date.removed)==F & date.removed<in.force.on.date) | is.na(date.implemented))
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="No"))
-
-        }
-
-      } else {
-        stop.print <- "Please specify keep.in.force.on.date as either 'yes', 'no' or 'any'."
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
+    # check nr.affected.incl
+    gtalibrary::gta_parameter_check(check.name = "nr.affected.incl", tolower(nr.affected.incl)), permissible.values = c("all", "selected", "unselected")
+
+    # incl. affected strictness
+    gtalibrary::gta_parameter_check(check.name = "incl.affected.strictness", tolower(incl.affected.strictness), c("all", "one", "oneplus"))
+
+    # implementation.period
+    if (!is.null(implementation.period)) {
+        gtalibrary::gta_type_check(implementation.period, lubridate::is.Date)
+        gtalibrary::gta_type_check(keep.implementation.na, is.logical)
+    }
+
+    # submission.period
+    if (!is.null(submission.period)){
 
     }
 
+    # revocation.period
+    if (!is.null(revocation.period)) {
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        error.message <<- c(T, "Unfortunately no rows remaining after filtering for in.force.on.date")
-        stop("Unfortunately no rows remaining after filtering for in.force.on.date")
-      }
+    }
 
-      # intervention.type
-      # keep.type
-      if(is.null(intervention.types)){
+    # reporting.period
+    if (!is.null(reporting.period)) {
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Intervention types included:", choice="All"))
+    }
 
-      } else {
+    # lag adjustment
+    if(!is.null(lag.adjustment)){
 
-        if(is.null(keep.type) | !is.logical(keep.type)){
-          stop.print <- "Please specify whether you want to focus on the specified intervention types or exclude them (keep.type=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-        } else{
+    }
 
-          int.mast.types <- gtalibrary::int.mast.types
-          check=gta_parameter_check(tolower(intervention.types), tolower(int.mast.types$intervention.type))
+    # check logical values / prepopulated
+    gtalibrary::gta_type_check(keep.implementer, is.logical)
+    gtalibrary::gta_type_check(keep.revocation.na, is.logical)
+    gtalibrary::gta_type_check(keep.others, is.logical)
+    gtalibrary::gta_type_check(add.unpublished, is.logical)
+    gtalibrary::gta_type_check(xlsx, is.logical)
 
-          if(check!="OK"){
-            stop(paste("Unknown intervention type(s): ", check, ".", sep=""))
 
-          } else {
-            if(keep.type==T){
-              master=subset(master, tolower(intervention.type) %in% tolower(intervention.types))
+    affected.interventions <- master$intervention.id ### WHAT DO WE DO WITH THIS?????????????
 
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Intervention types included:", choice=paste(intervention.types, collapse = ", ")))
 
-            } else if (keep.type==F){
-              master=subset(master, ! tolower(intervention.type) %in% tolower(intervention.types))
+    affected.interventions <- subset(master, a.un %in% affected)$intervention.id
+                }
 
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Intervention types included:", choice=paste("All except ", paste(intervention.types, collapse = ", "), sep="")))
+            # WHAT TO DO WITH THIS --> REFERS TO INCL. AFFECTED.STRICTNESS --> SEEMS to be time-costly operation because of the loop! --> Many function calls
+            else {
+                ## this is the 'ONEPLUS' case.
+                affected.combinations <- unique(master$intervention.id)
 
+                if (incl.affected.strictness == "ALL") {
+                    for (cty in affected) {
+                        a.c.temp <- unique(subset(master, a.un == cty)$intervention.id)
+
+                        affected.combinations <- intersect(
+                            affected.combinations,
+                            a.c.temp
+                        )
+                        rm(a.c.temp)
+                    }
+                }
+
+                if (incl.affected.strictness == "ONE") {
+                    one.aj <- subset(master, a.un %in% affected)
+
+                    one.aj <- aggregate(a.un ~ intervention.id, one.aj, function(x) length(unique(x)))
+
+                    affected.combinations <- subset(one.aj, a.un == 1)$intervention.id
+
+                    rm(one.aj)
+                }
+
+            affected.interventions <- intersect(affected.interventions, affected.combinations)
+
+            ### applying the restrictions on the number of affected trading partners per intervention
+
+            ## min/max nr of affected jurisdictions
+            nr.affected.min <- nr.affected[1]
+            nr.affected.max <- nr.affected[2]
+
+
+            ## Calculation form
+            if (!nr.affected.incl %in% c("ALL", "SELECTED", "UNSELECTED")) {
+                stop.print <- "Please choose which imports to include into the calculation for the number of affected jurisdictions (ALL/SELECTED/UNSELECTED)."
+                error.message <<- c(T, stop.print)
+                stop(stop.print)
+            } else {
+                if (nr.affected.incl == "ALL") {
+                    imp.count <- aggregate(a.un ~ intervention.id, master, function(x) length(unique(x)))
+
+                    parameter.choices <- rbind(
+                        parameter.choices,
+                        data.frame(parameter = "Nr. of affected jurisdictions calculated based on: ", choice = "All affected jurisdictions")
+                    )
+                }
+
+                if (nr.affected.incl == "SELECTED") {
+                    imp.count <- aggregate(a.un ~ intervention.id, subset(master, a.un %in% affected), function(x) length(unique(x)))
+
+                    parameter.choices <- rbind(
+                        parameter.choices,
+                        data.frame(parameter = "Nr. of affected jurisdictions calculated based on: ", choice = "Selected affected jurisdictions")
+                    )
+                }
+
+                if (nr.affected.incl == "UNSELECTED") {
+                    imp.count <- aggregate(a.un ~ intervention.id, subset(master, !a.un %in% affected), function(x) length(unique(x)))
+
+
+                    parameter.choices <- rbind(
+                        parameter.choices,
+                        data.frame(parameter = "Nr. of affected jurisdictions calculated based on: ", choice = "Unselected affected jurisdictions")
+                    )
+                }
+
+                # ensuring zero-AJ interventions are counted
+                imp.count <- rbind(
+                    imp.count,
+                    data.frame(
+                        intervention.id = unique(master$intervention.id[is.na(master$a.un)]),
+                        a.un = 0
+                    )
+                )
+
+                affected.interventions <- intersect(
+                    affected.interventions,
+                    subset(imp.count, a.un >= nr.affected.min &
+                        a.un <= nr.affected.max)$intervention.id
+                )
             }
 
-          }
+            ## applying all these conditions
+            master <- subset(master, intervention.id %in% affected.interventions)
 
+            ## keep.others
+            if (keep.others == FALSE & is.null(affected.country) == F) {
+                master <- subset(master, a.un %in% affected)
 
-        }
-      }
+            # announcement.period
+            date.period <- announcement.period
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for intervention.types"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
+            } else {
+                if (length(date.period) != 2) {
+                    stop.print <- "Please specify the date pair (after.date, before.date) for the announcement period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                } else {
+                    dates <- sum(as.numeric(is.na(date.period)) == F)
 
+                    if (dates > 0) {
+                        if (sum(is.na(as.Date(date.period[is.na(date.period) == F], "%Y-%m-%d"))) > 0) {
+                            error.message <<- c(T, "At least one of the announcement dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+                            stop("At least one of the announcement dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+                        }
 
-      parameter.choices$parameter=as.character(parameter.choices$parameter)
-      parameter.choices$choice=as.character(parameter.choices$choice)
+                        if (dates == 2) {
+                            master <- subset(master, date.announced >= as.Date(date.period[1], "%Y-%m-%d") & date.announced <= as.Date(date.period[2], "%Y-%m-%d"))
 
-      # mast.chapter
-      # keep.mast
-      if(is.null(mast.chapters)){
+                        }
 
-        if(is.null(intervention.types)){
+                        if (dates == 1) {
+                            if (is.na(as.Date(date.period[1], "%Y-%m-%d")) == F) {
+                                master <- subset(master, date.announced >= as.Date(date.period[1], "%Y-%m-%d"))
 
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Mast chapters included:", choice="All"))
-        } else {
+                            }
 
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Mast chapters included:", choice="Those implied by intervention type choice."))
+                            if (is.na(as.Date(date.period[2], "%Y-%m-%d")) == F) {
+                                master <- subset(master, date.announced <= as.Date(date.period[2], "%Y-%m-%d"))
 
-        }
+                            }
+                        }
 
+                    }
+                }
 
-
-      } else {
-
-        if(is.null(keep.mast) | !is.logical(keep.mast)){
-          stop.print <- "Please specify whether you want to focus on the specified mast chapters or exclude them (keep.mast=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          #Remove integers from string
-          mast.letter <- gsub("[0-9]+","", mast.chapters)
-          mast.letter <- mast.letter[mast.letter != ""]
-
-          int.mast.types <- gtalibrary::int.mast.types
-          check=gta_parameter_check(tolower(mast.letter), tolower(int.mast.types$mast.chapter.id))
-
-          if(check!="OK"){
-            stop.print <- paste("Unknown mast chapter(s): ", check, ".", sep="")
-            error.message <<- c(T, stop.print)
-            stop(stop.print)
-
-          } else {
-
-            if(keep.mast==T){
-              master=subset(master, tolower(mast.chapter) %in% tolower(mast.letter))
-
-
-              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice=="All"]="As implied by MAST choice"
-              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"]=paste(parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"], " and those implied by MAST choice.", sep="")
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Mast chapters included:", choice=paste(mast.letter, collapse = ", ")))
-
-            } else if(keep.mast==F){
-              master=subset(master, ! tolower(mast.chapter) %in% tolower(mast.letter))
-
-              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice=="All"]="As implied by MAST choice"
-              parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"]=paste(parameter.choices$choice[parameter.choices$parameter=="Intervention types included:" & parameter.choices$choice!="All"], " and those implied by MAST choice.", sep="")
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Mast chapters included:", choice=paste("All except ", paste(mast.letter, collapse = ", "), sep="")))
-
+                remove(date.period)
             }
 
-          }
+            # implementation.period
+            date.period <- implementation.period
 
+            if (is.null(date.period)) {
+                if (is.null(keep.implementation.na) == F) {
+                    if (keep.implementation.na == F) {
+                        master <- subset(master, is.na(date.implemented) == F)
 
-        }
-      }
+            } else {
+                if (length(date.period) != 2) {
+                    stop.print <- "Please specify the date pair (after.date, before.date) for the implementation period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                } else {
+                    dates <- sum(as.numeric(is.na(date.period)) == F)
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for mast.chapters"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
+                    if (dates > 0) {
+                        if (sum(is.na(as.Date(date.period[is.na(date.period) == F], "%Y-%m-%d"))) > 0) {
+                            stop("At least one of the implementation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+                        }
 
+                        if (is.null(keep.implementation.na)) {
+                            stop.print <- "Please specify whether you want to keep interventions with missing implementation date or exclude them (keep.implementation.na=T/F)."
+                            error.message <<- c(T, stop.print)
+                            stop(stop.print)
+                        }
 
+                        if (dates == 2) {
+                            if (keep.implementation.na == T) {
+                                master <- subset(master, (date.implemented >= as.Date(date.period[1], "%Y-%m-%d") & date.implemented <= as.Date(date.period[2], "%Y-%m-%d")) | is.na(date.implemented) == T)
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "implementation period:", choice = paste(date.period[1], " - ", date.period[2], ", as well as interventions without implementation date", sep = ""))
+                                )
+                            }
 
-      # implementation.level
-      # keep.level
-      if(is.null(implementation.level)){
+                            if (keep.implementation.na == F) {
+                                master <- subset(master, date.implemented >= as.Date(date.period[1], "%Y-%m-%d") & date.implemented <= as.Date(date.period[2], "%Y-%m-%d"))
+                        }
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Implementation levels included:", choice="All"))
+                        if (dates == 1) {
+                            if (is.na(as.Date(date.period[1], "%Y-%m-%d")) == F) {
+                                if (keep.implementation.na == T) {
+                                    master <- subset(master, date.implemented >= as.Date(date.period[1], "%Y-%m-%d") | is.na(date.implemented) == T)
+                                }
+                                if (keep.implementation.na == F) {
+                                    master <- subset(master, date.implemented >= as.Date(date.period[1], "%Y-%m-%d"))
+                                }
+                            }
 
-      } else {
+                            if (is.na(as.Date(date.period[2], "%Y-%m-%d")) == F) {
+                                if (keep.implementation.na == T) {
+                                    master <- subset(master, date.implemented <= as.Date(date.period[2], "%Y-%m-%d") | is.na(date.implemented) == T)
+                                }
+                                if (keep.implementation.na == F) {
+                                    master <- subset(master, date.implemented <= as.Date(date.period[2], "%Y-%m-%d"))
+                                }
+                            }
+                        }
 
-        if(is.null(keep.level) | !is.logical(keep.level)){
-          stop.print <- "Please specify whether you want to focus on the specified implementation levels or exclude them (keep.level=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          imp.levels <- gtalibrary::imp.levels
-
-          check=gta_parameter_check(tolower(implementation.level), tolower(imp.levels$implementation.level))
-
-          if(check!="OK"){
-            stop(paste("Unknown implementation level(s): ", check, ".", sep=""))
-
-          } else {
-
-            implementation.level.choice <- implementation.level
-
-            if(keep.level==T){
-              master=subset(master, tolower(implementation.level) %in% tolower(implementation.level.choice))
-
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Implementation levels included:", choice=paste(implementation.level, collapse = ", ")))
-
-            } else if(keep.level==F){
-              master=subset(master, ! tolower(implementation.level) %in% tolower(implementation.level.choice))
-
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Implementation levels included:", choice=paste("All except ", paste(implementation.level, collapse = ", "), sep="")))
-
+                remove(date.period)
             }
 
-          }
+            # revocation.period
+            date.period <- revocation.period
 
+            if (is.null(date.period)) {
+                parameter.choices <- rbind(
+                    parameter.choices,
+                    data.frame(parameter = "Revocation period:", choice = "None specified")
+                )
+            } else {
+                if (length(date.period) != 2) {
+                    stop.print <- "Please specify the date pair (after.date, before.date) for the revocation period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                } else {
+                    dates <- sum(as.numeric(is.na(date.period)) == F)
 
-        }
-      }
+                    if (dates > 0) {
+                        if (sum(is.na(as.Date(date.period[is.na(date.period) == F], "%Y-%m-%d"))) > 0) {
+                            error.message <<- c(T, "At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+                            stop("At least one of the revocation dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'.")
+                        }
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for implementation.level"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
+                        if (is.null(keep.revocation.na)) {
+                            stop.print <- "Please specify whether you want to keep interventions with missing revocation date or exclude them (keep.revocation.na=T/F)."
+                            error.message <<- c(T, stop.print)
+                            stop(stop.print)
+                        }
 
+                        if (dates == 2) {
+                            if (keep.revocation.na == T) {
+                                master <- subset(master, (date.removed >= as.Date(date.period[1], "%Y-%m-%d") & date.removed <= as.Date(date.period[2], "%Y-%m-%d")) | is.na(date.removed) == T)
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "Revocation period:", choice = paste(date.period[1], " - ", date.period[2], ", as well as interventions without removal date", sep = ""))
+                                )
+                            }
 
-      # eligible.firms
-      # keep.firms
-      if(is.null(eligible.firms)){
+                            if (keep.revocation.na == F) {
+                                master <- subset(master, date.removed >= as.Date(date.period[1], "%Y-%m-%d") & date.removed <= as.Date(date.period[2], "%Y-%m-%d"))
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "Revocation period:", choice = paste(date.period[1], " - ", date.period[2], " and excluding interventions without removal date", sep = ""))
+                                )
+                            }
+                        }
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Eligible firms categories included:", choice="Any"))
+                        if (dates == 1) {
+                            if (is.na(as.Date(date.period[1], "%Y-%m-%d")) == F) {
+                                if (keep.revocation.na == T) {
+                                    master <- subset(master, date.removed >= as.Date(date.period[1], "%Y-%m-%d") | is.na(date.removed) == T)
+                                }
+                                if (keep.revocation.na == F) {
+                                    master <- subset(master, date.removed >= as.Date(date.period[1], "%Y-%m-%d"))
+                                }
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "Revocation period:", choice = paste(date.period[1], " or more recent", sep = ""))
+                                )
+                            }
 
-      } else {
+                            if (is.na(as.Date(date.period[2], "%Y-%m-%d")) == F) {
+                                if (keep.revocation.na == T) {
+                                    master <- subset(master, date.removed <= as.Date(date.period[2], "%Y-%m-%d") | is.na(date.removed) == T)
+                                }
+                                if (keep.revocation.na == F) {
+                                    master <- subset(master, date.removed <= as.Date(date.period[2], "%Y-%m-%d"))
+                                }
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "Revocation period:", choice = paste(date.period[2], " or earlier", sep = ""))
+                                )
+                            }
+                        }
+                    } else {
+                        parameter.choices <- rbind(
+                            parameter.choices,
+                            data.frame(parameter = "Revocation period:", choice = "None specified")
+                        )
+                    }
+                }
 
-        if(is.null(keep.firms) | !is.logical(keep.firms)){
-          stop.print <- "Please specify whether you want to focus on the specified eligibe firms categories or exclude them (keep.level=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          elig.firms <- gtalibrary::elig.firms
-          eligible.firms.choice <- eligible.firms
-          check=gta_parameter_check(tolower(eligible.firms), tolower(elig.firms$eligible.firms))
-
-          if(check!="OK"){
-            stop.print <- paste("Unknown eligible firms categorie(s): ", check, ".", sep="")
-            error.message <<- c(T, stop.print)
-            stop(stop.print)
-
-          } else {
-
-            if(keep.firms==T){
-              master=subset(master, tolower(eligible.firms) %in% tolower(eligible.firms.choice))
-
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Eligible firms categories included:", choice=paste(eligible.firms, collapse = ", ")))
-
-            } else if (keep.firms==F){
-              master=subset(master, ! tolower(eligible.firms) %in% tolower(eligible.firms.choice))
-
-              parameter.choices=rbind(parameter.choices,
-                                      data.frame(parameter="Eligible firms categories included:", choice=paste("All except ", paste(eligible.firms, collapse = ", "), sep="")))
-
+                remove(date.period)
             }
 
-          }
+            # submission.period
+            date.period <- submission.period
 
+            if (is.null(date.period)) {
+                parameter.choices <- rbind(
+                    parameter.choices,
+                    data.frame(parameter = "Submission period:", choice = "Full GTA monitoring period")
+                )
+            } else {
+                if (length(date.period) != 2) {
+                    stop.print <- "Please specify the date pair (after.date, before.date) for the submission period. 'NA' is permissible, but has to be specified in case you only want one of the two."
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                } else {
+                    dates <- sum(as.numeric(is.na(date.period)) == F)
 
-        }
-      }
+                    if (dates > 0) {
+                        if (sum(is.na(as.Date(date.period[is.na(date.period) == F], "%Y-%m-%d"))) > 0) {
+                            stop.print <- "At least one of the submission dates you specified is neither in R date format ('2008-12-31'), nor specified as 'NA'."
+                            error.message <<- c(T, stop.print)
+                            stop(stop.print)
+                        }
 
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for eligible.firms"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
+                        if (dates == 2) {
+                            master <- subset(master, date.published >= as.Date(date.period[1], "%Y-%m-%d") & date.published <= as.Date(date.period[2], "%Y-%m-%d"))
+                            parameter.choices <- rbind(
+                                parameter.choices,
+                                data.frame(parameter = "Submission period:", choice = paste(date.period[1], " - ", date.period[2], sep = ""))
+                            )
+                        }
 
+                        if (dates == 1) {
+                            if (is.na(as.Date(date.period[1], "%Y-%m-%d")) == F) {
+                                master <- subset(master, date.published >= as.Date(date.period[1], "%Y-%m-%d"))
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "Submission period:", choice = paste(date.period[1], " or more recent", sep = ""))
+                                )
+                            }
 
-      # cpc.sectors
-      # keep.cpc
-      if(is.null(cpc.sectors)){
+                            if (is.na(as.Date(date.period[2], "%Y-%m-%d")) == F) {
+                                master <- subset(master, date.published <= as.Date(date.period[2], "%Y-%m-%d"))
+                                parameter.choices <- rbind(
+                                    parameter.choices,
+                                    data.frame(parameter = "Submission period:", choice = paste(date.period[2], " or earlier", sep = ""))
+                                )
+                            }
+                        }
+                    } else {
+                        parameter.choices <- rbind(
+                            parameter.choices,
+                            data.frame(parameter = "Submission period:", choice = "Full GTA monitoring period")
+                        )
+                    }
+                }
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="CPC sectors included:", choice="All"))
-
-      } else {
-
-        if(is.null(keep.cpc) | !is.logical(keep.cpc)){
-          stop.print <- "Please specify whether you want to focus on the specified CPC sectors or exclude them (keep.cpc=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          # CPC code check
-          cpc.sectors <- gta_cpc_code_check(codes = cpc.sectors)
-
-
-          # Create new specific id and master.temp
-          master$new.id <- seq(1,nrow(master))
-          master.temp <- unique(master[,c("new.id", "affected.sector")])
-          master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.sector"), direction="long", sep=",")
-
-          # Filter sectors
-          if(keep.cpc==T){
-            master.temp=subset(master.temp, as.numeric(affected.sector) %in% cpc.sectors)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="CPC sectors included:", choice=paste(cpc.sectors, collapse = ", ")))
-
-          } else if (keep.cpc==F){
-            master.temp=subset(master.temp, ! as.numeric(affected.sector) %in% cpc.sectors)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="CPC sectors included:", choice=paste("All except ", paste(cpc.sectors, collapse = ", "), sep="")))
-
-          }
-
-          # clear affected.sector column
-          master$affected.sector <- NULL
-
-          # Check # of rows
-          if(nrow(master.temp)==0) {
-            stop.print <- "Unfortunately no rows remaining while filtering for cpc.sectors"
-            error.message <<- c(T, stop.print)
-            stop(stop.print)
-          }
-
-          # Collapse cpc codes by id
-          master.temp <- aggregate( .~ new.id, master.temp, function(x) toString(x))
-
-          # Merge and remove new.id
-          master <- merge(master, master.temp, by="new.id")
-          master$new.id <- NULL
-
-          ## Correcting the affected product column to only include HS codes belong to the cpc.sectors, if any.
-          if(min(cpc.sectors)<500){
-
-            if(keep.cpc==T){
-              products=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
-            } else{
-              not.mentioned.cpc=unique(gtalibrary::cpc.to.hs$cpc)[! unique(gtalibrary::cpc.to.hs$cpc) %in% cpc.sectors]
-              products=gta_cpc_to_hs(not.mentioned.cpc)
+                remove(date.period)
             }
 
-            # Create new specific id and master.temp
-            master$new.id <- seq(1,nrow(master))
-            master.temp <- unique(master[,c("new.id", "affected.product")])
-            master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.product"), direction="long", sep=",")
-
-            master.temp=subset(master.temp, affected.product %in% products)
-
-
-            # clear affected.product/affected.sector column
-            master$affected.product <- NULL
-
-            # Check # of rows
-            if(nrow(master.temp)==0) {
-              stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
-              error.message <<- c(T, stop.print)
-              stop(stop.print)
-            }
-            # Collapse hs codes by id
-            master.hs <- aggregate( .~ new.id, master.temp, function(x) toString(x))
-
-
-            # Merge and remove new.id
-            master <- merge(master, master.hs, by="new.id", all.x=T) # all.x=T is vital here since there may also be service sectors in cpc.sectors
-            master$new.id <- NULL
-
-
-
-
-
-          } else {
-            ## If the stated sectors only include services, then remove all HS codes that may also have been affected by the same intervention
-            master$affected.product=NA
-          }
-
-        }
-
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for cpc.sectors"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-
-      # hs.codes
-      # keep.hs
-      if(is.null(hs.codes)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="HS codes included:", choice="All"))
-
-      } else {
-
-        if(is.null(keep.hs) | !is.logical(keep.hs)){
-          stop.print <- "Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          # HS code check
-          hs.codes <- gta_hs_code_check(codes = hs.codes)
-
-          # Create new specific id and master.temp
-          master$new.id <- seq(1,nrow(master))
-          master.temp <- unique(master[,c("new.id", "affected.product")])
-          master.temp <- cSplit(master.temp, which(colnames(master.temp)=="affected.product"), direction="long", sep=",")
-
-          # Filter products
-          if(keep.hs==T){
-            master.temp=subset(master.temp, affected.product %in% hs.codes)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="HS codes included:", choice=paste(hs.codes, collapse = ", ")))
-
-          } else if(keep.hs==F){
-            master.temp=subset(master.temp, ! affected.product %in% hs.codes)
-
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="HS codes included:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
-
-          }
-
-          # clear affected.product/affected.sector column
-          master$affected.product <- NULL
-          master$affected.sector <- NULL
-
-          # Check # of rows
-          if(nrow(master.temp)==0) {
-            stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
-            error.message <<- c(T, stop.print)
-            stop(stop.print)
-          }
-          # Collapse hs codes by id
-          master.hs <- aggregate( .~ new.id, master.temp, function(x) toString(x))
-
-          # Add and collapse corresponding CPC codes
-          cpc=gtalibrary::cpc.to.hs
-          cpc$affected.product <- cpc$hs
-          cpc$affected.sector <- cpc$cpc
-          master.temp=merge(master.temp, cpc, by="affected.product", all.x=T)
-
-          # Check # of rows
-          if(nrow(master.temp)==0) {
-            stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
-            error.message <<- c(T, stop.print)
-            stop(stop.print)
-          }
-          master.cpc <- aggregate(affected.sector ~ new.id, master.temp, function(x) toString(unique(x)))
-          cpc$affected.product <- NULL
-          cpc$affected.sector <- NULL
-
-          # Merge and remove new.id
-          master <- merge(master, master.hs, by="new.id")
-          master <- merge(master, master.cpc, by="new.id")
-          master$new.id <- NULL
-
-        }
-
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        error.message <<- c(T, "Unfortunately no rows remaining after filtering for hs.codes")
-        stop("Unfortunately no rows remaining after filtering for hs.codes")
-      }
-
-
-      # reporting lag adjustment
-      if(is.null(lag.adjustment)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Lag adjustment:", choice="Unadjusted"))
-
-      } else {
-
-        if (is.na(as.Date(lag.adjustment, "%m-%d"))==T) {
-          stop.print <- "Please specifiy a valid lag date ('mm-dd')."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else {
-
-          # Remove interventions without implementation date
-          master<-subset(master, is.na(date.implemented)==F)
-
-          # set lag date
-          master$date.lag=as.Date(paste(data.table::year(master$date.implemented),lag.adjustment, sep="-"),"%Y-%m-%d")
-          master=subset(master, date.published<=date.lag)
-          master$date.lag=NULL
-
-          parameter.choices=rbind(parameter.choices,
-                                  data.frame(parameter="Lag-adjustment date:", choice=paste(lag.adjustment)))
-
-        }
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for lag.adjustment"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-
-      # reporting period
-      if(is.null(reporting.period)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Reporting period:", choice="Complete GTA monitoring period"))
-
-      } else {
-
-        report.start=as.Date(reporting.period[1], "%Y-%m-%d")
-        report.end=as.Date(reporting.period[2], "%Y-%m-%d")
-
-        if(is.na(report.start)|is.na(report.end)){
-          stop.print <- "Reporting period does not correspond to format YYY-MM-DD"
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        }
-
-        master=subset(master, date.published>=report.start & date.published<=report.end)
-
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Reporting period:", choice="Complete GTA monitoring period"))
-
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for reporting.period"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-
-      }
-
-
-      ######## This needs to be the last check (else we won't know whether other parameters accidently removed the sought IDs.)
-      # intervention.id
-      # keep.intervention
-      if(is.null(intervention.ids)){
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Intervention IDs included:", choice="All"))
-
-      } else {
-
-        if(is.null(keep.interventions) | !is.logical(keep.interventions)){
-          stop.print <- "Please specify whether you want to focus on the specified intervetion IDs or exclude them (keep.interventions=T/F)."
-          error.message <<- c(T, stop.print)
-          stop(stop.print)
-
-        } else{
-
-          gta.interventions = unique(master$intervention.id)
-
-          if(keep.interventions==T){
-
-            check=gta_parameter_check(intervention.ids, gta.interventions)
-
-            if(check!="OK"){
-              stop.print <- paste("Unknown intervention IDs: ", check, ". You may have removed them with another parameter choice.", sep="")
-              error.message <<- c(T, stop.print)
-              stop(stop.print)
-
+            # in.force.on.date
+            if (is.null(in.force.on.date) & keep.in.force.on.date == "any") {
+                in.force.on.date <- Sys.Date()
+                parameter.choices <- rbind(
+                    parameter.choices,
+                    data.frame(parameter = paste0("In force on ", in.force.on.date, ":"), choice = "Regardless")
+                )
+            } else {
+                # determine interpretability of in.force.on.date
+                tryCatch(
+                    {
+                        date <- format(as.Date(x = in.force.on.date), "%Y-%m-%d")
+                    },
+                    error = function(e) {
+                        stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
+                        error.message <<- c(T, stop.print)
+                        stop(stop.print)
+                    },
+                    finally = {
+                        if (is.na(date) | !substr(as.character(date), 1, 4) %in% as.character(2000:2024) | length(date) != 1) {
+                            stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
+                            error.message <<- c(T, stop.print)
+                            stop(stop.print)
+                        }
+                    }
+                )
+                in.force.on.date <- as.Date(x = in.force.on.date)
+
+                if (tolower(keep.in.force.on.date) %in% c("yes", "no", "any")) {
+                    if (tolower(keep.in.force.on.date) == "any") {
+                        parameter.choices <- rbind(
+                            parameter.choices,
+                            data.frame(parameter = paste0("In force on ", in.force.on.date, ":"), choice = "Regardless")
+                        )
+                    }
+
+                    if (tolower(keep.in.force.on.date) == "yes") {
+                        master <- subset(master, date.implemented <= in.force.on.date & (is.na(date.removed) == T | date.removed >= in.force.on.date))
+
+                        parameter.choices <- rbind(
+                            parameter.choices,
+                            data.frame(parameter = paste0("In force on ", in.force.on.date, ":"), choice = "Yes")
+                        )
+                    }
+
+                    if (tolower(keep.in.force.on.date) == "no") {
+                        master <- subset(master, (date.implemented < in.force.on.date & is.na(date.removed) == F & date.removed < in.force.on.date) | is.na(date.implemented))
+
+                        parameter.choices <- rbind(
+                            parameter.choices,
+                            data.frame(parameter = paste0("In force on ", in.force.on.date, ":"), choice = "No")
+                        )
+                    }
+                } else {
+                    stop.print <- "Please specify keep.in.force.on.date as either 'yes', 'no' or 'any'."
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                }
             }
 
-            master=subset(master, intervention.id %in% intervention.ids)
+## Correcting the affected product column to only include HS codes belong to the cpc.sectors, if any.
+                    if (min(cpc.sectors) < 500) {
+                        if (keep.cpc == T) {
+                            products <- gta_cpc_to_hs(cpc.sectors[cpc.sectors < 500])
+                        } else {
+                            not.mentioned.cpc <- unique(gtalibrary::cpc.to.hs$cpc)[!unique(gtalibrary::cpc.to.hs$cpc) %in% cpc.sectors]
+                            products <- gta_cpc_to_hs(not.mentioned.cpc)
+                        }
 
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Intervention IDs included:", choice=paste(intervention.ids, collapse = ", ")))
+                        # Create new specific id and master.temp
+                        master$new.id <- seq(1, nrow(master))
+                        master.temp <- unique(master[, c("new.id", "affected.product")])
+                        master.temp <- cSplit(master.temp, which(colnames(master.temp) == "affected.product"), direction = "long", sep = ",")
 
-          } else if(keep.interventions==F){
-            master=subset(master, ! intervention.id %in% intervention.ids)
+                        master.temp <- subset(master.temp, affected.product %in% products)
 
-            parameter.choices=rbind(parameter.choices,
-                                    data.frame(parameter="Intervention IDs included:", choice=paste("All except ", paste(intervention.ids, collapse = ", "), sep="")))
-
-          }
-
-
-
-
-
-        }
-      }
-
-      # Check # of rows
-      if(nrow(master)==0) {
-        stop.print <- "Unfortunately no rows remaining after filtering for intervention.ids"
-        error.message <<- c(T, stop.print)
-        stop(stop.print)
-      }
-
-      ## writing to disk
-      if (xlsx==T) {
-        print("Saving XLSX ...")
-        if(is.null(output.path)){
-          write.xlsx(master, file=paste("GTA data slicer output ", Sys.Date(),".xlsx", sep=""), sheetName = "Interventions", row.names = F)
-          write.xlsx(parameter.choices, file=paste("GTA data slicer output ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", row.names = F, append=T)
-          print("Saving XLSX ... completed in working directory")
-        } else {
-          write.xlsx(trade.coverage.estimates, file=output.path, sheetName = "Estimates", row.names = F)
-          write.xlsx(parameter.choices, file=output.path, sheetName = "Parameter choices", row.names = F, append=T)
-          print("Saving XLSX ... completed in output path")
-        }
-      }
+                        # clear affected.product/affected.sector column
+                        master$affected.product <- NULL
 
 
-      ## Returning the result
-      error.message <<- FALSE
-      eval(parse(text=paste(df.name, "<<-master", sep="")))
-      eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
+                        # Collapse hs codes by id
+                        master.hs <- aggregate(. ~ new.id, master.temp, function(x) toString(x))
 
-  },
-  error = function(error.msg) {
-    if(exists("stop.print")){
-      error.message <<- c(T, stop.print)
-      print(paste("[ERROR DATA SLICER]: ",stop.print, sep=""))
-    } else {
-      error.message <<- c(T,error.msg$message)
-      print(paste("[ERROR DATA SLICER]: ",error.msg$message, sep=""))
-      }
-    master.sliced<<- master[0,]
-  })
-}
+                        # Merge and remove new.id
+                        master <- merge(master, master.hs, by = "new.id", all.x = T) # all.x=T is vital here since there may also be service sectors in cpc.sectors
+                        master$new.id <- NULL
+                    } else {
+                        ## If the stated sectors only include services, then remove all HS codes that may also have been affected by the same intervention
+                        master$affected.product <- NA
+                    }
+                }
+            }
+
+            # hs.codes
+            # keep.hs
+                    # HS code check
+                    hs.codes <- gta_hs_code_check(codes = hs.codes)
+
+                    # Create new specific id and master.temp
+                    master$new.id <- seq(1, nrow(master))
+                    master.temp <- unique(master[, c("new.id", "affected.product")])
+                    master.temp <- cSplit(master.temp, which(colnames(master.temp) == "affected.product"), direction = "long", sep = ",")
+
+                    # Filter products
+                    if (keep.hs == T) {
+                        master.temp <- subset(master.temp, affected.product %in% hs.codes)
+
+                        parameter.choices <- rbind(
+                            parameter.choices,
+                            data.frame(parameter = "HS codes included:", choice = paste(hs.codes, collapse = ", "))
+                        )
+                    } else if (keep.hs == F) {
+                        master.temp <- subset(master.temp, !affected.product %in% hs.codes)
+
+                    }
+
+                    # clear affected.product/affected.sector column
+                    master$affected.product <- NULL
+                    master$affected.sector <- NULL
+
+                    # Collapse hs codes by id
+                    master.hs <- aggregate(. ~ new.id, master.temp, function(x) toString(x))
+
+                    # Add and collapse corresponding CPC codes
+                    cpc <- gtalibrary::cpc.to.hs
+                    cpc$affected.product <- cpc$hs
+                    cpc$affected.sector <- cpc$cpc
+                    master.temp <- merge(master.temp, cpc, by = "affected.product", all.x = T)
+
+                    # Check # of rows
+                    if (nrow(master.temp) == 0) {
+                        stop.print <- "Unfortunately no rows remaining while filtering for hs.codes"
+                        error.message <<- c(T, stop.print)
+                        stop(stop.print)
+                    }
+                    master.cpc <- aggregate(affected.sector ~ new.id, master.temp, function(x) toString(unique(x)))
+                    cpc$affected.product <- NULL
+                    cpc$affected.sector <- NULL
+
+                    # Merge and remove new.id
+                    master <- merge(master, master.hs, by = "new.id")
+                    master <- merge(master, master.cpc, by = "new.id")
+                    master$new.id <- NULL
+                }
+            }
+
+            # reporting lag adjustment
+            if (is.null(lag.adjustment)) {
+                parameter.choices <- rbind(
+                    parameter.choices,
+                    data.frame(parameter = "Lag adjustment:", choice = "Unadjusted")
+                )
+            } else {
+                if (is.na(as.Date(lag.adjustment, "%m-%d")) == T) {
+                    stop.print <- "Please specifiy a valid lag date ('mm-dd')."
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                } else {
+                    # Remove interventions without implementation date
+                    master <- subset(master, is.na(date.implemented) == F)
+
+                    # set lag date
+                    master$date.lag <- as.Date(paste(data.table::year(master$date.implemented), lag.adjustment, sep = "-"), "%Y-%m-%d")
+                    master <- subset(master, date.published <= date.lag)
+                    master$date.lag <- NULL
+
+
+            # reporting period
+            if (is.null(reporting.period)) {
+                parameter.choices <- rbind(
+                    parameter.choices,
+                    data.frame(parameter = "Reporting period:", choice = "Complete GTA monitoring period")
+                )
+            } else {
+                report.start <- as.Date(reporting.period[1], "%Y-%m-%d")
+                report.end <- as.Date(reporting.period[2], "%Y-%m-%d")
+
+                if (is.na(report.start) | is.na(report.end)) {
+                    stop.print <- "Reporting period does not correspond to format YYY-MM-DD"
+                    error.message <<- c(T, stop.print)
+                    stop(stop.print)
+                }
+
+                master <- subset(master, date.published >= report.start & date.published <= report.end)
+
+
+                parameter.choices <- rbind(
+                    parameter.choices,
+                    data.frame(parameter = "Reporting period:", choice = "Complete GTA monitoring period")
+                )
+            }
+
+            ## writing to disk
+            if (xlsx == T) {
+                print("Saving XLSX ...")
+                if (is.null(output.path)) {
+                    write.xlsx(master, file = paste("GTA data slicer output ", Sys.Date(), ".xlsx", sep = ""), sheetName = "Interventions", row.names = F)
+                    write.xlsx(parameter.choices, file = paste("GTA data slicer output ", Sys.Date(), ".xlsx", sep = ""), sheetName = "Parameter choices", row.names = F, append = T)
+                    print("Saving XLSX ... completed in working directory")
+                } else {
+                    write.xlsx(trade.coverage.estimates, file = output.path, sheetName = "Estimates", row.names = F)
+                    write.xlsx(parameter.choices, file = output.path, sheetName = "Parameter choices", row.names = F, append = T)
+                    print("Saving XLSX ... completed in output path")
+                }
+            }
+

@@ -38,5 +38,3 @@ gta_un_code_vector <- function(countries = NULL) {
 
   return(un.codes)
 }
-
-gta_un_code_vector()

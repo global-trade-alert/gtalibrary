@@ -13,10 +13,20 @@ gta_ics_to_hs <- function(codes, as_list = FALSE, message = TRUE) {
     # Load conversion table
     ics.to.hs <- gtalibrary::ics.to.hs
 
+    hs_ics <- readxl::read_xlsx("C:/Users/sveng/Downloads/ICS_HS_mapping_table.xlsx")
+
+    save(file = "ics.to.hs.rda", hs_ics)
+
+    load("")
+    hs_ics <- hs_ics
+    ics.to.hs <- hs_ics
     # remove potential peridods in the supplied codes and in the conversion table
     codes <- gsub(pattern = "\\.", replacement = "", codes)
     ics.to.hs$ics <- sapply(ics.to.hs[["ics"]], \(x) gsub(pattern = "\\.", replacement = "", x))
 
+    ics.to.hs |>
+        filter(ics == "67120") |>
+        view()
     # return error if codes cannot be converted to numeric without NA coercion (NAs are allowed)
     tryCatch(
         codes <- as.character(as.numeric(codes)),
