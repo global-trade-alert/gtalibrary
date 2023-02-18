@@ -8,6 +8,7 @@
 #' All values must be convertible to numeric
 #' @param message prints conversion results if TRUE
 #' @import cli
+#' @import stringr
 #' @param as_list Returns a list with the same length as the codes vector with each list entry containing the converted codes for one supplied code
 #' FALSE per default. This returns a vector of unique converted codes
 #' @examples
@@ -24,7 +25,7 @@ gta_hs_code_check <- function(codes, as_list = FALSE, message = TRUE) {
 
     # transform all hs codes to 6 digit strings
     hs.codes <- unique(hs.names$HS12code)
-    hs.codes[nchar(hs.codes) %% 2 != 0] <- paste0("0", hs.codes[nchar(hs.codes) %% 2 != 0])
+    hs.codes <- stringr::str_pad(hs.codes, 6, "left", pad = "0")
 
     # return error if codes cannot be converted to numeric without NA coercion (NAs are allowed)
     tryCatch(

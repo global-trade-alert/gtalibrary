@@ -40,9 +40,7 @@ gta_hs_vintage_converter <-
     )
 
     # make sure that supplied years are valid
-    if (!all(years %in% c(2002, 2007, 2012, 2017, 2022))) {
-        cli::cli_abort(cli::style_bold("Invalid year provided. Make sure that year is in (2002, 2007, 2012, 2017, 2022)"))
-    }
+    gtalibrary::gta_parameter_check(years, c(2002, 2007, 2012, 2017, 2022))
 
     # pad codes that do not have an even character length
     codes[!is.na(codes) & nchar(codes) %% 2 != 0] <- paste0("0", codes[!is.na(codes) & nchar(codes) %% 2 != 0])

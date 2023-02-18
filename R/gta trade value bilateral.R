@@ -16,210 +16,104 @@
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata').
 #' @param df.name Set the name of the generated result data frame. Default is trade.base.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.trade.base.
-#'
+#' @import data.table
+#' @import dplyr
+#' @import dtplyr
 #' @return Output is two data frames. First data frame includes the trade values for the given importer-exporter-product combinations. Second data frame states parameter choices.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
 # Function infos and parameters  --------------------------------------------
 #' @export
 gta_trade_value_bilateral <- function(
-  importing.country = NULL,
-  keep.importer = NULL,
-  exporting.country = NULL,
-  keep.exporter = NULL,
-  cpc.sectors=NULL,
-  keep.cpc=TRUE,
-  hs.codes = NULL,
-  keep.hs = TRUE,
-  trade.data="base",
-  trade.data.path="data/support tables/Goods support table for gtalibrary.Rdata",
-  df.name="trade.base.bilateral",
-  pc.name="parameter.choice.trade.base"
+    importing.country = NULL, keep.importer = NULL,
+    exporting.country = NULL, keep.exporter = NULL,
+    cpc.sectors=NULL, keep.cpc=TRUE, hs.codes = NULL,
+    keep.hs = TRUE, trade.data="base",
+    trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
+    trade.data.file = NULL # ensure that this data.frame can also be fed from memory for better performance in loops!
 ) {
 
-  ## initialising
-  library(data.table)
-  parameter.choices=data.frame(parameter=character(), choice=character())
+    gtalibrary::gta_parameter_check(trade.data, c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020)))
+    filter_statement <- vector("character")
 
-  if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2020))){
-    stop("Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2020, 'prior year' or 'current year'.")
-  }
+    if (trade.data == "base") {
+        trade.base <- gtalibrary::trade.base |>
+            dplyr::mutate(trade.value = trade.value / 3)
 
-  if(trade.data=="base"){
-    trade.base=gtalibrary::trade.base
-    trade.base$trade.value=trade.base$trade.value/3
-  } else{
-    load(trade.data.path)
+    } else if (is.null(trade.data.file)) {
+        trade.base <- as.data.table(readRDS(trade.data.path))
+    } ## convert to data.table (analogous to gta.data.slicer())
 
-    if(trade.data %in% paste(2005:2020)){
-      yr=as.numeric(trade.data)
-      trade.base=subset(trade.annual, year==yr)
-      trade.base$year=NULL
-      rm(trade.annual)
-    } else {
-      trade.base=trade.annual
-      rm(trade.annual)
-
-      if(grepl("prior", trade.data, ignore.case = T)){
-        trade.base$year=trade.base$year+1
-      }
+    if(trade.data %in% as.character(2005:2020)) {
+      base_year <- as.numeric(trade.data)
+      trade.base <- trade.base |>
+          dplyr::filter(year == base_year)
 
     }
-  }
 
-
-  ## importer
-  if(is.null(importing.country)){
-
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Importing countries included in trade data:", choice="All"))
-
-  } else {
-
-    if(is.null(keep.importer)){
-      stop("Please specify whether you want to focus on the specified importing countries or exclude them (keep.importer=T/F).")
-    } else{
-
-      importers=gta_un_code_vector(importing.country, role="importing")
-
-      if(keep.importer==T){
-        trade.base=subset(trade.base, i.un %in% importers)
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Importing countries included in trade data:", choice=paste(importing.country, collapse = ", ")))
-
-      } else {
-        trade.base=subset(trade.base, ! i.un %in% importers)
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Importing countries included in trade data:", choice=paste("All except ", paste(importing.country, collapse = ", "), sep="")))
-
+    if(tolower(trade.data) == "prior year") {
+        trade.base <- trade.base |>
+            dplyr::mutate(year = year + 1)
       }
 
+     ## importer
+    if(!is.null(importing.country)){
 
+        gtalibrary::gta_logical_check(keep.importer, is.logical)
+        importers_filter <- gtalibrary::gta_un_code_vector(importing.country)
+
+        if(keep.importer){
+            filter_statement <- append(filter_statement, "i.un %in% importers_filter")
+        } else {
+            filter_statement <- append(filter_statement, "!i.un %in% importers_filter")
+        }
     }
-  }
 
-  ## exporter
-  if(is.null(exporting.country)){
+    ## exporter
+    if(!is.null(exporting.country)){
 
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="Exporting countries included in trade data:", choice="All"))
-
-  } else {
-
-    if(is.null(keep.exporter)){
-      stop("Please specify whether you want to focus on the specified exporting countries or exclude them (keep.exporter=T/F).")
-    } else{
-
-      exporters=gta_un_code_vector(exporting.country, role="exporting")
-
-      if(keep.exporter==T){
-        trade.base=subset(trade.base, a.un %in% exporters)
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Exporting countries included in trade data:", choice=paste(exporting.country, collapse = ", ")))
-
-      } else {
-        trade.base=subset(trade.base, ! a.un %in% exporters)
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Exporting countries included in trade data:", choice=paste("All except ", paste(exporting.country, collapse = ", "), sep="")))
-
-      }
-
-
-    }
-  }
-
+        gtalibrary::gta_logical_check(keep.exporter, is.logical)
+        exporters_filter <- gtalibrary::gta_un_code_vector(exporting.country)
+        if(keep.exporter) {
+            filter_statement <- append(filter_statement, "a.un %in% exporters_filter")
+        } else {
+            filter_statement <- append(filter_statement, "a.un %in% exporters_filter")
+        }
 
   ## hs codes
-  if(is.null(hs.codes)){
+    if(!is.null(hs.codes)){
 
-    parameter.choices=rbind(parameter.choices,
-                            data.frame(parameter="HS codes included in trade data:", choice="All"))
+        gtalibrary::gta_logical_check(keep.hs, is.logical)
+        hs_codes_filter <- gtalibrary::gta_hs_code_check(codes = hs.codes, message = FALSE)
 
-  } else {
-
-    if(is.null(keep.hs)){
-      stop("Please specify whether you want to focus on the specified HS codes or exclude them (keep.hs=T/F).")
-    } else{
-
-      # HS code check
-      hs.codes <- gta_hs_code_check(codes = hs.codes)
-
-      # Filter products
-      if(keep.hs==T){
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="HS codes included in trade data:", choice=paste(hs.codes, collapse = ", ")))
-
-      } else {
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="HS codes included in trade data:", choice=paste("All except ", paste(hs.codes, collapse = ", "), sep="")))
-
-      }
-
-
-    }
-
+        if (keep.hs){
+            filter_statement <- append(filter_statement, "hs6 %in% hs_codes_filter") ## check if we need to pad the codes or make them numeric!!!
+        } else {
+            filter_statement <- append(filter_statement, "!hs6 %in% hs_codes_filter") 
+        }
   }
 
-  ## cpc codes
-  if(is.null(cpc.sectors)){
+    ## cpc codes
+    if (!is.null(cpc.sectors)) {
+        gtalibrary::gta_logical_check(keep.cpc, is.loical)
+        cpc_codes_filter <- gtalibrary::gta_cpc_to_hs(cpc.sectors)
 
-    if(is.null(hs.codes)){
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="CPC sectors included in trade data:", choice="All"))
-    } else {
-
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="CPC sectors included in trade data:", choice="Those implied by HS code choice."))
+        if (is.null(heep.cpc)) {
+            filter_statement <- append(filter_statement, "hs6 %in% cpc_codes_filter")
+        } else {
+            filter_statement <- append(filter_statement, "!hs6 %in% cpc_codes_filter")
+        }
     }
 
-  }else{
-
-    if(is.null(hs.codes)){
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="CPC sectors included in trade data:", choice=paste(sprintf("%03i",cpc.sectors), collapse = ", ")))
-
-      hs.codes=gta_cpc_to_hs(cpc.sectors[cpc.sectors<500])
-      keep.hs=keep.cpc
-
-    } else {
-
-      parameter.choices=rbind(parameter.choices,
-                              data.frame(parameter="CPC sectors included in trade data:", choice=paste("Those implied by HS code choice and CPC ",paste(sprintf("%03i",cpc.sectors), collapse = ", "),".",sep="")))
-
-
-      if(keep.cpc==T){
-        strs=gtalibrary::cpc.to.hs
-        hs.codes=unique(c(hs.codes, strs$hs[strs$cpc %in% cpc.sectors]))
-        rm(strs)
-
-      }else {
-        strs=gtalibrary::cpc.to.hs
-        hs.codes=unique(c(hs.codes, strs$hs[! strs$cpc %in% cpc.sectors]))
-        rm(strs)
-      }
-
-    }
-
-
+    # filter dataset
+    trade.base |>
+        dplyr::filter(eval(parse(text = filter_statement))) |>
+        data.table::as.data.table()
   }
-
-  # adjusting trade to hs/cpc codes
-
-  if(is.null(hs.codes)==F){
-    if(keep.hs==T){
-      trade.base=subset(trade.base, hs6 %in% hs.codes)
-    } else{
-      trade.base=subset(trade.base, ! hs6 %in% hs.codes)
-    }
-  }
-
-
-  eval(parse(text=paste(df.name, "<<-trade.base", sep="")))
-  eval(parse(text=paste(pc.name, "<<-parameter.choices", sep="")))
 }
+gtalibrary::gta_trade_value_bilateral(
+    importing.country = c("Switzerland", "Japan"), keep.importer = TRUE
+)
+
+## could specify the year value here --> WOuld make it easier int he trade coverage function!
