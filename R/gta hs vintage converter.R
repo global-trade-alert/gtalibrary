@@ -131,4 +131,3 @@ gta_hs_vintage_converter <-
         return(unique(as.numeric(unlist(codes.converted))))
     }
 }
-

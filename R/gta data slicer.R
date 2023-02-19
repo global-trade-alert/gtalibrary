@@ -45,7 +45,8 @@
 #' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 #' @import data.table
 #' @import dtplyr
-#' @import tidyfast
+#' @import tidyr
+#' @import tibble
 #' @import dplyr
 #' @import lubridate
 #' @import tibble
@@ -55,20 +56,18 @@
 #' @author Global Trade Alert
 #' @export
 
-gta_data_slicer <- function(
-    data = NULL, data.path = "data/master.Rds",
-    gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
-    keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
-    incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
-    nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
-    keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
-    submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
-    intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
-    implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
-    cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-    intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
-    add.unpublished = FALSE
-) {
+gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
+                            gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
+                            keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
+                            incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
+                            nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
+                            keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
+                            submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
+                            intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
+                            implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
+                            cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
+                            intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
+                            add.unpublished = FALSE) {
     # if master dataset is not provided, load it as data table
     # if it is already provided, ensure that it is formatted as a data.table
     if (is.null(data)) data <- data.table::as.data.table(readRDS(data.path))
@@ -77,9 +76,7 @@ gta_data_slicer <- function(
         data <- data.table::as.data.table(data)
     }
 
-    # vector which stores all the filter arguments to the master data frame whcih are evaluated
-    filter_statement <- vector(mode = "character")
-
+    filter_statement <- vector("character")
     # Suppress summarize info
     options(dplyr.summarise.inform = FALSE)
     ##################################################################
@@ -87,14 +84,14 @@ gta_data_slicer <- function(
     ##################################################################
 
     # check vaildity of required / and or prepopulated function arguments
-    gtalibrary::gta_logical_check(keep.implementer, is.logical, "Keep.implementer must be a boolean")
-    gtalibrary::gta_logical_check(keep.revocation.na, is.logical, "Keep.revocation.na must be a boolean")
-    gtalibrary::gta_logical_check(keep.others, is.logical, "Keep.others must be a boolean")
-    gtalibrary::gta_logical_check(add.unpublished, is.logical, "add.unpublished must be a boolean")
+    gtalibrary::gta_logical_check(keep.implementer, is.logical, "Keep.implementer must be TRUE/FALSE")
+    gtalibrary::gta_logical_check(keep.revocation.na, is.logical, "Keep.revocation.na must be a TRUE/FALSE")
+    gtalibrary::gta_logical_check(keep.others, is.logical, "Keep.others must be a TRUE/FALSE")
+    gtalibrary::gta_logical_check(add.unpublished, is.logical, "add.unpublished must be a TRUE/FALSE")
     gtalibrary::gta_parameter_check(tolower(nr.affected.incl), c("all", "selected", "unselected"))
-    gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "Please make sure that in.force.on.date is a Date")
+    gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "in.force.on.date must be a date")
     gtalibrary::gta_parameter_check(tolower(keep.in.force.on.date), c("any", "yes", "no"))
-    gtalibrary::gta_logical_check(nr.affected, \(x) all(is.numeric(x) & x > 0 & trunc(x) == x), error_msg = "Please make sure that nr.affected is a valid integer larger than 0")
+    gtalibrary::gta_logical_check(nr.affected, \(x) (length(x) == 2 & x >= 0 & trunc(x) == x), error_msg = "nr.affected must be a vector of two valid integers >= 0")
 
     # gta.evaluation
     if (!is.null(gta.evaluation)) {
@@ -112,7 +109,7 @@ gta_data_slicer <- function(
 
     # check implementing country
     if (!is.null(implementing.country)) {
-        gtalibrary::gta_logical_check(keep.implementer, is.logical)
+        gtalibrary::gta_logical_check(keep.implementer, is.logical, "keep.implementer must be TRUE/FALSE")
         implementing_country_filter <- gtalibrary::gta_un_code_vector(countries = implementing.country)
         if (!keep.implementer) {
             filter_statement <- append(filter_statement, "!i.un %in% implementing_country_filter")
@@ -121,21 +118,82 @@ gta_data_slicer <- function(
         }
     }
 
-    # check affected.country
+    # must be done in the end after total filtering!
+    # check affected.country 
     if (!is.null(affected.country)) {
-        gtalibrary::gta_logical_check(keep.affected, is.logical)
+        gtalibrary::gta_logical_check(keep.affected, is.logical, "keep.affected must be TRUE/FALSE")
+        gtalibrary::gta_logical_check(keep.others, is.logical, "keep.others must be TRUE/FALSE")
         affected_country_filter <- gtalibrary::gta_un_code_vector(countries = affected.country)
 
-        if (!keep.affected) {
-            filter_statement <- append(filter_statement, "!a.un %in% affected_country_filter")
-        } else {
-            filter_statement <- append(filter_statement, "a.un %in% affected_country_filter")
+        # get intervention ids of affected countries
+        affected_interventions <- dtplyr::lazy_dt(data) |>
+            dplyr::filter(a.un %in% affected_country_filter) |>
+            dplyr::pull(intervention.id) |>
+            unique()
+        
+        # if any of the arguments deviate from the baseline, calculate information and adjust filtering of intervention.ids
+        if (nr.affected != c(0, 999) | nr.affected.incl != all | incl.affected.strictness != "ONEPLUS"){
+
+            # generates tibble that contains
+            # - number of affected countries per intervention.id where at least one member in the argument "affected.country" is included
+            # - number of values "affected.country" which are affected per intervention.id
+            affected_countries_info <- dtplyr::lazy_dt(data) |>
+                dplyr::filter(intervention.id %in% affected_interventions) |>
+                dplyr::select(a.un, intervention.id) |>
+                unique() |>
+                dplyr::mutate(affected_country = ifelse(a.un %in% affected_country_filter, TRUE, FALSE)) |>
+                dplyr::group_by(intervention.id) |>
+                dplyr::summarize(
+                    n_affected_total = length(a.un), # number of different affected countries per intervention.id
+                    n_affected_selected = length(a.un[affected_country]),  # number of diff. affected countries per intervention.id which are in "affected.country"
+                    n_affected_unselected = length(a.un[!affected_country])
+                )
+            
+            # test which statement was modified and select the interventions accordingly 
+            if (incl.affected.strictness != "ONEPLUS"){
+
+                # determine value which n_affected_selected must fulfill 
+                incl.affected.strictness <- switch(incl.affected.strictness,
+                    "ALL" = length(affected_country_filter),
+                    "ONE" = 1
+                )
+
+                affected_countries_info <- affected_countries_info |>
+                    dplyr::filter(n_affected_selected == incl.affected.strictness)
+            }
+
+            if (nr.affected != c(0, 999)){
+
+                # specifies the number of the column of the affected_countries_info df that is evaluated 
+                nr.affected.incl <- switch(nr.affected.incl,
+                    "ALL" = 2,
+                     "SELECTED" = 3,
+                    "UNSELECTED" = 4
+                )
+                
+                # filter for the range of affected countries in the respective column
+                affected_countries_info <- affected_countries_info |>
+                    dplyr::select(dplyr::all_of(nr.affected.incl)) |> 
+                    dplyr::filter(dplyr::between(nr.affected[1], nr.affected[2]))
+            }
+            
+            # retrieve all the intervention.ids that fulfill the given criteria
+            affected_interventions <- affected_countries_info |>
+                dplyr::pull(intervention.id) |>
+                unique()
+            
+            # if keep.affected = TRUE, intervention.ids can be taken over, if false, additionally filter for a.un %in% affected.country
+            if (keep.affected){
+                filter_statement <- append(filter_statement, "intervention.id %in% affected_interventions")
+            } else {
+                filter_statement <- append(filter_statement, "intervention.id %In% affected_interventions & a.un %in% affected_country_filter")
+            }
         }
     }
 
     # intervention.types
     if (!is.null(intervention.types)) {
-        gtalibrary::gta_logical_check(keep.type, is.logical)
+        gtalibrary::gta_logical_check(keep.type, is.logical, "keep.type must be TRUE/FALSE")
         permissible_values <- tolower(gtalibrary::int.mast.types$intervention.type)
         gtalibrary::gta_parameter_check(intervention.types, permissible_values)
         intervention_types_filter <- intervention.types
@@ -149,7 +207,7 @@ gta_data_slicer <- function(
 
     # mast.chapters
     if (!is.null(mast.chapters)) {
-        gtalibrary::gta_logical_check(keep.mast, is.logical)
+        gtalibrary::gta_logical_check(keep.mast, is.logical, "keep.mast must be TRUE/FALSE")
         mast_chapters_filter <- toupper(stringr::str_remove_all(pattern = "[0-9]+", string = mast.chapters))
         permissible_values <- toupper(gtalibrary::int.mast.types$mast.chapter.id)
         gtalibrary::gta_parameter_check(mast_chapters_filter, permissible_values)
@@ -163,7 +221,7 @@ gta_data_slicer <- function(
 
     # eligible.firms
     if (!is.null(eligible.firms)) {
-        gtalibrary::gta_logical_check(keep.firms, is.logical)
+        gtalibrary::gta_logical_check(keep.firms, is.logical, "keep.firms must be TRUE/FALSE")
         permissible_values <- tolower(gtalibrary::elig.firms$eligible.firms)
         eligible_firms_filter <- tolower(eligible.firms)
         gtalibrary::gta_parameter_check(eligible_firms_filter, admissible.values, arg_name = "eligible.firms")
@@ -177,7 +235,7 @@ gta_data_slicer <- function(
 
     # implementation.level
     if (!is.null(implementation.level)) {
-        gtalibrary::gta_logical_check(keep.level, is.logical)
+        gtalibrary::gta_logical_check(keep.level, is.logical, "kep.level must be TRUE/FALSE")
         permissible_values <- tolower(gtalibrary::imp.levels$implementation.level)
         implementation_level_filter <- tolower(implementation.level)
         gtalibrary::gta_parameter_check(implementation_level_filter, admissible.values, arg_name = "implementation.level")
@@ -191,7 +249,7 @@ gta_data_slicer <- function(
 
     # intervention.ids
     if (!is.null(intervention.ids)) {
-        gtalibrary::gta_logical_check(keep.interventions, is.logical)
+        gtalibrary::gta_logical_check(keep.interventions, is.logical, "keep.interventions must be TRUE/FALSE")
         permissible_values <- unique(master$intervention.id)
         gtalibrary::gta_parameter_check(intervention.ids, permissible_values)
         intervention_ids_filter <- intervention.ids
@@ -205,7 +263,7 @@ gta_data_slicer <- function(
     # implementation.period
     if (!is.null(implementation.period)) {
         gtalibrary::gta_logical_check(implementation.period, \(x) length(x) == 2, error_msg = "Implementation.period must be a vector of 2 elements")
-        gtalibrary::gta_logical_check(keep.implementation.na, is.logical, error_msg = "keep.implementation.na must be logical")
+        gtalibrary::gta_logical_check(keep.implementation.na, is.logical, error_msg = "keep.implementation.na must be TRUE/FALSE")
         gtalibrary::gta_logical_check(implementation.period[1], lubridate::is.Date, error_msg = "implementation.period[1] must be a Date")
         gtalibrary::gta_logical_check(implementation.period[1], \(x) (lubridate::is.Date(x) | is.na(x)), error_msg = "implementation.period[2] must be either a Date or NA")
 
@@ -213,7 +271,7 @@ gta_data_slicer <- function(
         if (is.na(implementation.period[2])) implementation.period[2] <- as.Date("9999-12-31")
 
         if (!keep.implementation.na) {
-            filter_statement <- append(filter_statement, "!is.na(date.implemented) & dplyr::between(date.implemented, implementation.period[1], implementation.period[2])")
+            filter_statement <- append(filter_statement, "!dplyr::between(date.implemented, implementation.period[1], implementation.period[2])")
         } else {
             filter_statement <- append(filter_statement, "dplyr::between(date.implemented, implementation.period[1], implementation.period[2])")
         }
@@ -242,22 +300,20 @@ gta_data_slicer <- function(
 
     # revocation.period
     if (!is.null(revocation.period)) {
-        gtalibrary::gta_logical_check(keep.revocation.na, is.logical, error_msg = "Please specify whether you want to keep interventions where the revocation date is missing (NA) in: keep.revocation.na (TRUE/FALSE)")
+        gtalibrary::gta_logical_check(keep.revocation.na, is.logical, error_msg = "keep.revocation.na must be TRUE/FALSE")
         gtalibrary::gta_logical_check(revocation.period[1], lubridate::is.Date, error_msg = "revocation.period[1] must be a Date")
         gtalibrary::gta_logical_check(revocation.period[1], \(x) (lubridate::is.Date(x) | is.na(x)), error_msg = "revocation.period[2] must be either a Date or NA")
         gtalibrary::gta_logical_check(revocation.period, \(x) length(x) == 2, error_msg = "revocation.period must be a vector of two elements")
 
         if (is.na(revocation.period[2])) revocation.period[2] <- as.Date("9999-12-31")
-
         filter_statement <- append(filter_statement, "dplyr::between(date.removed, announcement.period[1], announcement.period[2])")
-
-        ##### !!! Keep.revocation.na --> Implement CHeck
     }
+
     # in.force.on.date
     if (keep.in.force.on.date != "any") {
         keep.in.force.on.date <- tolower(keep.in.force.on.date)
         gtalibrary::gta_parameter_check(keep.in.force.on.date, c("yes", "no"))
-        gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "Please make sure that in.force.on.date is a date")
+        gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "in.force.on.date must be a date")
 
         if (keep.in.force.on.date == "yes") {
             filter_evaluation <- append(filter_evaluation, "date.implemented <= in.force.on.date & (is.na(date.removed) | date.removed >= in.force.on.date)")
@@ -272,40 +328,41 @@ gta_data_slicer <- function(
         gtalibrary::gta_logical_check(lag.adjustment, \(x) lubridate::is.Date(as.Date(x, format = "%m-%d")))
 
         cutoff_date <- lubridate::ymd(paste(lubridate::year(data$date.implemented), lag.adjustment, sep = "-"))
-        filter_statement <- append(filter_statement, "date.implemented <= cutoff_date & !is.na(date.implemented)")
+        filter_statement <- append(filter_statement, "date.implemented <= cutoff_date")
     }
 
     # filter the data frame for the first time
-    filter_statement <- paste(filter_statement, collapse = " & ")
-    data <- data |>
-        dplyr::filter(eval(parse(text = filter_statement))) |>
-        data.table::as.data.table()
+    if (!length(filter_statement) == 0) {
+        filter_statement <- paste(filter_statement, collapse = " & ")
+        data <- dtplyr::lazy_dt(data) |>
+            dplyr::filter(eval(parse(text = filter_statement))) |>
+            data.table::as.data.table()
+    }
 
-    # perform filter check for hs codes standalone
     # hs codes
     if (!is.null(hs.codes)) {
-        gtalibrary::gta_logical_check(keep.hs, is.logical)
+        gtalibrary::gta_logical_check(keep.hs, is.logical, "keep.hs must be TRUE/FALSE")
         hs_codes_filter <- gtalibrary::gta_hs_code_check(codes = hs.codes, message = FALSE)
         hs_codes_filter <- stringr::str_pad(hs_codes_filter, width = 6, side = "left", pad = "0")
 
         if (!keep.hs) {
-            filter_statement_hs <- "!afffected.product %in% hs_codes_filter"
+            filter_statement_hs <- "!affected.product %in% hs_codes_filter"
         } else {
             filter_statement_hs <- "affected.product %in% hs_codes_filter"
         }
 
-        data <- data |>
+        # keep as tibble and not as data.table --> Faster performance
+        data <- tibble::as_tibble(data) |>
             dplyr::mutate(affected.product = stringr::str_split(string = affected.product, pattern = ", ")) |>
-            tidyfast::dt_hoist(affected.product) |>
+            tidyr::unnest(cols = affected.product) |>
             dplyr::filter(eval(parse(text = filter_statement_hs))) |>
             dplyr::group_by(dplyr::across(-affected.product)) |>
-            dplyr::summarize(affected.product = paste(affected.product, collapse = ", ")) |>
-            data.table::as.data.table()
+            dplyr::summarize(affected.product = paste(affected.product, collapse = ", "))
     }
 
     # cpc.sectors
     if (!is.null(cpc.sectors)) {
-        gtalibrary::gta_logical_check(keep.cpc, is.logical)
+        gtalibrary::gta_logical_check(keep.cpc, is.logical, "keep.cpc must be TRUE/FALSE")
         cpc_sectors_filter <- gtalibrary::gta_cpc_code_check(codes = cpc.sectors)
 
         if (!keep.cpc) {
@@ -314,14 +371,13 @@ gta_data_slicer <- function(
             filter_statement_cpc <- "affected.sector %in% cpc_sectors_filter"
         }
 
-        data <- data |>
+        data <- tibble::as_tibble(data) |>
             dplyr::mutate(affected.sector = str_split(string = affected.sector, pattern = ", ")) |>
-            tidyfast::dt_hoist(affected.sector) |>
+            tidyr::unnest(cols = affected.sector) |>
             dplyr::filter(eval(parse(text = filter_cpc))) |>
             dplyr::group_by(dplyr::across(-affected.sector)) |>
-            dplyr::summarize(affected.product = paste(affected.sector, collapse = ", ")) |>
-            data.table::as.data.table()
+            dplyr::summarize(affected.product = paste(affected.sector, collapse = ", "))
     }
 
-    return(data)
+    return(tibble::as_tibble(data))
 }
