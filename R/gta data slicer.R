@@ -55,10 +55,6 @@
 #' @author Global Trade Alert
 #' @export
 
-a <- readRDS("data/master.Rds")
-
-b <- a |> gtalibrary::gta_data_slicer(data = a, gta.evaluation = "Amber", nr.affected = 10)
-
 gta_data_slicer <- function(
     data = NULL, data.path = "data/master.Rds",
     gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
