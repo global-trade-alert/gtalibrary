@@ -51,24 +51,21 @@
 #' @import tibble
 #' @import stringr
 #' @import cli
-#'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_data_slicer <- function(
-    data = NULL, data.path = "data/master.Rds",
-    gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
-    keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
-    incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
-    nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
-    keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
-    submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
-    intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
-    implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
-    cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-    intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
-    add.unpublished = FALSE
-) {
+gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
+                            gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
+                            keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
+                            incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
+                            nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
+                            keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
+                            submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
+                            intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
+                            implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
+                            cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
+                            intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
+                            add.unpublished = FALSE) {
     # if master dataset is not provided, load it as data table
     # if it is already provided, ensure that it is formatted as a data.table
     if (is.null(data)) data <- data.table::as.data.table(readRDS(data.path))
