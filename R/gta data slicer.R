@@ -56,20 +56,18 @@
 #' @author Global Trade Alert
 #' @export
 
-gta_data_slicer <- function(
-    data = NULL, data.path = "data/master.Rds",
-    gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
-    keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
-    incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
-    nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
-    keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
-    submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
-    intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
-    implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
-    cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-    intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
-    add.unpublished = FALSE
-) {
+gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
+                            gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
+                            keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
+                            incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
+                            nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
+                            keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
+                            submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
+                            intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
+                            implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
+                            cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
+                            intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
+                            add.unpublished = FALSE) {
     # if master dataset is not provided, load it as data table
     # if it is already provided, ensure that it is formatted as a data.table
     if (is.null(data)) data <- data.table::as.data.table(readRDS(data.path))
@@ -121,20 +119,29 @@ gta_data_slicer <- function(
     }
 
     # must be done in the end after total filtering!
-    # check affected.country 
+    # check affected.country
     if (!is.null(affected.country)) {
         gtalibrary::gta_logical_check(keep.affected, is.logical, "keep.affected must be TRUE/FALSE")
         gtalibrary::gta_logical_check(keep.others, is.logical, "keep.others must be TRUE/FALSE")
         affected_country_filter <- gtalibrary::gta_un_code_vector(countries = affected.country)
 
         # get intervention ids of affected countries
+        if (keep.affected) {
+            filter_affected <- "a.un %in% affected_country_filter"
+        } else {
+            filter_affected <- "!a.un %in% affected_country_filter"
+        }
+
         affected_interventions <- dtplyr::lazy_dt(data) |>
-            dplyr::filter(a.un %in% affected_country_filter) |>
+            dplyr::filter(eval(parse(text = filter_affected))) |>
             dplyr::pull(intervention.id) |>
             unique()
-        
+
         # if any of the arguments deviate from the baseline, calculate information and adjust filtering of intervention.ids
-        if (nr.affected != c(0, 999) | nr.affected.incl != all | incl.affected.strictness != "ONEPLUS"){
+        if (!all(nr.affected == c(0, 999)) | tolower(nr.affected.incl) != "all" | tolower(incl.affected.strictness) != "oneplus") {
+            ###### ¨¨¨¨
+            ###### !!! CHECK IF ADDITIONAL INFO WAS APPENDED TO THE DATA FRAME THAT COUNS THE AFFECTED TIMES!!!
+            ###### ¨¨¨¨
 
             # generates tibble that contains
             # - number of affected countries per intervention.id where at least one member in the argument "affected.country" is included
@@ -147,49 +154,47 @@ gta_data_slicer <- function(
                 dplyr::group_by(intervention.id) |>
                 dplyr::summarize(
                     n_affected_total = length(a.un), # number of different affected countries per intervention.id
-                    n_affected_selected = length(a.un[affected_country]),  # number of diff. affected countries per intervention.id which are in "affected.country"
+                    n_affected_selected = length(a.un[affected_country]), # number of diff. affected countries per intervention.id which are in "affected.country"
                     n_affected_unselected = length(a.un[!affected_country])
                 )
-            
-            # test which statement was modified and select the interventions accordingly 
-            if (incl.affected.strictness != "ONEPLUS"){
 
-                # determine value which n_affected_selected must fulfill 
-                incl.affected.strictness <- switch(incl.affected.strictness,
-                    "ALL" = length(affected_country_filter),
-                    "ONE" = 1
+            # test which statement was modified and select the interventions accordingly
+            if (tolower(incl.affected.strictness) != "oneplus") {
+                # determine value which n_affected_selected must fulfill
+                incl.affected.strictness <- switch(tlower(incl.affected.strictness),
+                    "all" = length(affected_country_filter),
+                    "one" = 1
                 )
 
                 affected_countries_info <- affected_countries_info |>
                     dplyr::filter(n_affected_selected == incl.affected.strictness)
             }
 
-            if (nr.affected != c(0, 999)){
-
-                # specifies the number of the column of the affected_countries_info df that is evaluated 
-                nr.affected.incl <- switch(nr.affected.incl,
-                    "ALL" = 2,
-                     "SELECTED" = 3,
-                    "UNSELECTED" = 4
+            if (!all(nr.affected == c(0, 999))) {
+                # specifies the column of the affected_countries_info df that is evaluated
+                nr.affected.incl <- switch(tolower(nr.affected.incl),
+                    "all" = "n_affected_total",
+                    "selected" = "n_affected_selected",
+                    "unselected" = "n_affected_unselected"
                 )
-                
+
                 # filter for the range of affected countries in the respective column
                 affected_countries_info <- affected_countries_info |>
-                    dplyr::select(dplyr::all_of(nr.affected.incl)) |> 
-                    dplyr::filter(dplyr::between(nr.affected[1], nr.affected[2]))
+                    dplyr::filter(dplyr::between(eval(parse(text = nr.affected.incl)), nr.affected[1], nr.affected[2]))
             }
-            
+
+
             # retrieve all the intervention.ids that fulfill the given criteria
             affected_interventions <- affected_countries_info |>
                 dplyr::pull(intervention.id) |>
                 unique()
-            
-            # if keep.affected = TRUE, intervention.ids can be taken over, if false, additionally filter for a.un %in% affected.country
-            if (keep.affected){
-                filter_statement <- append(filter_statement, "intervention.id %in% affected_interventions")
-            } else {
-                filter_statement <- append(filter_statement, "intervention.id %In% affected_interventions & a.un %in% affected_country_filter")
-            }
+        }
+
+        # if keep.affected = TRUE, intervention.ids can be taken over, if false, additionally filter for a.un %in% affected.country
+        if (keep.others) {
+            filter_statement <- append(filter_statement, "intervention.id %in% affected_interventions")
+        } else {
+            filter_statement <- append(filter_statement, "intervention.id %in% affected_interventions & a.un %in% affected_country_filter")
         }
     }
 
