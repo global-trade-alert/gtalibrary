@@ -8,12 +8,11 @@
 #' @param fx.frequency Provide time series frequency e.g. ('D','M','Q','A')
 #' @param series What time series do you want? Options: 'fx' for USD exchange rates.
 #' @param countries What countries do you want? Permissiable options are 'all' plus GTA names and ISO3 codes.
-#' @import IMFData
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
 gta_get_imf_data <- function(start.date = NULL, end.date = NULL, frequency = NULL, series = NULL, countries = NULL) {
-    library(IMFData)
+    # library(IMFData) package does not exist anymore ?
 
     imf.cur <- data.frame(
         currency = c("GBP", "PLN", "EUR", "SEK", "DKK", "HUF", "BGN", "CZK", "NOK", "CHF", "HRK", "USD", "RON", "SKK", "MKD", "ISK", "JPY", "LTL", "LVL", "MTL"),
