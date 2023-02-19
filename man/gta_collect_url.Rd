@@ -8,8 +8,8 @@ gta_collect_url(
   url = NULL,
   file.name = NULL,
   store.path = NULL,
-  add.timestamp = T,
-  update.file.name = T,
+  add.timestamp = TRUE,
+  update.file.name = TRUE,
   js.path = "setup/rasterize.js",
   phantom.path = "~/bin/phantomjs"
 )

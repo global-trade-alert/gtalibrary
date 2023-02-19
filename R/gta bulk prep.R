@@ -154,7 +154,6 @@ gta_bulk_prep <- function(dump.name = "data dump",
         stop(paste("Unkown eligible firm(s): ", paste(unique(subset(master, is.na(eligible.firm.id))$eligible.firms), collapse = "; "), sep = ""))
     }
 
-
     ## implementation level id
     print("... adding intervention level IDs.")
     master$implementation.level.id <- NA

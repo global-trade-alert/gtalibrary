@@ -46,7 +46,7 @@ gta_bulk_upload(
   hs.unit = "atl.unit",
   hs.official = "atl.official",
   hs.inception = "atl.implemented",
-  hs.removed = "atl.removed"
+  hs.removed = "atl.remove"
 )
 }
 \arguments{

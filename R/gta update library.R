@@ -3,7 +3,7 @@
 #' Get the latest version from GitHub.
 #'
 #' Syncs your local library with our latest GTA GitHub release.
-#'
+#' @import devtools
 #' @return Be up to date with our latest functions.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert

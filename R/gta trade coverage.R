@@ -74,8 +74,6 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
-roxygen2::roxygenize()
 ## Function infos and parameters  --------------------------------------------
 #
 # gta_trade_coverage <- function(
