@@ -54,6 +54,11 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
+
+a <- readRDS("data/master.Rds")
+
+b <- a |> gtalibrary::gta_data_slicer(data = a, gta.evaluation = "Amber", nr.affected = 10)
+
 gta_data_slicer <- function(
     data = NULL, data.path = "data/master.Rds",
     gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
@@ -79,36 +84,38 @@ gta_data_slicer <- function(
     # vector which stores all the filter arguments to the master data frame whcih are evaluated
     filter_statement <- vector(mode = "character")
 
+    # Suppress summarize info
+    options(dplyr.summarise.inform = FALSE)
     ##################################################################
     # Check argument validity and generate filter statement & further operations where necessary
     ##################################################################
 
     # check vaildity of required / and or prepopulated function arguments
     gtalibrary::gta_logical_check(keep.implementer, is.logical, "Keep.implementer must be a boolean")
-    gtalibrary::gta_logical_check(keep.revocation.na, is.logical, "Keep.revocation.na must be a boolean") # does this vlaue really have to be prepopulated!?
+    gtalibrary::gta_logical_check(keep.revocation.na, is.logical, "Keep.revocation.na must be a boolean")
     gtalibrary::gta_logical_check(keep.others, is.logical, "Keep.others must be a boolean")
     gtalibrary::gta_logical_check(add.unpublished, is.logical, "add.unpublished must be a boolean")
     gtalibrary::gta_parameter_check(tolower(nr.affected.incl), c("all", "selected", "unselected"))
     gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "Please make sure that in.force.on.date is a Date")
     gtalibrary::gta_parameter_check(tolower(keep.in.force.on.date), c("any", "yes", "no"))
-    gtalibrary::gta_logical_check(nr.affected, \(x) (is.numeric(x) & x > 0 & trunc(x) == x), error_msg = "Please make sure that nr.affected is a valid integer larger than 0")
+    gtalibrary::gta_logical_check(nr.affected, \(x) all(is.numeric(x) & x > 0 & trunc(x) == x), error_msg = "Please make sure that nr.affected is a valid integer larger than 0")
 
     # gta.evaluation
     if (!is.null(gta.evaluation)) {
         gtalibrary::gta_parameter_check(tolower(gta.evaluation), c("red", "amber", "green"), arg_name = "gta.evaluation")
-        gta_evaluation_filter <- str_to_title(gta.evaluation)
+        gta_evaluation_filter <- stringr::str_to_title(gta.evaluation)
         filter_statement <- append(filter_statement, "gta.evaluation %in% gta_evaluation_filter")
     }
 
     # affected flows
     if (!is.null(affected.flows)) {
-        gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"), arg_name = "affected.flows")
+        gtalibrary::gta_parameter_check(tolower(affected.flows), c("inward", "outward", "outward subsidy"), arg_name = "affected.flows")
         affected_flow_filter <- tolower(affected.flows)
         filter_statement <- append(filter_statement, "affected.flow %in% affected_flow_filter")
     }
 
     # check implementing country
-    if (!is.null(implementing_country)) {
+    if (!is.null(implementing.country)) {
         gtalibrary::gta_logical_check(keep.implementer, is.logical)
         implementing_country_filter <- gtalibrary::gta_un_code_vector(countries = implementing.country)
         if (!keep.implementer) {
@@ -274,7 +281,7 @@ gta_data_slicer <- function(
 
     # filter the data frame for the first time
     filter_statement <- paste(filter_statement, collapse = " & ")
-    data <- master |>
+    data <- data |>
         dplyr::filter(eval(parse(text = filter_statement))) |>
         data.table::as.data.table()
 
@@ -283,19 +290,20 @@ gta_data_slicer <- function(
     if (!is.null(hs.codes)) {
         gtalibrary::gta_logical_check(keep.hs, is.logical)
         hs_codes_filter <- gtalibrary::gta_hs_code_check(codes = hs.codes, message = FALSE)
+        hs_codes_filter <- stringr::str_pad(hs_codes_filter, width = 6, side = "left", pad = "0")
 
         if (!keep.hs) {
-            filter_hs <- "!afffected.product %in% hs_codes_filter"
+            filter_statement_hs <- "!afffected.product %in% hs_codes_filter"
         } else {
             filter_statement_hs <- "affected.product %in% hs_codes_filter"
         }
 
         data <- data |>
-            mutate(affected.product = stringr::str_split(string = affected.product, pattern = ", ")) |>
+            dplyr::mutate(affected.product = stringr::str_split(string = affected.product, pattern = ", ")) |>
             tidyfast::dt_hoist(affected.product) |>
-            dplyr::filter(eval(parse(text = filter_hs))) |>
+            dplyr::filter(eval(parse(text = filter_statement_hs))) |>
             dplyr::group_by(dplyr::across(-affected.product)) |>
-            summarize(affected.product = paste(affected.product, collapse = ", ")) |>
+            dplyr::summarize(affected.product = paste(affected.product, collapse = ", ")) |>
             data.table::as.data.table()
     }
 
@@ -311,11 +319,11 @@ gta_data_slicer <- function(
         }
 
         data <- data |>
-            mutate(affected.sector = str_split(string = affected.sector, pattern = ", ")) |>
+            dplyr::mutate(affected.sector = str_split(string = affected.sector, pattern = ", ")) |>
             tidyfast::dt_hoist(affected.sector) |>
             dplyr::filter(eval(parse(text = filter_cpc))) |>
             dplyr::group_by(dplyr::across(-affected.sector)) |>
-            summarize(affected.product = paste(affected.sector, collapse = ", ")) |>
+            dplyr::summarize(affected.product = paste(affected.sector, collapse = ", ")) |>
             data.table::as.data.table()
     }
 

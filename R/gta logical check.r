@@ -7,7 +7,7 @@ gta_logical_check <- function(check_arg = NULL, check_function = NULL, error_msg
 
     if (!is.logical(check)) cli::cli_abort("Make sure that the check_function returns a boolean")
 
-    if (!check) {
+    if (!all(check)) {
         if (is.null(error_msg)) {
             check_function_name <- deparse(substitute(check_function))
             error_msg <- "{deparse(substitute(check_arg))} must fulfill: {check_function_name}"

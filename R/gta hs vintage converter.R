@@ -131,3 +131,12 @@ gta_hs_vintage_converter <-
         return(unique(as.numeric(unlist(codes.converted))))
     }
 }
+
+devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
+
+remotes::install_github("global-trade-alert/gtalibrary@hs_functions")
+
+gtalibrary::gta_parameter_check("hello", "bye")
+
+install.packages("IMFData")
+gtalibrary::gta_bulk_prep
