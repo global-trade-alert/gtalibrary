@@ -19,7 +19,7 @@ gta_cpc_code_check <- function(codes) {
     stop("Please provide codes only up to 3 figures")
   }
   # check vector type to decide further processing
-  if (is.numeric(codes) == T) {
+  if (is.numeric(codes)) {
     # Expand all codes to 3 digits, to take care of leading zeros
     codes <- as.factor(sprintf("%03i", codes))
 
@@ -36,8 +36,12 @@ gta_cpc_code_check <- function(codes) {
       return(non.existing)
     }
     # Check whether vector is character, indicating that there are leading zeros cpc 3rd level codes included
-  } else if (is.numeric(codes) == F) {
+  } else if (!is.numeric(codes)) {
     stop("Please input all codes as integer!")
   }
   rm(codes)
 }
+
+devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
+
+sessionInfo()
