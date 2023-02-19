@@ -51,386 +51,384 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_bulk_prep <- function(
-  dump.name = "data dump",
-    master.frame = "master",test.size = 5,
-    author = "Piotr",sa.id = "state.act.id",
-    sa.title = "title",sa.description = "announcement.description",
-    announcement.date = "date.announced",sa.source = "source",
-    source.off = "source.official",int.id = "intervention.id",
-    implementer = "implementing.jurisdiction",implementer.type = "name",
-    int.type = "intervention.type",int.description = "intervention.description",
-    int.flow = "affected.flow",eval.gta = "gta.evaluation",
-    eval.research = "research.evaluation",inception.date = "date.implemented",
-    removal.date = "date.removed", temporary = "duration.limited",
-    firms = "eligible.firms",imp.level = "implementation.level",
-    is.noncommercial = "non.commercial",is.horizontal = "horizontal",
-    is.fta = "include.fta",int.prior = "level.prior",
-    int.new = "level.new",int.unit = "level.unit",
-    sectors.nonhs = "affected.sectors.nonhs",dm.nonsupport = "dm.editor.choice",
-    dm.type = "name",dm.freeze = "freeze.dm",
-    aj.nonsupport = "aj.editor.choice",aj.type = "name",
-    aj.freeze = "freeze.aj",hs.code = "affected.product",hs.prior = "atl.prior",
-    hs.new = "atl.new",hs.unit = "atl.unit",hs.official = "atl.official",
-    hs.inception = "atl.implemented",hs.removed = "atl.removed"
-) {
-  ## loading and renaming the master data frame
-  print("Loading and formatting master data frame ...")
-  eval(parse(text = paste("master=", master.frame, sep = "")))
+gta_bulk_prep <- function(dump.name = "data dump",
+                          master.frame = "master", test.size = 5,
+                          author = "Piotr", sa.id = "state.act.id",
+                          sa.title = "title", sa.description = "announcement.description",
+                          announcement.date = "date.announced", sa.source = "source",
+                          source.off = "source.official", int.id = "intervention.id",
+                          implementer = "implementing.jurisdiction", implementer.type = "name",
+                          int.type = "intervention.type", int.description = "intervention.description",
+                          int.flow = "affected.flow", eval.gta = "gta.evaluation",
+                          eval.research = "research.evaluation", inception.date = "date.implemented",
+                          removal.date = "date.removed", temporary = "duration.limited",
+                          firms = "eligible.firms", imp.level = "implementation.level",
+                          is.noncommercial = "non.commercial", is.horizontal = "horizontal",
+                          is.fta = "include.fta", int.prior = "level.prior",
+                          int.new = "level.new", int.unit = "level.unit",
+                          sectors.nonhs = "affected.sectors.nonhs", dm.nonsupport = "dm.editor.choice",
+                          dm.type = "name", dm.freeze = "freeze.dm",
+                          aj.nonsupport = "aj.editor.choice", aj.type = "name",
+                          aj.freeze = "freeze.aj", hs.code = "affected.product", hs.prior = "atl.prior",
+                          hs.new = "atl.new", hs.unit = "atl.unit", hs.official = "atl.official",
+                          hs.inception = "atl.implemented", hs.removed = "atl.removed") {
+    ## loading and renaming the master data frame
+    print("Loading and formatting master data frame ...")
+    eval(parse(text = paste("master=", master.frame, sep = "")))
 
-  given.names <- c(sa.id, sa.title, sa.description, announcement.date, sa.source, source.off, int.id, implementer, int.type, int.description, int.flow, eval.gta, eval.research, inception.date, removal.date, temporary, firms, imp.level, is.noncommercial, is.horizontal, is.fta, int.prior, int.new, int.unit, sectors.nonhs, dm.nonsupport, dm.freeze, aj.nonsupport, aj.freeze, hs.code, hs.prior, hs.new, hs.unit, hs.official, hs.inception, hs.removed)
-  fct.names <- c("state.act.id", "title", "announcement.description", "date.announced", "source", "source.official", "intervention.id", "implementing.jurisdiction", "intervention.type", "intervention.description", "affected.flow", "gta.evaluation", "research.evaluation", "date.implemented", "date.removed", "duration.limited", "eligible.firms", "implementation.level", "non.commercial", "horizontal", "include.fta", "level.prior", "level.new", "level.unit", "affected.sectors.nonhs", "dm.editor.choice", "freeze.dm", "aj.editor.choice", "freeze.aj", "affected.product", "atl.prior", "atl.new", "atl.unit", "atl.official", "atl.implemented", "atl.removed")
+    given.names <- c(sa.id, sa.title, sa.description, announcement.date, sa.source, source.off, int.id, implementer, int.type, int.description, int.flow, eval.gta, eval.research, inception.date, removal.date, temporary, firms, imp.level, is.noncommercial, is.horizontal, is.fta, int.prior, int.new, int.unit, sectors.nonhs, dm.nonsupport, dm.freeze, aj.nonsupport, aj.freeze, hs.code, hs.prior, hs.new, hs.unit, hs.official, hs.inception, hs.removed)
+    fct.names <- c("state.act.id", "title", "announcement.description", "date.announced", "source", "source.official", "intervention.id", "implementing.jurisdiction", "intervention.type", "intervention.description", "affected.flow", "gta.evaluation", "research.evaluation", "date.implemented", "date.removed", "duration.limited", "eligible.firms", "implementation.level", "non.commercial", "horizontal", "include.fta", "level.prior", "level.new", "level.unit", "affected.sectors.nonhs", "dm.editor.choice", "freeze.dm", "aj.editor.choice", "freeze.aj", "affected.product", "atl.prior", "atl.new", "atl.unit", "atl.official", "atl.implemented", "atl.removed")
 
-  master <- unique(master[, given.names])
-  names(master) <- fct.names
-  print("Loading and formatting master data frame ... complete.")
+    master <- unique(master[, given.names])
+    names(master) <- fct.names
+    print("Loading and formatting master data frame ... complete.")
 
-  #### state act CSV
+    #### state act CSV
 
-  print("Generating state act data frame ...")
-  master$author.id <- 29
-  if (author == "Johannes") {
-    master$author.id <- 1
-  }
-  if (author == "Josse") {
-    master$author.id <- 30
-  }
-
-
-  master$title <- as.character(master$title)
-  master$announcement.description <- as.character(master$announcement.description)
-  master$date.announced <- as.factor(master$date.announced)
-  master$source <- as.character(master$source)
-
-  state.act <- unique(data.frame(
-    import_id = master$state.act.id,
-    author_id = master$author.id,
-    title = master$title,
-    description = master$announcement.description,
-    announcement_date = master$date.announced,
-    source = master$source,
-    is_source_official = master$source.official,
-    status_id = 4
-  ))
-
-  print("State act data frame is ready.")
-
-
-  #### intervention CSV
-
-  ## intervention type conversion
-  print("Generating intervention data frame ...")
-  int.type <- gtalibrary::int.mast.types
-
-  print("... adding intervention types.")
-  master <- merge(master, int.type[, c("intervention.type", "intervention.type.id")], by = "intervention.type", all.x = T)
-
-  if (nrow(subset(master, is.na(intervention.type.id))) > 0) {
-    stop(paste("Unkown intervention type(s): ", paste(unique(subset(master, is.na(intervention.type.id))$intervention.type), collapse = "; "), sep = ""))
-  }
-
-
-
-  ## affected flow id
-  print("... adding affected flow IDs.")
-  master$affected.flow.id <- NA
-  master$affected.flow.id[tolower(master$affected.flow) == "inward"] <- 1
-  master$affected.flow.id[tolower(master$affected.flow) == "outward"] <- 2
-  master$affected.flow.id[tolower(master$affected.flow) == "outward subsidy"] <- 3
-
-  if (nrow(subset(master, is.na(affected.flow.id))) > 0) {
-    stop(paste("Unkown affected flow(s): ", paste(unique(subset(master, is.na(affected.flow.id))$affected.flow), collapse = "; "), sep = ""))
-  }
-
-  ## eligible firms id
-  print("... adding eligible firm IDs.")
-  master$eligible.firm.id <- NA
-  master$eligible.firm.id[tolower(master$eligible.firms) == "all"] <- 1
-  master$eligible.firm.id[tolower(master$eligible.firms) == "smes"] <- 2
-  master$eligible.firm.id[tolower(master$eligible.firms) == "firm-specific"] <- 3
-  master$eligible.firm.id[tolower(master$eligible.firms) == "state-controlled"] <- 4
-  master$eligible.firm.id[tolower(master$eligible.firms) == "state trading enterprise"] <- 5
-  master$eligible.firm.id[tolower(master$eligible.firms) == "sector-specific"] <- 6
-
-  if (nrow(subset(master, is.na(eligible.firm.id))) > 0) {
-    stop(paste("Unkown eligible firm(s): ", paste(unique(subset(master, is.na(eligible.firm.id))$eligible.firms), collapse = "; "), sep = ""))
-  }
-
-
-  ## implementation level id
-  print("... adding intervention level IDs.")
-  master$implementation.level.id <- NA
-  master$implementation.level.id[tolower(master$implementation.level) == "supranational"] <- 1
-  master$implementation.level.id[tolower(master$implementation.level) == "national"] <- 2
-  master$implementation.level.id[tolower(master$implementation.level) == "subnational"] <- 3
-  master$implementation.level.id[tolower(master$implementation.level) == "sez"] <- 4
-  master$implementation.level.id[tolower(master$implementation.level) == "ifi"] <- 5
-  master$implementation.level.id[tolower(master$implementation.level) == "nfi"] <- 6
-
-  if (nrow(subset(master, is.na(implementation.level.id))) > 0) {
-    stop(paste("Unkown implementation level(s): ", paste(unique(subset(master, is.na(implementation.level.id))$implementation.level), collapse = "; "), sep = ""))
-  }
-
-  ## evaluation ids
-  print("... adding evaluation IDs.")
-  master$gta.evaluation.id <- NA
-  master$gta.evaluation.id[tolower(master$gta.evaluation) == "red"] <- 1
-  master$gta.evaluation.id[tolower(master$gta.evaluation) == "amber"] <- 2
-  master$gta.evaluation.id[tolower(master$gta.evaluation) == "green"] <- 3
-
-  if (nrow(subset(master, is.na(gta.evaluation.id))) > 0) {
-    stop(paste("Unkown GTA evaluation(s): ", paste(unique(subset(master, is.na(gta.evaluation.id))$gta.evaluation), collapse = "; "), sep = ""))
-  }
-
-  master$research.evaluation.id <- NA
-  master$research.evaluation.id[tolower(master$research.evaluation) == "red"] <- 1
-  master$research.evaluation.id[tolower(master$research.evaluation) == "amber"] <- 2
-  master$research.evaluation.id[tolower(master$research.evaluation) == "green"] <- 3
-  master$research.evaluation.id[is.na(master$research.evaluation)] <- ""
-
-  if (nrow(subset(master, is.na(research.evaluation.id))) > 0) {
-    stop(paste("Unkown research evaluation(s): ", paste(unique(subset(master, is.na(research.evaluation.id))$research.evaluation), collapse = "; "), sep = ""))
-  }
-
-
-  ## levels
-  unit.df <- data.frame(
-    level.unit.id = c(1, 1, 1:19),
-    level.unit = c("percent", "%", "per cent", "total budget (USD)", "firm-specific budget (USD)", "USD/MT", "USD/kg", "USD/tonne", "USD/unit", "count", "USD/litre", "USD/pc", "USD/squaremetre", "USD/pair", "USD/ldt", "USD/lb", "USD/gallon", "USD/hl", "USD/LAL", "USD/tyre", "USD/stick")
-  )
-  unit.df$level.unit <- tolower(as.character(unit.df$level.unit))
-  master$level.unit <- tolower(as.character(master$level.unit))
-
-
-  print("... reformatting levels, dates etc.")
-  master$level.prior <- as.character(master$level.prior)
-  master$level.new <- as.character(master$level.new)
-  master <- merge(master, unit.df, by = "level.unit", all.x = T)
-
-  if (nrow(subset(master, is.na(level.unit.id) & is.na(level.unit) == F)) > 0) {
-    stop(paste("Unkown level unit(s): ", paste(unique(subset(master, is.na(level.unit.id) & is.na(level.unit) == F)$level.unit), collapse = "; "), sep = ""))
-  }
-
-  ## dates
-  master$date.implemented <- as.factor(master$date.implemented)
-  master$date.removed <- as.factor(master$date.removed)
-
-  ## sectors
-  master$affected.sectors.nonhs <- as.character(master$affected.sectors.nonhs)
-  master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs) == 2 & is.na(master$affected.sectors.nonhs) == F] <- paste(0, master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs) == 2 & is.na(master$affected.sectors.nonhs) == F], sep = "")
-
-  ## country ids
-  gta.jurisdictions <- gtalibrary::country.names
-
-  ## IJ
-  print("... adding country IDs.")
-
-  if (implementer.type == "name") {
-    gta.jur <- gta.jurisdictions[, c("name", "jurisdiction.id")]
-  } else {
-    if (implementer.type == "un") {
-      gta.jur <- gta.jurisdictions[, c("un_code", "jurisdiction.id")]
-    } else {
-      stop("Implementer type is neither 'un' nor 'name'.")
+    print("Generating state act data frame ...")
+    master$author.id <- 29
+    if (author == "Johannes") {
+        master$author.id <- 1
     }
-  }
-
-  names(gta.jur) <- c("implementing.jurisdiction", "implementing.jurisdiction.id")
-  master <- merge(master, gta.jur, by = "implementing.jurisdiction", all.x = T)
-
-  if (nrow(subset(master, is.na(implementing.jurisdiction.id))) > 0) {
-    stop(paste("Unkown implementer(s): ", paste(unique(subset(master, is.na(implementing.jurisdiction.id))$implementing.jurisdiction), collapse = "; "), sep = ""))
-  }
-
-
-  ### CSVs
-  if (nrow(subset(master, is.na(implementing.jurisdiction.id) == F)) > 0) {
-    ij <- unique(master[, c("intervention.id", "implementing.jurisdiction", "implementing.jurisdiction.id")])
-    ij <- merge(aggregate(implementing.jurisdiction ~ intervention.id, ij, function(x) paste(unique(x), collapse = ",")),
-      aggregate(implementing.jurisdiction.id ~ intervention.id, ij, function(x) paste(unique(x), collapse = ",")),
-      by = "intervention.id"
-    )
-
-    master$implementing.jurisdiction.id <- NULL
-    master$implementing.jurisdiction <- NULL
-    master <- merge(unique(master), ij, by = "intervention.id", all.x = T)
-  }
-
-  ## AJ
-  if (aj.type == "name") {
-    gta.jur <- gta.jurisdictions[, c("name", "jurisdiction.id")]
-  } else {
-    if (aj.type == "un") {
-      gta.jur <- gta.jurisdictions[, c("un_code", "jurisdiction.id")]
-    } else {
-      stop("AJ type is neither 'un' nor 'name'.")
+    if (author == "Josse") {
+        master$author.id <- 30
     }
-  }
 
-  names(gta.jur) <- c("aj.editor.choice", "affected.jurisdiction.id")
-  master <- merge(master, gta.jur, by = "aj.editor.choice", all.x = T)
 
-  if (nrow(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice) == F)) > 0) {
-    stop(paste("Unkown affected jurisdiction(s): ", paste(unique(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice) == F)$aj.editor.choice), collapse = "; "), sep = ""))
-  }
+    master$title <- as.character(master$title)
+    master$announcement.description <- as.character(master$announcement.description)
+    master$date.announced <- as.factor(master$date.announced)
+    master$source <- as.character(master$source)
 
-  ### CSVs
-  if (nrow(subset(master, is.na(affected.jurisdiction.id) == F)) > 0) {
-    aj <- unique(master[, c("intervention.id", "aj.editor.choice", "affected.jurisdiction.id")])
-    aj <- merge(aggregate(aj.editor.choice ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
-      aggregate(affected.jurisdiction.id ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
-      by = "intervention.id"
-    )
+    state.act <- unique(data.frame(
+        import_id = master$state.act.id,
+        author_id = master$author.id,
+        title = master$title,
+        description = master$announcement.description,
+        announcement_date = master$date.announced,
+        source = master$source,
+        is_source_official = master$source.official,
+        status_id = 4
+    ))
 
-    master$affected.jurisdiction.id <- NULL
-    master$aj.editor.choice <- NULL
-    master <- merge(unique(master), aj, by = "intervention.id", all.x = T)
-  }
+    print("State act data frame is ready.")
 
-  ## DM
-  if (dm.type == "name") {
-    gta.jur <- gta.jurisdictions[, c("name", "jurisdiction.id")]
-  } else {
-    if (dm.type == "un") {
-      gta.jur <- gta.jurisdictions[, c("un_code", "jurisdiction.id")]
-    } else {
-      stop("DM type is neither 'un' nor 'name'.")
+
+    #### intervention CSV
+
+    ## intervention type conversion
+    print("Generating intervention data frame ...")
+    int.type <- gtalibrary::int.mast.types
+
+    print("... adding intervention types.")
+    master <- merge(master, int.type[, c("intervention.type", "intervention.type.id")], by = "intervention.type", all.x = T)
+
+    if (nrow(subset(master, is.na(intervention.type.id))) > 0) {
+        stop(paste("Unkown intervention type(s): ", paste(unique(subset(master, is.na(intervention.type.id))$intervention.type), collapse = "; "), sep = ""))
     }
-  }
-
-  names(gta.jur) <- c("dm.editor.choice", "distorted.market.id")
-  master <- merge(master, gta.jur, by = "dm.editor.choice", all.x = T)
-
-  if (nrow(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice) == F)) > 0) {
-    stop(paste("Unkown distorted market(s): ", paste(unique(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice) == F)$dm.editor.choice), collapse = "; "), sep = ""))
-  }
 
 
-  ### CSVs
-  if (nrow(subset(master, is.na(distorted.market.id) == F)) > 0) {
-    aj <- unique(master[, c("intervention.id", "dm.editor.choice", "distorted.market.id")])
-    aj <- merge(aggregate(dm.editor.choice ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
-      aggregate(distorted.market.id ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
-      by = "intervention.id"
+
+    ## affected flow id
+    print("... adding affected flow IDs.")
+    master$affected.flow.id <- NA
+    master$affected.flow.id[tolower(master$affected.flow) == "inward"] <- 1
+    master$affected.flow.id[tolower(master$affected.flow) == "outward"] <- 2
+    master$affected.flow.id[tolower(master$affected.flow) == "outward subsidy"] <- 3
+
+    if (nrow(subset(master, is.na(affected.flow.id))) > 0) {
+        stop(paste("Unkown affected flow(s): ", paste(unique(subset(master, is.na(affected.flow.id))$affected.flow), collapse = "; "), sep = ""))
+    }
+
+    ## eligible firms id
+    print("... adding eligible firm IDs.")
+    master$eligible.firm.id <- NA
+    master$eligible.firm.id[tolower(master$eligible.firms) == "all"] <- 1
+    master$eligible.firm.id[tolower(master$eligible.firms) == "smes"] <- 2
+    master$eligible.firm.id[tolower(master$eligible.firms) == "firm-specific"] <- 3
+    master$eligible.firm.id[tolower(master$eligible.firms) == "state-controlled"] <- 4
+    master$eligible.firm.id[tolower(master$eligible.firms) == "state trading enterprise"] <- 5
+    master$eligible.firm.id[tolower(master$eligible.firms) == "sector-specific"] <- 6
+
+    if (nrow(subset(master, is.na(eligible.firm.id))) > 0) {
+        stop(paste("Unkown eligible firm(s): ", paste(unique(subset(master, is.na(eligible.firm.id))$eligible.firms), collapse = "; "), sep = ""))
+    }
+
+
+    ## implementation level id
+    print("... adding intervention level IDs.")
+    master$implementation.level.id <- NA
+    master$implementation.level.id[tolower(master$implementation.level) == "supranational"] <- 1
+    master$implementation.level.id[tolower(master$implementation.level) == "national"] <- 2
+    master$implementation.level.id[tolower(master$implementation.level) == "subnational"] <- 3
+    master$implementation.level.id[tolower(master$implementation.level) == "sez"] <- 4
+    master$implementation.level.id[tolower(master$implementation.level) == "ifi"] <- 5
+    master$implementation.level.id[tolower(master$implementation.level) == "nfi"] <- 6
+
+    if (nrow(subset(master, is.na(implementation.level.id))) > 0) {
+        stop(paste("Unkown implementation level(s): ", paste(unique(subset(master, is.na(implementation.level.id))$implementation.level), collapse = "; "), sep = ""))
+    }
+
+    ## evaluation ids
+    print("... adding evaluation IDs.")
+    master$gta.evaluation.id <- NA
+    master$gta.evaluation.id[tolower(master$gta.evaluation) == "red"] <- 1
+    master$gta.evaluation.id[tolower(master$gta.evaluation) == "amber"] <- 2
+    master$gta.evaluation.id[tolower(master$gta.evaluation) == "green"] <- 3
+
+    if (nrow(subset(master, is.na(gta.evaluation.id))) > 0) {
+        stop(paste("Unkown GTA evaluation(s): ", paste(unique(subset(master, is.na(gta.evaluation.id))$gta.evaluation), collapse = "; "), sep = ""))
+    }
+
+    master$research.evaluation.id <- NA
+    master$research.evaluation.id[tolower(master$research.evaluation) == "red"] <- 1
+    master$research.evaluation.id[tolower(master$research.evaluation) == "amber"] <- 2
+    master$research.evaluation.id[tolower(master$research.evaluation) == "green"] <- 3
+    master$research.evaluation.id[is.na(master$research.evaluation)] <- ""
+
+    if (nrow(subset(master, is.na(research.evaluation.id))) > 0) {
+        stop(paste("Unkown research evaluation(s): ", paste(unique(subset(master, is.na(research.evaluation.id))$research.evaluation), collapse = "; "), sep = ""))
+    }
+
+
+    ## levels
+    unit.df <- data.frame(
+        level.unit.id = c(1, 1, 1:19),
+        level.unit = c("percent", "%", "per cent", "total budget (USD)", "firm-specific budget (USD)", "USD/MT", "USD/kg", "USD/tonne", "USD/unit", "count", "USD/litre", "USD/pc", "USD/squaremetre", "USD/pair", "USD/ldt", "USD/lb", "USD/gallon", "USD/hl", "USD/LAL", "USD/tyre", "USD/stick")
     )
-
-    master$distorted.market.id <- NULL
-    master$dm.editor.choice <- NULL
-    master <- merge(unique(master), aj, by = "intervention.id", all.x = T)
-  }
-
-  # generate intervention frame
-  print("... pulling it all together.")
-  intervention <- unique(data.frame(
-    import_id = master$intervention.id,
-    import_measure_id = master$state.act.id,
-    measure_type_id = master$intervention.type.id,
-    description = master$intervention.description,
-    affected_flow_id = master$affected.flow.id,
-    evaluation_id = master$gta.evaluation.id,
-    research_evaluation_id = master$research.evaluation.id,
-    inception_date = master$date.implemented,
-    removal_date = master$date.removed,
-    is_duration_limited = master$duration.limited,
-    eligible_firms_id = master$eligible.firm.id,
-    implementation_level_id = master$implementation.level.id,
-    is_non_trade_related_rationale = master$non.commercial,
-    is_chain_measure = 0,
-    is_horizontal_measure = master$horizontal,
-    is_jumbo = 0,
-    is_fta_included = master$include.fta,
-    prior_level = master$level.prior,
-    new_level = master$level.new,
-    unit = master$level.unit.id,
-    tariff_peak = 0,
-    affected_sectors = master$affected.sectors.nonhs,
-    IJ = master$implementing.jurisdiction.id,
-    DM = master$distorted.market.id,
-    dm_freeze = master$freeze.dm,
-    AJ = master$affected.jurisdiction.id,
-    aj_freeze = master$freeze.aj
-  ))
+    unit.df$level.unit <- tolower(as.character(unit.df$level.unit))
+    master$level.unit <- tolower(as.character(master$level.unit))
 
 
-  print("Intervention data frame is ready.")
+    print("... reformatting levels, dates etc.")
+    master$level.prior <- as.character(master$level.prior)
+    master$level.new <- as.character(master$level.new)
+    master <- merge(master, unit.df, by = "level.unit", all.x = T)
 
-  ## affected.TL
-  ## level formatting
-  print("Generating affected product data frame ...")
-  master$atl.unit <- tolower(as.character(master$atl.unit))
-  names(unit.df) <- c("atl.unit.id", "atl.unit")
-  master <- merge(master, unit.df, by = "atl.unit", all.x = T)
+    if (nrow(subset(master, is.na(level.unit.id) & is.na(level.unit) == F)) > 0) {
+        stop(paste("Unkown level unit(s): ", paste(unique(subset(master, is.na(level.unit.id) & is.na(level.unit) == F)$level.unit), collapse = "; "), sep = ""))
+    }
 
-  if (nrow(subset(master, is.na(atl.unit.id) & is.na(atl.unit) == F)) > 0) {
-    stop(paste("Unkown level unit(s) at the HS code level: ", paste(unique(subset(master, is.na(atl.unit.id) & is.na(atl.unit) == F)$atl.unit), collapse = "; "), sep = ""))
-  }
+    ## dates
+    master$date.implemented <- as.factor(master$date.implemented)
+    master$date.removed <- as.factor(master$date.removed)
 
-  master$atl.peak <- as.numeric(master$atl.unit == 1 & master$atl.new >= 15)
+    ## sectors
+    master$affected.sectors.nonhs <- as.character(master$affected.sectors.nonhs)
+    master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs) == 2 & is.na(master$affected.sectors.nonhs) == F] <- paste(0, master$affected.sectors.nonhs[nchar(master$affected.sectors.nonhs) == 2 & is.na(master$affected.sectors.nonhs) == F], sep = "")
 
-  master$atl.prior <- as.character(master$atl.prior)
-  master$atl.new <- as.character(master$atl.new)
+    ## country ids
+    gta.jurisdictions <- gtalibrary::country.names
 
+    ## IJ
+    print("... adding country IDs.")
 
-  ## dates
-  master$atl.implemented <- as.factor(master$atl.implemented)
-  master$atl.removed <- as.factor(master$atl.removed)
+    if (implementer.type == "name") {
+        gta.jur <- gta.jurisdictions[, c("name", "jurisdiction.id")]
+    } else {
+        if (implementer.type == "un") {
+            gta.jur <- gta.jurisdictions[, c("un_code", "jurisdiction.id")]
+        } else {
+            stop("Implementer type is neither 'un' nor 'name'.")
+        }
+    }
 
+    names(gta.jur) <- c("implementing.jurisdiction", "implementing.jurisdiction.id")
+    master <- merge(master, gta.jur, by = "implementing.jurisdiction", all.x = T)
 
-  ## adding sectors
-  hs.cpc <- gtalibrary::cpc.to.hs
-  names(hs.cpc) <- c("atl.sector", "affected.product")
-  master <- merge(master, hs.cpc, by = "affected.product", all.x = T)
-
-  ## adding the zeros
-  master$affected.product <- as.character(master$affected.product)
-  master$affected.product[nchar(master$affected.product) == 5 & is.na(master$affected.product) == F] <- paste(0, master$affected.product[nchar(master$affected.product) == 5 & is.na(master$affected.product) == F], sep = "")
-
-  master$atl.sector <- as.character(master$atl.sector)
-  master$atl.sector[nchar(master$atl.sector) == 2 & is.na(master$atl.sector) == F] <- paste(0, master$atl.sector[nchar(master$atl.sector) == 2 & is.na(master$atl.sector) == F], sep = "")
-
-  print("... pulling it all together.")
-  affected.tl <- unique(data.frame(
-    import_intervention_id = master$intervention.id,
-    tariff_line_code = master$affected.product,
-    prior_level = master$atl.prior,
-    new_level = master$atl.new,
-    unit = master$atl.unit.id,
-    tariff_peak = master$atl.peak,
-    is_tariff_line_official = master$atl.official,
-    sector_code = master$atl.sector,
-    inception_date = master$atl.implemented,
-    removal_date = master$atl.removed
-  ))
-
-  print("Affected product data frame is ready.")
+    if (nrow(subset(master, is.na(implementing.jurisdiction.id))) > 0) {
+        stop(paste("Unkown implementer(s): ", paste(unique(subset(master, is.na(implementing.jurisdiction.id))$implementing.jurisdiction), collapse = "; "), sep = ""))
+    }
 
 
-  ## exporting CSVs
-  # test
-  state.act.test <- subset(state.act, import_id %in% unique(state.act$import_id)[1:test.size])
-  intervention.test <- subset(intervention, import_measure_id %in% state.act.test$import_id)
-  affected.tl.test <- subset(affected.tl, import_intervention_id %in% intervention.test$import_id)
+    ### CSVs
+    if (nrow(subset(master, is.na(implementing.jurisdiction.id) == F)) > 0) {
+        ij <- unique(master[, c("intervention.id", "implementing.jurisdiction", "implementing.jurisdiction.id")])
+        ij <- merge(aggregate(implementing.jurisdiction ~ intervention.id, ij, function(x) paste(unique(x), collapse = ",")),
+            aggregate(implementing.jurisdiction.id ~ intervention.id, ij, function(x) paste(unique(x), collapse = ",")),
+            by = "intervention.id"
+        )
 
-  print("Writing test CSVs ...")
-  write.csv(state.act.test, file = paste(dump.name, " - ", Sys.Date(), " - test - measure.csv", sep = ""), row.names = F, na = "")
-  write.csv(intervention.test, file = paste(dump.name, " - ", Sys.Date(), " - test - intervention.csv", sep = ""), row.names = F, na = "")
-  write.csv(affected.tl.test, file = paste(dump.name, " - ", Sys.Date(), " - test - atl.csv", sep = ""), row.names = F, na = "")
+        master$implementing.jurisdiction.id <- NULL
+        master$implementing.jurisdiction <- NULL
+        master <- merge(unique(master), ij, by = "intervention.id", all.x = T)
+    }
+
+    ## AJ
+    if (aj.type == "name") {
+        gta.jur <- gta.jurisdictions[, c("name", "jurisdiction.id")]
+    } else {
+        if (aj.type == "un") {
+            gta.jur <- gta.jurisdictions[, c("un_code", "jurisdiction.id")]
+        } else {
+            stop("AJ type is neither 'un' nor 'name'.")
+        }
+    }
+
+    names(gta.jur) <- c("aj.editor.choice", "affected.jurisdiction.id")
+    master <- merge(master, gta.jur, by = "aj.editor.choice", all.x = T)
+
+    if (nrow(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice) == F)) > 0) {
+        stop(paste("Unkown affected jurisdiction(s): ", paste(unique(subset(master, is.na(affected.jurisdiction.id) & is.na(aj.editor.choice) == F)$aj.editor.choice), collapse = "; "), sep = ""))
+    }
+
+    ### CSVs
+    if (nrow(subset(master, is.na(affected.jurisdiction.id) == F)) > 0) {
+        aj <- unique(master[, c("intervention.id", "aj.editor.choice", "affected.jurisdiction.id")])
+        aj <- merge(aggregate(aj.editor.choice ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
+            aggregate(affected.jurisdiction.id ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
+            by = "intervention.id"
+        )
+
+        master$affected.jurisdiction.id <- NULL
+        master$aj.editor.choice <- NULL
+        master <- merge(unique(master), aj, by = "intervention.id", all.x = T)
+    }
+
+    ## DM
+    if (dm.type == "name") {
+        gta.jur <- gta.jurisdictions[, c("name", "jurisdiction.id")]
+    } else {
+        if (dm.type == "un") {
+            gta.jur <- gta.jurisdictions[, c("un_code", "jurisdiction.id")]
+        } else {
+            stop("DM type is neither 'un' nor 'name'.")
+        }
+    }
+
+    names(gta.jur) <- c("dm.editor.choice", "distorted.market.id")
+    master <- merge(master, gta.jur, by = "dm.editor.choice", all.x = T)
+
+    if (nrow(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice) == F)) > 0) {
+        stop(paste("Unkown distorted market(s): ", paste(unique(subset(master, is.na(distorted.market.id) & is.na(dm.editor.choice) == F)$dm.editor.choice), collapse = "; "), sep = ""))
+    }
 
 
-  # remaining full set
-  state.act.full <- subset(state.act, !import_id %in% state.act.test$import_id)
-  intervention.full <- subset(intervention, !import_measure_id %in% state.act.test$import_id)
-  affected.tl.full <- subset(affected.tl, !import_intervention_id %in% intervention.test$import_id)
+    ### CSVs
+    if (nrow(subset(master, is.na(distorted.market.id) == F)) > 0) {
+        aj <- unique(master[, c("intervention.id", "dm.editor.choice", "distorted.market.id")])
+        aj <- merge(aggregate(dm.editor.choice ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
+            aggregate(distorted.market.id ~ intervention.id, aj, function(x) paste(unique(x), collapse = ",")),
+            by = "intervention.id"
+        )
 
-  print("Writing full CSVs ...")
-  write.csv(state.act.full, file = paste(dump.name, " - ", Sys.Date(), " - full - measure.csv", sep = ""), row.names = F, na = "")
-  write.csv(intervention.full, file = paste(dump.name, " - ", Sys.Date(), " - full - intervention.csv", sep = ""), row.names = F, na = "")
-  write.csv(affected.tl.full, file = paste(dump.name, " - ", Sys.Date(), " - full - atl.csv", sep = ""), row.names = F, na = "")
+        master$distorted.market.id <- NULL
+        master$dm.editor.choice <- NULL
+        master <- merge(unique(master), aj, by = "intervention.id", all.x = T)
+    }
 
-  print("Voilà!")
-  # returning modified DF into global environment
-  master.bulk <<- master
-  state.act.csv <<- state.act
-  intervention.csv <<- intervention
-  affected.tl.csv <<- affected.tl
+    # generate intervention frame
+    print("... pulling it all together.")
+    intervention <- unique(data.frame(
+        import_id = master$intervention.id,
+        import_measure_id = master$state.act.id,
+        measure_type_id = master$intervention.type.id,
+        description = master$intervention.description,
+        affected_flow_id = master$affected.flow.id,
+        evaluation_id = master$gta.evaluation.id,
+        research_evaluation_id = master$research.evaluation.id,
+        inception_date = master$date.implemented,
+        removal_date = master$date.removed,
+        is_duration_limited = master$duration.limited,
+        eligible_firms_id = master$eligible.firm.id,
+        implementation_level_id = master$implementation.level.id,
+        is_non_trade_related_rationale = master$non.commercial,
+        is_chain_measure = 0,
+        is_horizontal_measure = master$horizontal,
+        is_jumbo = 0,
+        is_fta_included = master$include.fta,
+        prior_level = master$level.prior,
+        new_level = master$level.new,
+        unit = master$level.unit.id,
+        tariff_peak = 0,
+        affected_sectors = master$affected.sectors.nonhs,
+        IJ = master$implementing.jurisdiction.id,
+        DM = master$distorted.market.id,
+        dm_freeze = master$freeze.dm,
+        AJ = master$affected.jurisdiction.id,
+        aj_freeze = master$freeze.aj
+    ))
+
+
+    print("Intervention data frame is ready.")
+
+    ## affected.TL
+    ## level formatting
+    print("Generating affected product data frame ...")
+    master$atl.unit <- tolower(as.character(master$atl.unit))
+    names(unit.df) <- c("atl.unit.id", "atl.unit")
+    master <- merge(master, unit.df, by = "atl.unit", all.x = T)
+
+    if (nrow(subset(master, is.na(atl.unit.id) & is.na(atl.unit) == F)) > 0) {
+        stop(paste("Unkown level unit(s) at the HS code level: ", paste(unique(subset(master, is.na(atl.unit.id) & is.na(atl.unit) == F)$atl.unit), collapse = "; "), sep = ""))
+    }
+
+    master$atl.peak <- as.numeric(master$atl.unit == 1 & master$atl.new >= 15)
+
+    master$atl.prior <- as.character(master$atl.prior)
+    master$atl.new <- as.character(master$atl.new)
+
+
+    ## dates
+    master$atl.implemented <- as.factor(master$atl.implemented)
+    master$atl.removed <- as.factor(master$atl.removed)
+
+
+    ## adding sectors
+    hs.cpc <- gtalibrary::cpc.to.hs
+    names(hs.cpc) <- c("atl.sector", "affected.product")
+    master <- merge(master, hs.cpc, by = "affected.product", all.x = T)
+
+    ## adding the zeros
+    master$affected.product <- as.character(master$affected.product)
+    master$affected.product[nchar(master$affected.product) == 5 & is.na(master$affected.product) == F] <- paste(0, master$affected.product[nchar(master$affected.product) == 5 & is.na(master$affected.product) == F], sep = "")
+
+    master$atl.sector <- as.character(master$atl.sector)
+    master$atl.sector[nchar(master$atl.sector) == 2 & is.na(master$atl.sector) == F] <- paste(0, master$atl.sector[nchar(master$atl.sector) == 2 & is.na(master$atl.sector) == F], sep = "")
+
+    print("... pulling it all together.")
+    affected.tl <- unique(data.frame(
+        import_intervention_id = master$intervention.id,
+        tariff_line_code = master$affected.product,
+        prior_level = master$atl.prior,
+        new_level = master$atl.new,
+        unit = master$atl.unit.id,
+        tariff_peak = master$atl.peak,
+        is_tariff_line_official = master$atl.official,
+        sector_code = master$atl.sector,
+        inception_date = master$atl.implemented,
+        removal_date = master$atl.removed
+    ))
+
+    print("Affected product data frame is ready.")
+
+
+    ## exporting CSVs
+    # test
+    state.act.test <- subset(state.act, import_id %in% unique(state.act$import_id)[1:test.size])
+    intervention.test <- subset(intervention, import_measure_id %in% state.act.test$import_id)
+    affected.tl.test <- subset(affected.tl, import_intervention_id %in% intervention.test$import_id)
+
+    print("Writing test CSVs ...")
+    write.csv(state.act.test, file = paste(dump.name, " - ", Sys.Date(), " - test - measure.csv", sep = ""), row.names = F, na = "")
+    write.csv(intervention.test, file = paste(dump.name, " - ", Sys.Date(), " - test - intervention.csv", sep = ""), row.names = F, na = "")
+    write.csv(affected.tl.test, file = paste(dump.name, " - ", Sys.Date(), " - test - atl.csv", sep = ""), row.names = F, na = "")
+
+
+    # remaining full set
+    state.act.full <- subset(state.act, !import_id %in% state.act.test$import_id)
+    intervention.full <- subset(intervention, !import_measure_id %in% state.act.test$import_id)
+    affected.tl.full <- subset(affected.tl, !import_intervention_id %in% intervention.test$import_id)
+
+    print("Writing full CSVs ...")
+    write.csv(state.act.full, file = paste(dump.name, " - ", Sys.Date(), " - full - measure.csv", sep = ""), row.names = F, na = "")
+    write.csv(intervention.full, file = paste(dump.name, " - ", Sys.Date(), " - full - intervention.csv", sep = ""), row.names = F, na = "")
+    write.csv(affected.tl.full, file = paste(dump.name, " - ", Sys.Date(), " - full - atl.csv", sep = ""), row.names = F, na = "")
+
+    print("Voilà!")
+    # returning modified DF into global environment
+    master.bulk <<- master
+    state.act.csv <<- state.act
+    intervention.csv <<- intervention
+    affected.tl.csv <<- affected.tl
 }
