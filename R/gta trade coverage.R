@@ -106,7 +106,6 @@ gta_trade_coverage <- function(
 
   # Initialising Function ---------------------------------------------------
     filter_statement <- vector("character")
-
     data <- gta_data_slicer(data.path=data.path,
         gta.evaluation= gta.evaluation, affected.flows = affected.flows, announcement.period = announcement.period,
         implementation.period = implementation.period, keep.implementation.na = FALSE, revocation.period = revocation.period,
@@ -149,7 +148,7 @@ gta_trade_coverage <- function(
     }
 
     # filter data set from the data slicer again ? is this necessary ?
-    data <- data |> 
+    data <- data |>
         dplyr::filter(eval(parse(text = filter_statement)))
 
     ### restricted the data set to the specified exporters.
@@ -220,7 +219,7 @@ gta_trade_coverage <- function(
     ## Calculation form
     gtalibrary::gta_parameter_check(tolower(nr.exporters.incl), c("all", "one", "oneplus"))
 
-    }else {
+    else {
 
       if(nr.exporters.incl=="ALL"){
 
@@ -334,16 +333,14 @@ gta_trade_coverage <- function(
         years = c(year.start, year.end),
         current.year.todate = current.year.todate
     )
-    
+
     master.sliced <- ms.parked
-    rm(ms.parked) ###??
     data.table::setnames(intervention.duration, "intervention.id","date.id")
     master.dates <- unique(master.dates[,c("intervention.id","affected.product","date.id")])
 
     print("Calculating intervention durations ... complete.")
 
     ######## calculate implementer-importer-exporter-product tuples
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path,"'.", sep="")))
 
     print("Building intervention-importer-exporter-product tuples ...")
     master.sliced <<- master.sliced
@@ -351,13 +348,6 @@ gta_trade_coverage <- function(
                           master.data.frame=TRUE,
                           replica.path.tuple=replica.path.tuple)
     print("Building intervention-importer-exporter-product tuples ... complete.")
-    # rm(parameter.tuple)
-
-    if(nrow(master.tuple)==0) {
-      stop.print <- "There are no affected trading relationships for your parameters."
-      error.message <<- c(T, stop.print)
-      stop(stop.print)
-    }
 
     ## correct for user choice of implementers and roles
     ## relevant parameters: importers, exporters, implementers/roles.
@@ -365,18 +355,15 @@ gta_trade_coverage <- function(
 
     if(is.null(importers)){
       importing.country=gtalibrary::country.names$un_code
-      parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice="All"))
     }else {
 
       if(keep.importers){
         importing.country=gta_un_code_vector(importers, "importing")
-        parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste(importers, collapse=", ")))
 
       }else{
         if(!keep.importers){
 
           importing.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(importers, "importing"))
-          parameter.choices=rbind(parameter.choices, data.frame(parameter="Importing countries:", choice=paste("All except ",paste(importers, collapse=", "),sep="")))
 
         } else {
           stop.print <- "Please specify whether you want to focus on the specified importers or exclude them (keep.importers=T/F)."
@@ -391,14 +378,11 @@ gta_trade_coverage <- function(
     ### IMPLEMENTERS
     if(is.null(implementers)){
       implementing.country=gtalibrary::country.names$un_code
-      parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice="All"))
     }else {
       if(keep.implementer){
         implementing.country=gta_un_code_vector(implementers, "implementing")
-        parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste(implementers, collapse=", ")))
       } else {
         implementing.country=setdiff(gtalibrary::country.names$un_code,gta_un_code_vector(implementers, "implementing"))
-        parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing countries:", choice=paste("all except ",paste(implementers, collapse=", "), sep="")))
       }
     }
 
@@ -419,8 +403,6 @@ gta_trade_coverage <- function(
         stop(stop.print)
       }
     }
-    parameter.choices=rbind(parameter.choices, data.frame(parameter="Implementing country role(s):", choice=paste(implementer.role, collapse=", ")))
-
 
     ## restrict data to the combination of selected importers
     if(! incl.importers.strictness %in% c("ALL","ONE","ONEPLUS")){
@@ -482,15 +464,11 @@ gta_trade_coverage <- function(
     ## Calculation form
     gtalibrary::gta_parameter_check(tolower(nr.importers.incl), c("all", "one", "oneplus"))
 
-    }else {
+    else {
 
       if(nr.importers.incl=="ALL"){
 
         imp.count=aggregate(importer.un ~ intervention.id,interventions.by.importer,function(x) length(unique(x)))
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of affected importers calculated based on: ", choice="All importers"))
-
 
       }
 
@@ -498,18 +476,11 @@ gta_trade_coverage <- function(
 
         imp.count=aggregate(importer.un ~ intervention.id,subset(interventions.by.importer, importer.un %in% importing.country),function(x) length(unique(x)))
 
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of affected importers calculated based on: ", choice="Selected importers"))
-
       }
 
       if(nr.importers.incl=="UNSELECTED"){
 
         imp.count=aggregate(importer.un ~ intervention.id,subset(interventions.by.importer, ! importer.un %in% importing.country),function(x) length(unique(x)))
-
-
-        parameter.choices=rbind(parameter.choices,
-                                data.frame(parameter="Nr. of affected importers calculated based on: ", choice="Unselected importers"))
 
       }
 
@@ -713,7 +684,6 @@ gta_trade_coverage <- function(
     }
 
     print(paste("Calculating maximum coverage per importer-exporter-product combination across all instruments complete.",sep=""))
-
 
     ## Add individual instervention.types, if called for.
     if(group.type==F){
@@ -957,7 +927,6 @@ gta_trade_coverage <- function(
           rm(trade.base.bilateral.temp)
         }
       }
-
 
       if (separate.implementer.groups) {
         implementer.country.groups = tolower(implementers[tolower(implementers) %in% tolower(country.groups$country.groups)])

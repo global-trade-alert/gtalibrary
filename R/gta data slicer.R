@@ -290,10 +290,10 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
         }
 
         data <- data |>
-            mutate(affected.product = str_split(string = affected.product, pattern = ", ")) |>
+            mutate(affected.product = stringr::str_split(string = affected.product, pattern = ", ")) |>
             tidyfast::dt_hoist(affected.product) |>
             dplyr::filter(eval(parse(text = filter_hs))) |>
-            dplyr::group_by(across(-affected.product)) |>
+            dplyr::group_by(dplyr::across(-affected.product)) |>
             summarize(affected.product = paste(affected.product, collapse = ", ")) |>
             data.table::as.data.table()
     }
@@ -313,10 +313,12 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
             mutate(affected.sector = str_split(string = affected.sector, pattern = ", ")) |>
             tidyfast::dt_hoist(affected.sector) |>
             dplyr::filter(eval(parse(text = filter_cpc))) |>
-            dplyr::group_by(across(-affected.sector)) |>
+            dplyr::group_by(dplyr::across(-affected.sector)) |>
             summarize(affected.product = paste(affected.sector, collapse = ", ")) |>
             data.table::as.data.table()
     }
 
     return(data)
 }
+
+devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
