@@ -5,7 +5,8 @@
 \title{This function allows you to extract a tailored subset of the GTA database.}
 \usage{
 gta_data_slicer(
-  data.path = "data/master_plus.Rdata",
+  data = NULL,
+  data.path = "data/master.Rds",
   gta.evaluation = NULL,
   affected.flows = NULL,
   implementing.country = NULL,
@@ -39,12 +40,7 @@ gta_data_slicer(
   intervention.ids = NULL,
   keep.interventions = NULL,
   lag.adjustment = NULL,
-  reporting.period = NULL,
-  add.unpublished = F,
-  df.name = "master.sliced",
-  pc.name = "parameter.choice.slicer",
-  xlsx = FALSE,
-  output.path = NULL
+  add.unpublished = FALSE
 )
 }
 \arguments{
@@ -115,8 +111,6 @@ gta_data_slicer(
 \item{keep.interventions}{Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.}
 
 \item{lag.adjustment}{Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').}
-
-\item{reporting.period}{Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).}
 
 \item{add.unpublished}{Including material that is not published (GTA 28 specifc: dumps & subsidies)}
 

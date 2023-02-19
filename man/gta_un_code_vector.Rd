@@ -4,7 +4,7 @@
 \alias{gta_un_code_vector}
 \title{Create a vector of UN country codes}
 \usage{
-gta_un_code_vector(countries, role = NULL)
+gta_un_code_vector(countries = NULL)
 }
 \arguments{
 \item{countries}{Vector with either country names, country group names or UN codes. Do not mix UN codes with country or group names. Please use function also for UN codes to ensure the ones you supply are consistent with the ones used by the GTA.}

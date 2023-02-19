@@ -11,7 +11,6 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-#'
 gta_parameter_check <- function(parameter = NULL, permissible_values = NULL, arg_name = NULL, warning = FALSE) {
     if (!all(parameter %in% permissible_values)) {
         if (is.null(arg_name)) {
@@ -30,7 +29,6 @@ gta_parameter_check <- function(parameter = NULL, permissible_values = NULL, arg
 }
 
 #' @export
-#' checks if a parameter of a function is of a desired value. if no, show error message
 gta_logical_check <- function(check_arg = NULL, check_function = NULL, error_msg = NULL) {
     check <- tryCatch(
         expr = check_function(check_arg),

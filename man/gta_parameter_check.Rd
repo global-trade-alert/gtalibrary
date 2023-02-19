@@ -4,9 +4,17 @@
 \alias{gta_parameter_check}
 \title{This is a helper function that evaluates whether all user input is understood. Returns 'OK' if this is so and the unconforming values otherwise.}
 \usage{
-gta_parameter_check(check.vector = NULL, permissible.values = NULL)
+gta_parameter_check(
+  parameter = NULL,
+  permissible_values = NULL,
+  arg_name = NULL,
+  warning = FALSE
+)
 }
 \arguments{
+\item{warning}{specifies whether the ocurrence of a value in parameter which is not contained in permissible_values should give a warning or an error
+gives an error by default (ie. Warning = FALSE)}
+
 \item{check.vector}{Specify the vector you want to check.}
 
 \item{permissible.values}{Specify the permissible values.}

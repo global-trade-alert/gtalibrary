@@ -15,8 +15,7 @@ gta_trade_value_bilateral(
   keep.hs = TRUE,
   trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
-  df.name = "trade.base.bilateral",
-  pc.name = "parameter.choice.trade.base"
+  trade.data.file = NULL
 )
 }
 \arguments{
