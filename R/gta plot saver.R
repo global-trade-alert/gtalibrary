@@ -95,7 +95,3 @@ gta_plot_saver <- function(plot = NULL,
     )
   }
 }
-devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
-
-
-gtalibrary::gta_check
