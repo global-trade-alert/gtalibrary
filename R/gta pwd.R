@@ -10,22 +10,27 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_pwd <- function(type=NULL) {
-
+gta_pwd <- function(type = NULL) {
   # Load stored credentials
   source("setup/pwd.R")
 
-  if(is.null(type)) {
-    eval(parse(text=paste0("creds <- list(",paste0(credentials," = ",credentials, collapse=", "),")")))
+  if (is.null(type)) {
+    eval(parse(text = paste0("creds <- list(", paste0(credentials, " = ", credentials, collapse = ", "), ")")))
     return(creds)
   } else {
-    if (! tolower(type) %in% tolower(credentials)) {
+    if (!tolower(type) %in% tolower(credentials)) {
       stop("Credentials type not found")
     } else {
-      eval(parse(text=paste0("creds <- ",credentials[tolower(credentials) == tolower(type)])))
+      eval(parse(text = paste0("creds <- ", credentials[tolower(credentials) == tolower(type)])))
       # eval(parse(text=paste0("rm(credentials,",paste(credentials, collapse=","),")")))
       return(creds)
     }
   }
+}
 
-  }
+
+roxygen2::roxygenize()
+
+devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
+
+gtalibrary::gta_logical_check
