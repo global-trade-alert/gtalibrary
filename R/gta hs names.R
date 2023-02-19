@@ -10,8 +10,7 @@
 #' @author Global Trade Alert
 
 #' @export
-gta_hs_names = function(codes){
-
+gta_hs_names <- function(codes) {
   # Load cpc names
   hs.names <- gtalibrary::hs.names
   codes <- gta_hs_code_check(codes)
@@ -19,5 +18,4 @@ gta_hs_names = function(codes){
   hs.code.names <<- data.frame(hs = codes, names = hs.names$hs.name[hs.names$HS12code %in% codes])
 
   rm(codes)
-
 }

@@ -27,10 +27,3 @@ gta_pwd <- function(type = NULL) {
     }
   }
 }
-
-
-roxygen2::roxygenize()
-
-devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
-
-gtalibrary::gta_logical_check

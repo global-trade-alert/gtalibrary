@@ -18,12 +18,11 @@
 
 # Function infos and parameters  --------------------------------------------
 #' @export
-gta_intervention_duration <- function(data.path = "data/master_plus.Rdata",
-                                      is.data.frame = FALSE,
-                                      years = NULL,
-                                      current.year.todate = TRUE,
-                                      df.name = "intervention.duration",
-                                      pc.name = "parameter.choice.duration") {
+gta_intervention_duration <- function(
+    data.path = "data/master_plus.Rdata",
+    is.data.frame = FALSE, years = NULL,
+    current.year.todate = TRUE, df.name = "intervention.duration",
+    pc.name = "parameter.choice.duration") {
   ## initialising
   library(data.table)
   parameter.choices <- data.frame(parameter = character(), choice = character(), stringsAsFactors = F)

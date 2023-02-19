@@ -29,25 +29,17 @@
 #' @author Global Trade Alert
 
 #' @export
-gta_plot_3d_map <- function(data = NULL,
-                            countries = NULL,
-                            value.x = NULL,
-                            value.y = NULL,
-                            value.x.breaks = 4,
-                            value.y.breaks = 4,
-                            x.high.y.low = gta_colour$blue[1],
-                            x.high.y.high = gta_colour$blue[4],
-                            x.low.y.high = gta_colour$red[4],
-                            x.low.y.low = gta_colour$red[1],
-                            x.axis.title = NULL,
-                            y.axis.title = NULL,
-                            x.axis.labels = NULL,
-                            y.axis.labels = NULL,
-                            legend.title = NULL,
-                            save.eps = FALSE,
-                            save.png = FALSE,
-                            save.path = "/",
-                            save.name = "3D-Map") {
+gta_plot_3d_map <- function(
+    data = NULL,
+    countries = NULL, value.x = NULL,
+    value.y = NULL, value.x.breaks = 4,
+    value.y.breaks = 4, x.high.y.low = gta_colour$blue[1],
+    x.high.y.high = gta_colour$blue[4],x.low.y.high = gta_colour$red[4],
+    x.low.y.low = gta_colour$red[1],x.axis.title = NULL,
+    y.axis.title = NULL,x.axis.labels = NULL,
+    y.axis.labels = NULL,legend.title = NULL,
+    save.eps = FALSE,save.png = FALSE,save.path = "/",save.name = "3D-Map"
+) {
 
   library("data.table")
   library("ggplot2")

@@ -12,8 +12,7 @@
 #' @author Global Trade Alert
 
 #' @export
-gta_colour_palette <- function(){
-
+gta_colour_palette <- function() {
   ### THE GTA standard colour palette
 
   # Evaluation colours
@@ -40,7 +39,7 @@ gta_colour_palette <- function(){
 
   # Qualitative colors
 
-  qualitative <-  c(blue[1], blue[4], brown[1], brown[4], turquoise[1], turquoise[4], desert[1], desert[4])
+  qualitative <- c(blue[1], blue[4], brown[1], brown[4], turquoise[1], turquoise[4], desert[1], desert[4])
 
   # General plot colours
   panel.bg <- "#EDF2F6"
@@ -56,29 +55,31 @@ gta_colour_palette <- function(){
   grey.shades <- colorRampPalette(c(grey[1], grey[4]))
 
 
-  gta_colour = list("green" = green,
-                            "liberalising" = liberalising,
-                            "green.light" = green.light,
-                            "red" = red,
-                            "harmful" = harmful,
-                            "light.red" = light.red,
-                            "amber" = amber,
-                            "blue" = blue,
-                            "brown" = brown,
-                            "turquoise" = turquoise,
-                            "desert" = desert,
-                            "grey" = grey,
-                            "blue.complement" = blue.complement,
-                            "qualitative" = qualitative,
-                            "panel.bg" = panel.bg,
-                            "green.shades" = green.shades,
-                            "red.shades" = red.shades,
-                            "blue.shades" = blue.shades,
-                            "amber.shades" = amber.shades,
-                            "brown.shades" = brown.shades,
-                            "desert.shades" = desert.shades,
-                            "turquoise.shades" = turquoise.shades,
-                            "grey.shades" = grey.shades)
+  gta_colour <- list(
+    "green" = green,
+    "liberalising" = liberalising,
+    "green.light" = green.light,
+    "red" = red,
+    "harmful" = harmful,
+    "light.red" = light.red,
+    "amber" = amber,
+    "blue" = blue,
+    "brown" = brown,
+    "turquoise" = turquoise,
+    "desert" = desert,
+    "grey" = grey,
+    "blue.complement" = blue.complement,
+    "qualitative" = qualitative,
+    "panel.bg" = panel.bg,
+    "green.shades" = green.shades,
+    "red.shades" = red.shades,
+    "blue.shades" = blue.shades,
+    "amber.shades" = amber.shades,
+    "brown.shades" = brown.shades,
+    "desert.shades" = desert.shades,
+    "turquoise.shades" = turquoise.shades,
+    "grey.shades" = grey.shades
+  )
 
   gta_colour <<- gta_colour
 }

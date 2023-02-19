@@ -9,9 +9,8 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_rbind=function(list){
-
-  diff = c()
+gta_rbind <- function(list) {
+  diff <- c()
   for (i in 1:length(list)) {
     diff <- append(diff, colnames(list[[i]]))
     diff <- unique(diff)
@@ -26,7 +25,7 @@ gta_rbind=function(list){
 
   result <- as.data.frame(list[[1]])
 
-  for (i in 2:length(list)){
+  for (i in 2:length(list)) {
     result <- rbind(result, as.data.frame(list[[i]]))
   }
 

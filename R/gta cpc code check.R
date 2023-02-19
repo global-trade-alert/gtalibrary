@@ -41,7 +41,3 @@ gta_cpc_code_check <- function(codes) {
   }
   rm(codes)
 }
-
-devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
-
-sessionInfo()

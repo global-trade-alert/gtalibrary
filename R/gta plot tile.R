@@ -14,27 +14,30 @@
 #' @param title Specify a title for the map plot. Default: No title.
 #' @param x.axis.name Specify the x-axis label. Default: No label.
 #' @param y.axis.name Specify the x-axis label. Default: No label.
-#'
+#' @import data.table
+#' @import ggplot2
+#' @import lubridate
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
 #' @export
-gta_plot_tile <- function(data = NULL,
-                         value.x = NULL,
-                         value.y = NULL,
-                         values = NULL,
-                         colour.low = gta_colour$blue[4],
-                         colour.high = gta_colour$blue[1],
-                         legend.title = NULL,
-                         title = NULL,
-                         x.axis.name = NULL,
-                         y.axis.name = NULL) {
+gta_plot_tile <- function(
+    data = NULL,
+    value.x = NULL,
+    value.y = NULL,
+    values = NULL,
+    colour.low = gta_colour$blue[4],
+    colour.high = gta_colour$blue[1],
+    legend.title = NULL,
+    title = NULL,
+    x.axis.name = NULL,
+    y.axis.name = NULL
+) {
 
   library("data.table")
   library("ggplot2")
   library("lubridate")
-
 
   # Load colour palette
   gta_colour_palette()

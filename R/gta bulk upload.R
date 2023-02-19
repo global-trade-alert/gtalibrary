@@ -49,119 +49,87 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_bulk_upload = function(  dump.name="data dump",
-                             master.path=NULL,
-                             test.size=5,
-                             sa.id="state.act.id",
-                             sa.title="title",
-                             sa.description="announcement.description",
-                             announcement.date="date.announced",
-                             sa.source="source",
-                             source.off="source.official",
-                             int.id="intervention.id",
-                             implementer="implementing.jurisdiction",
-                             implementer.type="name",
-                             int.type="intervention.type",
-                             int.description="intervention.description",
-                             int.flow="affected.flow",
-                             eval.gta="gta.evaluation",
-                             eval.research="research.evaluation",
-                             inception.date="date.implemented",
-                             removal.date="date.removed",
-                             temporary="duration.limited",
-                             firms="eligible.firms",
-                             imp.level="implementation.level",
-                             is.noncommercial="non.commercial",
-                             is.horizontal="horizontal",
-                             is.fta="include.fta",
-                             int.prior="level.prior",
-                             int.new="level.new",
-                             int.unit="level.unit",
-                             sectors.nonhs="affected.sectors.nonhs",
-                             dm.nonsupport="dm.editor.choice",
-                             dm.type="name",
-                             dm.freeze="freeze.dm",
-                             aj.nonsupport="aj.editor.choice",
-                             aj.type="name",
-                             aj.freeze="freeze.aj",
-                             hs.code="affected.product",
-                             hs.prior="atl.prior",
-                             hs.new="atl.new",
-                             hs.unit="atl.unit",
-                             hs.official="atl.official",
-                             hs.inception="atl.implemented",
-                             hs.removed="atl.removed"){
+gta_bulk_upload <- function(dump.name = "data dump", master.path = NULL,
+                            test.size = 5, sa.id = "state.act.id",
+                            sa.title = "title", sa.description = "announcement.description",
+                            announcement.date = "date.announced", sa.source = "source",
+                            source.off = "source.official", int.id = "intervention.id",
+                            implementer = "implementing.jurisdiction", implementer.type = "name",
+                            int.type = "intervention.type", int.description = "intervention.description",
+                            int.flow = "affected.flow", eval.gta = "gta.evaluation",
+                            eval.research = "research.evaluation", inception.date = "date.implemented",
+                            removal.date = "date.removed", temporary = "duration.limited", firms = "eligible.firms",
+                            imp.level = "implementation.level", is.noncommercial = "non.commercial",
+                            is.horizontal = "horizontal", is.fta = "include.fta",
+                            int.prior = "level.prior", int.new = "level.new",
+                            int.unit = "level.unit", sectors.nonhs = "affected.sectors.nonhs",
+                            dm.nonsupport = "dm.editor.choice", dm.type = "name",
+                            dm.freeze = "freeze.dm", aj.nonsupport = "aj.editor.choice",
+                            aj.type = "name", aj.freeze = "freeze.aj",
+                            hs.code = "affected.product", hs.prior = "atl.prior",
+                            hs.new = "atl.new", hs.unit = "atl.unit",
+                            hs.official = "atl.official", hs.inception = "atl.implemented",
+                            hs.removed = "atl.remove") {
+    library(pool)
+    library(RMariaDB)
+    library(data.table)
+    library(sodium)
 
-  library(gtalibrary)
-  library(gtasql)
-  library(gtalibrary)
-  library(pool)
-  library(RMariaDB)
-  library(data.table)
-  library(sodium)
+    gta_setwd()
+    database <<- "gtamain"
 
-  gta_setwd()
-  database <<- "gtamain"
+    gta_sql_pool_open(
+        db.title = database,
+        db.host = gta_pwd(database)$host,
+        db.name = gta_pwd(database)$name,
+        db.user = gta_pwd(database)$user,
+        db.password = gta_pwd(database)$password,
+        table.prefix = "gta_"
+    )
 
-  gta_sql_pool_open(db.title=database,
-                    db.host = gta_pwd(database)$host,
-                    db.name = gta_pwd(database)$name,
-                    db.user = gta_pwd(database)$user,
-                    db.password = gta_pwd(database)$password,
-                    table.prefix = "gta_")
+    source("setup/keys/main db upload.R")
 
-  source("setup/keys/main db upload.R")
+    if (is.null(master.path)) {
+        gta_sql_pool_close()
+
+        stop("Please path to master Rdata file")
+    }
 
 
-  if(is.null(master.path)){
+    # ## Authetification TBA
+    # login= readline("Please provide your Admin Panel login name:   ")
+    # pwd= readline("Please provide your Admin Panel password:   ")
+    #
+    #
+    # user.credentials <- gta_sql_get_value(sqlInterpolate(pool, "SELECT f_name, passwd FROM fw_users WHERE login = ?userLogin;", userLogin = login))
+    # if(nrow(user.credentials)==0){
+    #   stop("Unknown login name.")
+    # } else {
+    #
+    #   if(password_verify(as.character(user.credentials$password), as.character(pwd))){
+    #
+    #     print(paste0("Good luck, ",unique(user.credentials$f.name)[1],"!"))
+    #
+    #   } else {
+    #
+    #     stop("---- wrong password ----")
+    #
+    #   }
+    #
+    #
+    # }
 
-    gta_sql_pool_close()
+    pwd <- readline("Please enter upload password: ")
 
-    stop("Please path to master Rdata file")
+    if (pwd == pwd.main) {
+        print("Thanks & good luck")
+    } else {
+        gta_sql_pool_close()
+        stop("---- wrong password ----")
+    }
 
-  }
-
-
-  # ## Authetification TBA
-  # login= readline("Please provide your Admin Panel login name:   ")
-  # pwd= readline("Please provide your Admin Panel password:   ")
-  #
-  #
-  # user.credentials <- gta_sql_get_value(sqlInterpolate(pool, "SELECT f_name, passwd FROM fw_users WHERE login = ?userLogin;", userLogin = login))
-  # if(nrow(user.credentials)==0){
-  #   stop("Unknown login name.")
-  # } else {
-  #
-  #   if(password_verify(as.character(user.credentials$password), as.character(pwd))){
-  #
-  #     print(paste0("Good luck, ",unique(user.credentials$f.name)[1],"!"))
-  #
-  #   } else {
-  #
-  #     stop("---- wrong password ----")
-  #
-  #   }
-  #
-  #
-  # }
-
-  pwd=readline("Please enter upload password: ")
-
-  if(pwd==pwd.main){
-
-    print("Thanks & good luck")
-
-  } else {
+    ## loading data
+    load(master.path)
 
     gta_sql_pool_close()
-    stop("---- wrong password ----")
-
-  }
-
-  ## loading data
-  load(master.path)
-
-
-
-  gta_sql_pool_close()
 }

@@ -54,18 +54,20 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
-                            gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
-                            keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
-                            incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
-                            nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
-                            keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
-                            submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
-                            intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
-                            implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
-                            cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-                            intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
-                            add.unpublished = FALSE) {
+gta_data_slicer <- function(
+    data = NULL, data.path = "data/master.Rds",
+    gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
+    keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
+    incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
+    nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
+    keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
+    submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
+    intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
+    implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
+    cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
+    intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL,
+    add.unpublished = FALSE
+) {
     # if master dataset is not provided, load it as data table
     # if it is already provided, ensure that it is formatted as a data.table
     if (is.null(data)) data <- data.table::as.data.table(readRDS(data.path))
@@ -186,7 +188,7 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
 
     # intervention.ids
     if (!is.null(intervention.ids)) {
-        gta_type_check(keep.interventions, is.logical)
+        gtalibrary::gta_logical_check(keep.interventions, is.logical)
         permissible_values <- unique(master$intervention.id)
         gtalibrary::gta_parameter_check(intervention.ids, permissible_values)
         intervention_ids_filter <- intervention.ids
@@ -279,7 +281,7 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
     # perform filter check for hs codes standalone
     # hs codes
     if (!is.null(hs.codes)) {
-        gtalibrary::gta_type_check(keep.hs, is.logical)
+        gtalibrary::gta_logical_check(keep.hs, is.logical)
         hs_codes_filter <- gtalibrary::gta_hs_code_check(codes = hs.codes, message = FALSE)
 
         if (!keep.hs) {
@@ -299,7 +301,7 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
 
     # cpc.sectors
     if (!is.null(cpc.sectors)) {
-        gtalibrary::gta_type_check(keep.cpc, is.logical)
+        gtalibrary::gta_logical_check(keep.cpc, is.logical)
         cpc_sectors_filter <- gtalibrary::gta_cpc_code_check(codes = cpc.sectors)
 
         if (!keep.cpc) {
@@ -319,5 +321,3 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
 
     return(data)
 }
-
-devtools::install_github("global-trade-alert/gtalibrary@hs_functions")

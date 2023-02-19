@@ -59,170 +59,166 @@
 
 #' @export
 gta_plot_wrapper <- function(
-  data=NULL,
-  data.x=NULL,
-  data.y=NULL,
-  group=NULL,
-  plot.title = NULL,
-  plot.subtitle = NULL,
-  x.data.type = "continuous",
-  x.bottom.name = NULL,
-  x.bottom.breaks = waiver(),
-  x.bottom.limits = NULL,
-  x.bottom.labels = waiver(),
-  x.bottom.expand = c(0.02,0.02),
-  x.top.enable = F,
-  x.top.transform = 1,
-  x.top.name = x.bottom.name,
-  x.top.breaks = x.bottom.breaks,
-  x.top.limits = x.bottom.limits,
-  x.top.labels = waiver(),
-  y.data.type = "continuous",
-  y.left.name = NULL,
-  y.left.breaks = waiver(),
-  y.left.limits = NULL,
-  y.left.labels = waiver(),
-  y.left.expand = c(0.02,0.02),
-  y.right.enable = T,
-  y.right.transform = 1,
-  y.right.name = y.left.name,
-  y.right.breaks = y.left.breaks,
-  y.right.limits = y.left.limits,
-  y.right.labels = y.left.labels,
-  colour.palette = gta_colour$qualitative,
-  colour.labels = waiver(),
-  colour.legend.title = waiver(),
-  colour.legend.col = 1,
-  colour.legend.enable = T,
-  fill.palette = gta_colour$qualitative,
-  fill.labels = waiver(),
-  fill.legend.title = waiver(),
-  fill.legend.col = 1,
-  fill.legend.enable = T,
-  flip.plot = F,
-  facet.var = NULL,
-  facet.ncol = 1,
-  facet.nrow = 1,
-  x.highlight.range = NULL,
-  x.highlight.colour = gta_colour$grey[1],
-  x.highlight.title = NULL,
-  x.highlight.alpha = 0.2,
-  y.highlight.range = NULL,
-  y.highlight.colour = gta_colour$grey[1],
-  y.highlight.title = NULL,
-  y.highlight.alpha = 0.2
+    data = NULL, data.x = NULL,
+    data.y = NULL, group = NULL,
+    plot.title = NULL, plot.subtitle = NULL,
+    x.data.type = "continuous", x.bottom.name = NULL,
+    x.bottom.breaks = waiver(), x.bottom.limits = NULL, x.bottom.labels = waiver(),
+    x.bottom.expand = c(0.02, 0.02), x.top.enable = F,
+    x.top.transform = 1, x.top.name = x.bottom.name,
+    x.top.breaks = x.bottom.breaks, x.top.limits = x.bottom.limits,
+    x.top.labels = waiver(), y.data.type = "continuous",
+    y.left.name = NULL, y.left.breaks = waiver(),
+    y.left.limits = NULL, y.left.labels = waiver(),
+    y.left.expand = c(0.02, 0.02), y.right.enable = T,
+    y.right.transform = 1, y.right.name = y.left.name,
+    y.right.breaks = y.left.breaks, y.right.limits = y.left.limits,
+    y.right.labels = y.left.labels, colour.palette = gta_colour$qualitative,
+    colour.labels = waiver(), colour.legend.title = waiver(),
+    colour.legend.col = 1, colour.legend.enable = T,
+    fill.palette = gta_colour$qualitative, fill.labels = waiver(),
+    fill.legend.title = waiver(), fill.legend.col = 1,
+    fill.legend.enable = T, flip.plot = F,
+    facet.var = NULL, facet.ncol = 1,
+    facet.nrow = 1, x.highlight.range = NULL,
+    x.highlight.colour = gta_colour$grey[1], x.highlight.title = NULL,
+    x.highlight.alpha = 0.2, y.highlight.range = NULL,
+    y.highlight.colour = gta_colour$grey[1], y.highlight.title = NULL, y.highlight.alpha = 0.2
+) {
+    gta_colour_palette()
 
-){
-  library("scales")
+    if (is.character(data[, data.x])) {
+        data[, data.x] <- as.factor(data[, data.x])
+    }
+    if (is.character(data[, data.y])) {
+        data[, data.y] <- as.factor(data[, data.y])
+    }
 
-  gta_colour_palette()
-
-  if(is.character(data[,data.x])) {
-    data[,data.x] <- as.factor(data[,data.x])
-  }
-  if(is.character(data[,data.y])) {
-    data[,data.y] <- as.factor(data[,data.y])
-  }
-
-  list(
-
-    ggtitle(plot.title,
-            subtitle = plot.subtitle),
-
-
-    labs(x=x.bottom.name,
-         y=y.left.name),
-
-
-    if (is.numeric(data[,data.y])){
-      if (y.right.enable==T){
-        scale_y_continuous(limits = y.left.limits,
-                           breaks = y.left.breaks,
-                           expand = y.left.expand,
-                           labels = y.left.labels,
-                           sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",y.right.transform))),
-                                               name = y.right.name,
-                                               labels = y.right.labels,
-                                               breaks = y.right.breaks))
-      } else {
-        scale_y_continuous(limits = y.left.limits,
-                           breaks = y.left.breaks,
-                           expand = y.left.expand,
-                           labels = y.left.labels)}
-
-    } else if (is.numeric(data[,data.y])==F) {
-      if (y.right.enable==T){
-        scale_y_discrete(limits = y.left.limits,
-                         breaks = y.left.breaks,
-                         expand = y.left.expand,
-                         labels = y.left.labels,
-                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",y.right.transform))),
-                                             name = y.right.name,
-                                             labels = y.right.labels,
-                                             breaks = y.right.breaks))
-      } else {
-        scale_y_discrete(limits = y.left.limits,
-                         breaks = y.left.breaks,
-                         expand = y.left.expand,
-                         labels = y.left.labels)}},
-
-    if (is.numeric(data[,data.x])) {
-      if (x.top.enable==T){
-        scale_x_continuous(limits = x.bottom.limits,
-                           breaks = x.bottom.breaks,
-                           expand = x.bottom.expand,
-                           labels = x.bottom.labels,
-                           sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",x.top.transform))),
-                                               name = x.top.name,
-                                               labels = x.top.labels,
-                                               breaks = x.top.breaks))
-      } else {
-        scale_x_continuous(limits = x.bottom.limits,
-                           breaks = x.bottom.breaks,
-                           expand = x.bottom.expand,
-                           labels = x.bottom.labels)}
-
-    } else if (is.numeric(data[,data.x])==F) {
-      if (x.top.enable==T){
-        scale_x_discrete(limits = x.bottom.limits,
-                         breaks = x.bottom.breaks,
-                         expand = x.bottom.expand,
-                         labels = x.bottom.labels,
-                         sec.axis = sec_axis(trans = eval(parse(text=paste("~.*",x.top.transform))),
-                                             name = x.top.name,
-                                             labels = x.top.labels,
-                                             breaks = x.top.breaks))
-      } else {
-        scale_x_discrete(limits = x.bottom.limits,
-                         breaks = x.bottom.breaks,
-                         expand = x.bottom.expand,
-                         labels = x.bottom.labels)}},
-
-
-    if (colour.legend.enable) {
-      scale_color_manual(values=colour.palette, labels=colour.labels)
-    },
-    if (fill.legend.enable) {
-      scale_fill_manual(values=fill.palette, labels = fill.labels)
-    },
-    guides(color = guide_legend(title = colour.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = colour.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right"),
-           fill = guide_legend(title = fill.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = fill.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right")),
-
-    if(is.null(x.highlight.range)==F) {
-      geom_rect(aes(xmin = x.highlight.range[1], xmax = x.highlight.range[2], ymin = -Inf, ymax = Inf), fill=x.highlight.colour, colour="transparent", alpha = x.highlight.alpha)
-    },
-    if(is.null(x.highlight.title)==F) {
-      geom_text(aes(x=x.highlight.range[1], y=Inf, label=x.highlight.title), hjust=-0.1, vjust=1.6, color = x.highlight.colour, lineheight = 1)
-    },
-    if(is.null(y.highlight.range)==F) {
-      geom_rect(aes(ymin = y.highlight.range[1], ymax = y.highlight.range[2], xmin = -Inf, xmax = Inf), fill=y.highlight.colour, colour="transparent", alpha = y.highlight.alpha)
-    },
-    if(is.null(y.highlight.title)==F) {
-      geom_text(aes(y=y.highlight.range[2], x=-Inf, label=y.highlight.title), hjust=-0.1, vjust=1.5, color = y.highlight.colour, lineheight = 1)
-    },
-
-    if (flip.plot == T) {coord_flip()},
-
-
-    if (is.null(facet.var)==F){facet_wrap(facets=vars(eval(facet.var)), ncol = facet.ncol, nrow = facet.nrow)}
-  )}
+    list(
+        ggtitle(plot.title,
+            subtitle = plot.subtitle
+        ),
+        labs(
+            x = x.bottom.name,
+            y = y.left.name
+        ),
+        if (is.numeric(data[, data.y])) {
+            if (y.right.enable == T) {
+                scale_y_continuous(
+                    limits = y.left.limits,
+                    breaks = y.left.breaks,
+                    expand = y.left.expand,
+                    labels = y.left.labels,
+                    sec.axis = sec_axis(
+                        trans = eval(parse(text = paste("~.*", y.right.transform))),
+                        name = y.right.name,
+                        labels = y.right.labels,
+                        breaks = y.right.breaks
+                    )
+                )
+            } else {
+                scale_y_continuous(
+                    limits = y.left.limits,
+                    breaks = y.left.breaks,
+                    expand = y.left.expand,
+                    labels = y.left.labels
+                )
+            }
+        } else if (is.numeric(data[, data.y]) == F) {
+            if (y.right.enable == T) {
+                scale_y_discrete(
+                    limits = y.left.limits,
+                    breaks = y.left.breaks,
+                    expand = y.left.expand,
+                    labels = y.left.labels,
+                    sec.axis = sec_axis(
+                        trans = eval(parse(text = paste("~.*", y.right.transform))),
+                        name = y.right.name,
+                        labels = y.right.labels,
+                        breaks = y.right.breaks
+                    )
+                )
+            } else {
+                scale_y_discrete(
+                    limits = y.left.limits,
+                    breaks = y.left.breaks,
+                    expand = y.left.expand,
+                    labels = y.left.labels
+                )
+            }
+        },
+        if (is.numeric(data[, data.x])) {
+            if (x.top.enable == T) {
+                scale_x_continuous(
+                    limits = x.bottom.limits,
+                    breaks = x.bottom.breaks,
+                    expand = x.bottom.expand,
+                    labels = x.bottom.labels,
+                    sec.axis = sec_axis(
+                        trans = eval(parse(text = paste("~.*", x.top.transform))),
+                        name = x.top.name,
+                        labels = x.top.labels,
+                        breaks = x.top.breaks
+                    )
+                )
+            } else {
+                scale_x_continuous(
+                    limits = x.bottom.limits,
+                    breaks = x.bottom.breaks,
+                    expand = x.bottom.expand,
+                    labels = x.bottom.labels
+                )
+            }
+        } else if (is.numeric(data[, data.x]) == F) {
+            if (x.top.enable == T) {
+                scale_x_discrete(
+                    limits = x.bottom.limits,
+                    breaks = x.bottom.breaks,
+                    expand = x.bottom.expand,
+                    labels = x.bottom.labels,
+                    sec.axis = sec_axis(
+                        trans = eval(parse(text = paste("~.*", x.top.transform))),
+                        name = x.top.name,
+                        labels = x.top.labels,
+                        breaks = x.top.breaks
+                    )
+                )
+            } else {
+                scale_x_discrete(
+                    limits = x.bottom.limits,
+                    breaks = x.bottom.breaks,
+                    expand = x.bottom.expand,
+                    labels = x.bottom.labels
+                )
+            }
+        },
+        if (colour.legend.enable) {
+            scale_color_manual(values = colour.palette, labels = colour.labels)
+        },
+        if (fill.legend.enable) {
+            scale_fill_manual(values = fill.palette, labels = fill.labels)
+        },
+        guides(
+            color = guide_legend(title = colour.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = colour.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right"),
+            fill = guide_legend(title = fill.legend.title, label.hjust = 0, label.vjust = 0.5, title.position = "top", ncol = fill.legend.col, title.hjust = 0, direction = "horizontal", label.position = "right")
+        ),
+        if (is.null(x.highlight.range) == F) {
+            geom_rect(aes(xmin = x.highlight.range[1], xmax = x.highlight.range[2], ymin = -Inf, ymax = Inf), fill = x.highlight.colour, colour = "transparent", alpha = x.highlight.alpha)
+        },
+        if (is.null(x.highlight.title) == F) {
+            geom_text(aes(x = x.highlight.range[1], y = Inf, label = x.highlight.title), hjust = -0.1, vjust = 1.6, color = x.highlight.colour, lineheight = 1)
+        },
+        if (is.null(y.highlight.range) == F) {
+            geom_rect(aes(ymin = y.highlight.range[1], ymax = y.highlight.range[2], xmin = -Inf, xmax = Inf), fill = y.highlight.colour, colour = "transparent", alpha = y.highlight.alpha)
+        },
+        if (is.null(y.highlight.title) == F) {
+            geom_text(aes(y = y.highlight.range[2], x = -Inf, label = y.highlight.title), hjust = -0.1, vjust = 1.5, color = y.highlight.colour, lineheight = 1)
+        },
+        if (flip.plot == T) {
+            coord_flip()
+        },
+        if (is.null(facet.var) == F) {
+            facet_wrap(facets = vars(eval(facet.var)), ncol = facet.ncol, nrow = facet.nrow)
+        }
+    )
+}

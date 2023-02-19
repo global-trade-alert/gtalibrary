@@ -25,12 +25,13 @@
 
 # Function infos and parameters  --------------------------------------------
 #' @export
-gta_trade_value_bilateral <- function(importing.country = NULL, keep.importer = NULL,
-                                      exporting.country = NULL, keep.exporter = NULL,
-                                      cpc.sectors = NULL, keep.cpc = TRUE, hs.codes = NULL,
-                                      keep.hs = TRUE, trade.data = "base",
-                                      trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
-                                      trade.data.file = NULL # ensure that this data.frame can also be fed from memory for better performance in loops!
+gta_trade_value_bilateral <- function(
+    importing.country = NULL, keep.importer = NULL,
+    exporting.country = NULL, keep.exporter = NULL,
+    cpc.sectors = NULL, keep.cpc = TRUE, hs.codes = NULL,
+    keep.hs = TRUE, trade.data = "base",
+    trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
+    trade.data.file = NULL
 ) {
     gtalibrary::gta_parameter_check(trade.data, c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020)))
     filter_statement <- vector("character")

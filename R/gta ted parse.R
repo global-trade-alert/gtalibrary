@@ -18,8 +18,6 @@ gta_ted_parse <- function(dom.df=NULL,
                      "parse.successful"=F,
                      "parse.error.msg"=NA)
 
-
-
   #### FIRST TEST: GPA coverage
   ## Is there a GPA reference?
   gpa.references=any(grepl("GPA", dom.df$element.name)|grepl("GPA", dom.df$element.value))
