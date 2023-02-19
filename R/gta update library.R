@@ -8,9 +8,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_update_library = function(x){
-  devtools::install_github("global-trade-alert/gtalibrary", force=T)
-  library("gtalibrary")
-
+gta_update_library <- function(x) {
+  devtools::install_github("global-trade-alert/gtalibrary", force = TRUE)
   print("You are up to date.")
 }
