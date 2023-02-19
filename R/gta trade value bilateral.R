@@ -106,3 +106,5 @@ gta_trade_value_bilateral <- function(importing.country = NULL, keep.importer = 
     }
 }
 ## could specify the year value here --> WOuld make it easier int he trade coverage function!
+
+roxygen2::roxygenize()

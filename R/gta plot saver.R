@@ -30,56 +30,72 @@ gta_plot_saver <- function(plot = NULL,
                            pdf = F,
                            jpg = F,
                            cairo_ps = F,
-                           aspect.ratio = 21/29.7) {
+                           aspect.ratio = 21 / 29.7) {
   if (is.null(height)) {
-    height = width*aspect.ratio
+    height <- width * aspect.ratio
   } else {
-    height = height
+    height <- height
   }
 
   if (png == T) {
-    ggsave(filename=paste0(name,".png"),
-           plot=plot,
-           device = "png",
-           path=path,
-           dpi=600,
-           width=width,
-           height = height,
-           units = "cm")}
+    ggsave(
+      filename = paste0(name, ".png"),
+      plot = plot,
+      device = "png",
+      path = path,
+      dpi = 600,
+      width = width,
+      height = height,
+      units = "cm"
+    )
+  }
   if (jpg == T) {
-    ggsave(filename=paste0(name,".jpg"),
-           plot=plot,
-           device = "jpg",
-           path=path,
-           dpi=600,
-           width=width,
-           height = height,
-           units = "cm")}
+    ggsave(
+      filename = paste0(name, ".jpg"),
+      plot = plot,
+      device = "jpg",
+      path = path,
+      dpi = 600,
+      width = width,
+      height = height,
+      units = "cm"
+    )
+  }
   if (eps == T) {
-    ggsave(filename=paste0(name,".eps"),
-           plot=plot,
-           device = "eps",
-           path=path,
-           width=width,
-           height = height,
-           units = "cm")
+    ggsave(
+      filename = paste0(name, ".eps"),
+      plot = plot,
+      device = "eps",
+      path = path,
+      width = width,
+      height = height,
+      units = "cm"
+    )
   }
   if (pdf == T) {
-    ggsave(filename=paste0(name,".pdf"),
-           plot=plot,
-           device = grDevices::cairo_pdf,
-           path=path,
-           width=width,
-           height = height,
-           units = "cm")
+    ggsave(
+      filename = paste0(name, ".pdf"),
+      plot = plot,
+      device = grDevices::cairo_pdf,
+      path = path,
+      width = width,
+      height = height,
+      units = "cm"
+    )
   }
   if (cairo_ps == T) {
-    ggsave(filename=paste0(name,".eps"),
-           plot=plot,
-           device = grDevices::cairo_ps,
-           path=path,
-           width=width,
-           height = height,
-           units = "cm")
+    ggsave(
+      filename = paste0(name, ".eps"),
+      plot = plot,
+      device = grDevices::cairo_ps,
+      path = path,
+      width = width,
+      height = height,
+      units = "cm"
+    )
   }
 }
+devtools::install_github("global-trade-alert/gtalibrary@hs_functions")
+
+
+gtalibrary::gta_check
