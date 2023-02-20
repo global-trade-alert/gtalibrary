@@ -89,6 +89,7 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
     gtalibrary::gta_logical_check(keep.others, is.logical, "Keep.others must be a TRUE/FALSE")
     gtalibrary::gta_logical_check(add.unpublished, is.logical, "add.unpublished must be a TRUE/FALSE")
     gtalibrary::gta_parameter_check(tolower(nr.affected.incl), c("all", "selected", "unselected"))
+    gtalibrary::gta_parameter_check(tolower(incl.affected.strictness), c("all", "one", "oneplus"))
     gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "in.force.on.date must be a date")
     gtalibrary::gta_parameter_check(tolower(keep.in.force.on.date), c("any", "yes", "no"))
     gtalibrary::gta_logical_check(nr.affected, \(x) (length(x) == 2 & x >= 0 & trunc(x) == x), error_msg = "nr.affected must be a vector of two valid integers >= 0")
@@ -161,7 +162,7 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
             # test which statement was modified and select the interventions accordingly
             if (tolower(incl.affected.strictness) != "oneplus") {
                 # determine value which n_affected_selected must fulfill
-                incl.affected.strictness <- switch(tlower(incl.affected.strictness),
+                incl.affected.strictness <- switch(tolower(incl.affected.strictness),
                     "all" = length(affected_country_filter),
                     "one" = 1
                 )
@@ -323,9 +324,9 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
         gtalibrary::gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "in.force.on.date must be a date")
 
         if (keep.in.force.on.date == "yes") {
-            filter_evaluation <- append(filter_evaluation, "date.implemented <= in.force.on.date & (is.na(date.removed) | date.removed >= in.force.on.date)")
+            filter_statement <- append(filter_statement, "date.implemented <= in.force.on.date & (is.na(date.removed) | date.removed >= in.force.on.date)")
         } else {
-            filter_evaluation <- append(filter_evaluation, "date.removed < in.force.on.date & date.implemented < in.force.on.date | is.na(date.implemented)")
+            filter_statement <- append(filter_statement, "date.removed < in.force.on.date & date.implemented < in.force.on.date | is.na(date.implemented)")
         }
     }
 
@@ -373,17 +374,17 @@ gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
         cpc_sectors_filter <- gtalibrary::gta_cpc_code_check(codes = cpc.sectors)
 
         if (!keep.cpc) {
-            filter_cpc <- "!affected.sector %in% cpc_sectors_filter"
+            filter_statement_cpc <- "!affected.sector %in% cpc_sectors_filter"
         } else {
             filter_statement_cpc <- "affected.sector %in% cpc_sectors_filter"
         }
 
         data <- tibble::as_tibble(data) |>
-            dplyr::mutate(affected.sector = str_split(string = affected.sector, pattern = ", ")) |>
+            dplyr::mutate(affected.sector = stringr::str_split(string = affected.sector, pattern = ", ")) |>
             tidyr::unnest(cols = affected.sector) |>
-            dplyr::filter(eval(parse(text = filter_cpc))) |>
+            dplyr::filter(eval(parse(text = filter_statement_cpc))) |>
             dplyr::group_by(dplyr::across(-affected.sector)) |>
-            dplyr::summarize(affected.product = paste(affected.sector, collapse = ", "))
+            dplyr::summarize(affected.sector = paste(affected.sector, collapse = ", "))
     }
 
     return(tibble::as_tibble(data))

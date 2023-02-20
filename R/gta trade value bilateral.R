@@ -18,6 +18,7 @@
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.trade.base.
 #' @import data.table
 #' @import dplyr
+#' @import tibble
 #' @import dtplyr
 #' @return Output is two data frames. First data frame includes the trade values for the given importer-exporter-product combinations. Second data frame states parameter choices.
 #' @references www.globaltradealert.org
@@ -25,21 +26,19 @@
 
 # Function infos and parameters  --------------------------------------------
 #' @export
-gta_trade_value_bilateral <- function(
-    importing.country = NULL, keep.importer = NULL,
-    exporting.country = NULL, keep.exporter = NULL,
-    cpc.sectors = NULL, keep.cpc = TRUE, hs.codes = NULL,
-    keep.hs = TRUE, trade.data = "base",
-    trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
-    trade.data.file = NULL
-) {
+gta_trade_value_bilateral <- function(data,
+                                      importing.country = NULL, keep.importer = NULL,
+                                      exporting.country = NULL, keep.exporter = NULL,
+                                      cpc.sectors = NULL, keep.cpc = TRUE, hs.codes = NULL,
+                                      keep.hs = TRUE, trade.data = "base",
+                                      trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata") {
     gtalibrary::gta_parameter_check(trade.data, c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020)))
     filter_statement <- vector("character")
 
     if (trade.data == "base") {
         trade.base <- gtalibrary::trade.base |>
             dplyr::mutate(trade.value = trade.value / 3)
-    } else if (is.null(trade.data.file)) {
+    } else if (is.null(data)) {
         trade.base <- data.table::as.data.table(readRDS(trade.data.path))
     } ## convert to data.table (analogous to gta.data.slicer())
 
@@ -101,8 +100,8 @@ gta_trade_value_bilateral <- function(
         }
 
         # filter dataset
-        trade.base |>
+        dtplyr::lazy_dt(trade.base) |>
             dplyr::filter(eval(parse(text = filter_statement))) |>
-            data.table::as.data.table()
+            tibble::as_tibble()
     }
 }
