@@ -2,5 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 datefunction <- function(start, end, current_date, current_year_todate = TRUE) {
-    .Call(`_tet_datefunction`, start, end, current_date, current_year_todate)
+    .Call(`_gtalibrary_datefunction`, start, end, current_date, current_year_todate)
 }
+
+rcpp_hello_world <- function() {
+    .Call(`_gtalibrary_rcpp_hello_world`)
+}
+

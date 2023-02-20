@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // datefunction
 List datefunction(const DateVector& start, const DateVector& end, const Date& current_date, const bool current_year_todate);
-RcppExport SEXP _tet_datefunction(SEXP startSEXP, SEXP endSEXP, SEXP current_dateSEXP, SEXP current_year_todateSEXP) {
+RcppExport SEXP _gtalibrary_datefunction(SEXP startSEXP, SEXP endSEXP, SEXP current_dateSEXP, SEXP current_year_todateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,7 +26,7 @@ END_RCPP
 }
 // rcpp_hello_world
 List rcpp_hello_world();
-RcppExport SEXP _tet_rcpp_hello_world() {
+RcppExport SEXP _gtalibrary_rcpp_hello_world() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,12 +36,12 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_tet_datefunction", (DL_FUNC) &_tet_datefunction, 4},
-    {"_tet_rcpp_hello_world", (DL_FUNC) &_tet_rcpp_hello_world, 0},
+    {"_gtalibrary_datefunction", (DL_FUNC) &_gtalibrary_datefunction, 4},
+    {"_gtalibrary_rcpp_hello_world", (DL_FUNC) &_gtalibrary_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_tet(DllInfo *dll) {
+RcppExport void R_init_gtalibrary(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
