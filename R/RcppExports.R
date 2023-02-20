@@ -8,4 +8,3 @@ datefunction <- function(start, end, current_date, current_year_todate = TRUE) {
 rcpp_hello_world <- function() {
     .Call(`_gtalibrary_rcpp_hello_world`)
 }
-
