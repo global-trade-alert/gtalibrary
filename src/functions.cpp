@@ -13,6 +13,7 @@ List datefunction(const DateVector &start, const DateVector &end, const Date &cu
     Date start_date;
     Date end_date;
 
+    // loop over each element in the input vectors
     for (int i = 0; i < n; ++i)
     {
         start_date = start[i];
@@ -23,34 +24,40 @@ List datefunction(const DateVector &start, const DateVector &end, const Date &cu
         {
             throw std::invalid_argument("start and end cannot contain and NAs");
         }
-        // control for errors
+        // Ensure that Start date is before end date
         if (start_date >= end_date)
         {
             throw std::invalid_argument("make sure that the start date is before the end date");
         }
 
+        // calculate year  / day of year for start and end date
         const int year_start = start_date.getYear();
         const int year_end = end_date.getYear();
-        const int day_start = start_date.getYearday();
-        const int day_end = end_date.getYearday();
+        const double day_start = start_date.getYearday();
+        const double day_end = end_date.getYearday();
 
         NumericVector year_valid(year_end - year_start + 1);
+        // R equivalent to seq(from = year_start, to = year_end, by = 1)
         std::iota(year_valid.begin(), year_valid.end(), year_start);
+        // generate vector of same length as year_valid and prepopulate with 1s (shares for the first and last year are modified below)
         std::vector<double> share_of_year(year_end - year_start + 1, 1.0);
 
-        const double share_start = (365.0 - day_start) / 365.0;
-        double share_end;
-
-        share_end = (current_year_todate && (year_end == current_year) ? day_end / day_today : day_end / 365.0);
-        share_of_year[0] = share_start;
-        if (year_end > year_start)
+        // ensure right calculation of intra year duration for different cases
+        if (year_end != year_start)
         {
-            share_of_year[year_end - year_start] = share_end;
+            share_of_year[0] = (365.0 - day_start) / 365.0;
+            share_of_year[year_end - year_start] = (current_year_todate && (year_end == current_year)) ? day_end / day_today : day_end / 365.0;
+        }
+        else
+        {
+            share_of_year[0] = (current_year_todate && (year_end == current_year)) ? (day_end - day_start) / day_today : (day_end - day_start) / 365.0;
         }
 
+        // append results to list
         list_years_valid[i] = year_valid;
         list_share_of_year[i] = share_of_year;
     }
 
+    // return list consisting of two lists (year in force and share of year)
     return List::create(Named("year_in_force") = list_years_valid, Named("share_of_year") = list_share_of_year);
 }
