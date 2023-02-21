@@ -69,5 +69,3 @@ gta_intervention_duration <- function(data = NULL, ## the function does not show
         return(unique_interventions)
     }
 }
-
-Rcpp::Rcpp.package.skeleton("gtalibrary", cpp_files = "src/functions.cpp")
