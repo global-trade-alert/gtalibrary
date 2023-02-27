@@ -96,6 +96,5 @@ List gta_code_converter_cpp(const std::vector<std::string> &codes_2012,
         results[j] = wrap(temp_results);
         temp_results.clear(); // clear temporary results after they are appended to output list
     }
-
     return List::create(Named("converted") = results, Named("unconverted") = unconverted_codes);
 }

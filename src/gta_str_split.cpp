@@ -1,3 +1,6 @@
+#include <Rcpp.h>
+using namespace Rcpp;
+
 // [[Rcpp::export]]
 List string_split_cpp(const std::vector<std::string> &input_string, const std::string &pattern)
 {
@@ -22,6 +25,5 @@ List string_split_cpp(const std::vector<std::string> &input_string, const std::s
         out[i] = temp_results; // push back the last substring after the last delimiter
         temp_results.clear();
     }
-
     return out;
 }

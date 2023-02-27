@@ -10,6 +10,8 @@
 #' @author Global Trade Alert
 
 #' @export
+#'
+#' ## necessary ? can be returned with check as well...
 gta_cpc_code_expand <- function(codes) {
   # Load cpc names
   cpc.names <- gtalibrary::cpc.names
@@ -20,7 +22,7 @@ gta_cpc_code_expand <- function(codes) {
   }
 
   # check vector type to decide further processing
-  if (is.numeric(codes) == T) {
+  if (is.numeric(codes)) {
     # Expand all numbers to 2 digit factors
     codes <- as.factor(sprintf("%02i", codes))
 
@@ -38,15 +40,9 @@ gta_cpc_code_expand <- function(codes) {
     }
 
     # Check whether vector is character, indicating that there are leading zeros cpc 3rd level codes included
-  } else if (is.numeric(codes) == F) {
+  } else if (!is.numeric(codes)) {
     stop("Please input all codes as integer!")
   }
 
   rm(codes)
 }
-
-
-Rcpp::sourceCpp("C:/Users/sveng/OneDrive/Dokumente/GitHub/GTA/gtalibrary/src/functions.cpp")
-Rcpp::depends()
-
-install.packages("Rcpp")

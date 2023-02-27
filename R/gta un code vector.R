@@ -26,12 +26,12 @@ gta_un_code_vector <- function(countries = NULL) {
     # check if either (all numeric (un codes) or all string (country names))
     if (is.numeric(countries)) {
         permissible.values <- unique(country.correspondence$un_code)
-        gtalibrary::gta_parameter_check(countries, permissible.values)
+        gta_parameter_check(countries, permissible.values)
         un.codes <- countries
     } else if (is.character(countries)) {
         countries <- tolower(countries)
         permissible.values <- tolower(unique(country.correspondence$name))
-        gtalibrary::gta_parameter_check(countries, permissible.values)
+        gta_parameter_check(countries, permissible.values)
         un.codes <- country.correspondence |>
             dplyr::filter(tolower(name) %in% countries) |>
             dplyr::pull(un_code) |>
