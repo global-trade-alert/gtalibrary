@@ -31,13 +31,14 @@ gta_trade_value_bilateral <- function(data,
                                       exporting.country = NULL, keep.exporter = NULL,
                                       cpc.sectors = NULL, keep.cpc = TRUE, hs.codes = NULL,
                                       keep.hs = TRUE, trade.data = "base",
-                                      trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata") {
-    gtalibrary::gta_parameter_check(trade.data, c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020)))
+                                      trade.data.path = "data/support tables/good support table for gtalibrary.rds") {
+    gta_parameter_check(trade.data, c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020)))
     filter_statement <- vector("character")
 
     if (trade.data == "base") {
         trade.base <- gtalibrary::trade.base |>
-            dplyr::mutate(trade.value = trade.value / 3)
+            dplyr::mutate(trade.value = trade.value / 3) |>
+            data.table::as.data.table()
     } else if (is.null(data)) {
         trade.base <- data.table::as.data.table(readRDS(trade.data.path))
     } ## convert to data.table (analogous to gta.data.slicer())
@@ -55,8 +56,8 @@ gta_trade_value_bilateral <- function(data,
 
     ## importer
     if (!is.null(importing.country)) {
-        gtalibrary::gta_logical_check(keep.importer, is.logical)
-        importers_filter <- gtalibrary::gta_un_code_vector(importing.country)
+        gta_logical_check(keep.importer, is.logical)
+        importers_filter <- gta_un_code_vector(importing.country)
 
         if (keep.importer) {
             filter_statement <- append(filter_statement, "i.un %in% importers_filter")
@@ -67,41 +68,47 @@ gta_trade_value_bilateral <- function(data,
 
     ## exporter
     if (!is.null(exporting.country)) {
-        gtalibrary::gta_logical_check(keep.exporter, is.logical)
-        exporters_filter <- gtalibrary::gta_un_code_vector(exporting.country)
+        gta_logical_check(keep.exporter, is.logical)
+        exporters_filter <- gta_un_code_vector(exporting.country)
         if (keep.exporter) {
             filter_statement <- append(filter_statement, "a.un %in% exporters_filter")
         } else {
             filter_statement <- append(filter_statement, "a.un %in% exporters_filter")
         }
+    }
+    ## hs codes
+    if (!is.null(hs.codes)) {
+        gta_logical_check(keep.hs, is.logical)
+        hs_codes_filter <- gta_hs_code_check(codes = hs.codes, message = FALSE)
 
-        ## hs codes
-        if (!is.null(hs.codes)) {
-            gtalibrary::gta_logical_check(keep.hs, is.logical)
-            hs_codes_filter <- gtalibrary::gta_hs_code_check(codes = hs.codes, message = FALSE)
-
-            if (keep.hs) {
-                filter_statement <- append(filter_statement, "hs6 %in% hs_codes_filter") ## check if we need to pad the codes or make them numeric!!!
-            } else {
-                filter_statement <- append(filter_statement, "!hs6 %in% hs_codes_filter")
-            }
+        if (keep.hs) {
+            filter_statement <- append(filter_statement, "hs6 %in% hs_codes_filter") ## check if we need to pad the codes or make them numeric!!!
+        } else {
+            filter_statement <- append(filter_statement, "!hs6 %in% hs_codes_filter")
         }
+    }
 
-        ## cpc codes
-        if (!is.null(cpc.sectors)) {
-            gtalibrary::gta_logical_check(keep.cpc, is.loical)
-            cpc_codes_filter <- gtalibrary::gta_cpc_to_hs(cpc.sectors)
+    ## cpc codes
+    if (!is.null(cpc.sectors)) {
+        gta_logical_check(keep.cpc, is.loical)
+        cpc_codes_filter <- gta_cpc_to_hs(cpc.sectors)
 
-            if (is.null(heep.cpc)) {
-                filter_statement <- append(filter_statement, "hs6 %in% cpc_codes_filter")
-            } else {
-                filter_statement <- append(filter_statement, "!hs6 %in% cpc_codes_filter")
-            }
+        if (is.null(heep.cpc)) {
+            filter_statement <- append(filter_statement, "hs6 %in% cpc_codes_filter")
+        } else {
+            filter_statement <- append(filter_statement, "!hs6 %in% cpc_codes_filter")
         }
+    }
 
+    if (!length(filter_statement) == 0) {
         # filter dataset
-        dtplyr::lazy_dt(trade.base) |>
+        filter_statement <- paste(filter_statement, collapse = " & ")
+        out <- dtplyr::lazy_dt(trade.base) |>
             dplyr::filter(eval(parse(text = filter_statement))) |>
             tibble::as_tibble()
+
+        return(out)
+    } else {
+        return(trade.base)
     }
 }

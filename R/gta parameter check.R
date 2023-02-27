@@ -19,7 +19,7 @@ gta_parameter_check <- function(parameter = NULL, permissible_values = NULL, arg
         }
 
         error_source <- paste(parameter[!parameter %in% permissible_values], collapse = ", ")
-        error_msg <- glue::glue("Unknown values in {arg_name}: {paste(error_source, collapse = ', ')}")
+        error_msg <- glue::glue("Unknown values in {.var arg_name}: {paste(error_source, collapse = ', ')}")
 
         if (warning) {
             cli::cli_alert_warning(error_msg)

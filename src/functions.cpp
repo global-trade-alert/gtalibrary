@@ -1,10 +1,27 @@
-// datefunction()
 #include <Rcpp.h>
 using namespace Rcpp;
 
+/*
+gta_code_converter_cpp() is used in gta_hs_vintage_converter() and XX
+to speed up the function. Instead of looping over every code that must be converted,
+checking if it matches with a vintage hs code and then appending the results to a list in R,
+this loop is implemented in c++.
+
+Arguments:
+    - codes_vinage & codes_2012: Two string vectors from the conversion matrix in gtalibrary::hs_vintages
+    --> before passing them to the function, make sure that the pairs are unique
+    - codes_convert: the vector of codes that should be converted to HS2012
+    - message: If true, also returns a list of unconverted codes
+
+Warning:
+    The function does not check if the aruments satisfy all necessary conditions (eg. type, size etc.).
+    This is implemented in R in gta_hs_vintage_converter() before the arguments are passed to gta_code_converter_cpp()
+    Thus, it is not recommended to use this function outside of gta_hs_vintage_converter()
+*/
 // [[Rcpp::export]]
 List datefunction(const DateVector &start, const DateVector &end, const Date &current_date, const bool current_year_todate = true)
 {
+    // define parameters
     const int n = start.size();
     const int current_year = current_date.getYear();
     const int day_today = current_date.getYearday();
@@ -36,7 +53,7 @@ List datefunction(const DateVector &start, const DateVector &end, const Date &cu
         const double day_start = start_date.getYearday();
         const double day_end = end_date.getYearday();
 
-        NumericVector year_valid(year_end - year_start + 1);
+        std::vector<int> year_valid(year_end - year_start + 1);
         // R equivalent to seq(from = year_start, to = year_end, by = 1)
         std::iota(year_valid.begin(), year_valid.end(), year_start);
         // generate vector of same length as year_valid and prepopulate with 1s (shares for the first and last year are modified below)

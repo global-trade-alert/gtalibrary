@@ -84,6 +84,6 @@ gta_theme <- function(base.size = 12,
         plot.margin = unit(c(0.05, 0.05, 0.05, 0.05), "npc"),
         strip.background = element_rect(fill = "#FFFFFF", colour = gta_colour$grey[1], size = 0.5, linetype = 1),
         strip.text = element_text(family = base.family, colour = font.colour, size = base.size * 0.9, hjust = 0.5),
-        complete = F
+        complete = FALSE
     )
 }

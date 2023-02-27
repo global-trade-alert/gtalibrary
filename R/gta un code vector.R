@@ -4,6 +4,7 @@
 #'
 #' Returns a vector of codes based on country or group names.
 #'
+#' @usage gta_un_code_vector(countries = NULL)
 #' @param countries Vector with either country names, country group names or UN codes. Do not mix UN codes with country or group names. Please use function also for UN codes to ensure the ones you supply are consistent with the ones used by the GTA.
 #' @param role This parameter tailors the error message e.g. "Unkown ROLE country value ...". Only useful if command is run for more than one set of countries.
 #' @import cli
@@ -38,5 +39,7 @@ gta_un_code_vector <- function(countries = NULL) {
     } else {
         cli::cli_abort("countries must either be vector of type character (names) or numeric (un codes)")
     }
+
+    # return output
     return(un.codes)
 }

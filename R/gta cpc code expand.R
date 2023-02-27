@@ -44,3 +44,9 @@ gta_cpc_code_expand <- function(codes) {
 
   rm(codes)
 }
+
+
+Rcpp::sourceCpp("C:/Users/sveng/OneDrive/Dokumente/GitHub/GTA/gtalibrary/src/functions.cpp")
+Rcpp::depends()
+
+install.packages("Rcpp")

@@ -6,33 +6,24 @@
 #'
 #' @param codes Supply the CPC codes of which you want to get the name.
 #' @param level Specify the level of the codes provided (2 or 3).
-#'
+#' @usage gta_cpc_names(codes, levels = NULL)
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
 gta_cpc_names <- function(codes, level = NULL) {
-  # Load cpc names
-  cpc.names <- gtalibrary::cpc.names
+    # check validity of parameters
+    gta_parameter_check(level, c(2, 3))
+    gta_parameter_check(codes, cpc_codes$cpc[cpc_codes$cpc.digit.level == level])
 
-  if (level == 2) {
-    check <- gta_parameter_check(codes, cpc.names$cpc[cpc.names$cpc.digit.level == 2])
+    # load relevant data frame
+    cpc_codes <- tibble::as_tibble(gtalibrary::cpc.names)
 
-    if (check != "OK") {
-      print(paste("Unkown CPC code(s): ", check, ".", sep = ""))
-    } else {
-      cpc.code.names <<- data.frame(cpc = codes, names = cpc.names$cpc.name[cpc.names$cpc.digit.level == 2 & cpc.names$cpc == codes])
-    }
-  } else if (level == 3) {
-    check <- gta_parameter_check(codes, cpc.names$cpc[cpc.names$cpc.digit.level == 3])
+    # filter data frame according to user input
+    out <- cpc_codes |>
+        dplyr::filter(cpc %in% codes, cpc.digit.level == level) |>
+        dplyr::select(cpc, cpc.name) |>
+        dplyr::rename(cpc_code = cpc, cpc_name = cpc.name)
 
-    if (check != "OK") {
-      print(paste("Unkown CPC code(s): ", check, ".", sep = ""))
-    } else {
-      cpc.code.names <<- data.frame(cpc = codes, names = cpc.names$cpc.name[cpc.names$cpc.digit.level == 3 & cpc.names$cpc == codes])
-    }
-  } else {
-    stop("Please specify the CPC level correctly.")
-  }
-
-  rm(codes)
+    # return results
+    return(out)
 }
