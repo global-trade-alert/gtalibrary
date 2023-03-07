@@ -11,38 +11,40 @@
 
 #' @export
 #'
+
 #' ## necessary ? can be returned with check as well...
-gta_cpc_code_expand <- function(codes) {
-  # Load cpc names
-  cpc.names <- gtalibrary::cpc.names
+gta_cpc_code_expand <- function(codes, as_list = FALSE, message = TRUE) {
+    # Load cpc names
+    ## use these, remove hs values, take the 3 digit codes, make 2 digit codes out of it --> then put in two columns and use one for the key, other for the value :) (mabye rename parameters in function)
+    # cpc.names <- gtalibrary::cpc_to_hs
+    # make use of the existing CPC_HS_conversion table and modify it for this purpose
+    cpc_expansion <- readRDS("c:\\Users\\sveng\\OneDrive\\Dokumente\\GitHub\\GTA\\gtalibrary\\data\\cpc_to_hs.rda")
+    cpc_expansion <- cpc_expansion |>
+        dplyr::mutate(HS_2012 = stringr::str_sub(CPC_21, 1, 2)) |>
+        dplyr::rename(cpc_2_digit = HS_2012, cpc_3_digit = CPC_21) |>
+        dplyr::distinct()
 
-  # Check length of longest number in codes, make sure it is not higher than 3
-  if (max(nchar(codes)) >= 3) {
-    stop("Please provide codes with 2 characters or less.")
-  }
+    # Check length of longest number in codes, make sure it is not higher than 3
+    # gta_logical_check(codes, \(x) nchar(codes) %in% c(1, 2))
+    stringr::str_pad(codes, width = 2, side = "left", pad = "0")
 
-  # check vector type to decide further processing
-  if (is.numeric(codes)) {
-    # Expand all numbers to 2 digit factors
-    codes <- as.factor(sprintf("%02i", codes))
-
-    # check if all codes exist
-    if (all(unique(codes) %in% sprintf("%02i", subset(cpc.names, cpc.digit.level == 2)$cpc) == T)) {
-      codes <- sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)[substr(sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc), 1, 2) %in% codes]
-      print("Expansion successful. Returning vector of 3-digit level CPC codes.")
-
-      return(as.numeric(codes))
-    } else {
-      non.existing <- codes[!codes %in% sprintf("%02i", subset(cpc.names, cpc.digit.level == 2)$cpc)]
-      print(paste0("Unknown values provided: ", paste0(non.existing, collapse = ", ")))
-
-      return(non.existing)
-    }
-
-    # Check whether vector is character, indicating that there are leading zeros cpc 3rd level codes included
-  } else if (!is.numeric(codes)) {
-    stop("Please input all codes as integer!")
-  }
-
-  rm(codes)
+    # use cpc_to_hs_CPP function as it does the same
+    conversion <- cpc_to_hs_CPP(cpc_codes = cpc_expansion$cpc_2_digit, hs_2012_codes = cpc_expansion$cpc_3_digit, codes = codes)
+    ###########
+    ##########
+    #########
+    ########
+    #######
+    ######
+    #####
+    ####
+    ###
+    ##
+    #
+    return(conversion)
 }
+
+microbenchmark::microbenchmark(
+    times = 1,
+    gta_cpc_code_expand(codes = rep("01", 100000))
+)

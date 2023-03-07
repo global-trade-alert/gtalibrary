@@ -1,9 +1,9 @@
 
 #' Check whether function arguments fulfill a logical conditoion
-#' @example
+#' @usage
 #' gta_logical_check(
-#'      check_arg = NULL,
-#'      check_function = NULL,
+#'      check_arg,
+#'      check_function,
 #'      error_msg = NULL
 #' )
 #' @param check_arg The argument / variable that you want to check
@@ -23,7 +23,7 @@
 #' @import glue
 #' @author Global Trade Alert
 #' @export
-gta_logical_check <- function(check_arg = NULL, check_function = NULL, error_msg = NULL) {
+gta_logical_check <- function(check_arg, check_function, error_msg = NULL) {
     check <- tryCatch(
         expr = check_function(check_arg),
         error = function(e) cli::cli_abort("Please pass a valid check_function", call = NULL)

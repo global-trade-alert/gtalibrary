@@ -28,10 +28,13 @@ List gta_code_converter_cpp(const std::vector<std::string> &codes_2012,
     const int m = codes.size();
     List results(m);
 
-    // Create HS2 and HS4 codes from code_vintages // create maps!!!
-    std::unordered_multimap<std::string, std::string> hs_2012_vintage_map(n);
-    std::unordered_multimap<std::string, std::string> hs_2012_vintage_4_map(n);
-    std::unordered_multimap<std::string, std::string> hs_2012_vintage_2_map(n);
+    // Create HS2 and HS4 codes from code_vintages // create 3 different maps to reduce probability of hash collision
+    std::unordered_multimap<std::string, std::string> hs_2012_vintage_map;
+    hs_2012_vintage_map.reserve(n);
+    std::unordered_multimap<std::string, std::string> hs_2012_vintage_4_map;
+    hs_2012_vintage_4_map.reserve(n);
+    std::unordered_multimap<std::string, std::string> hs_2012_vintage_2_map;
+    hs_2012_vintage_2_map.reserve(n);
     std::vector<std::string> unconverted_codes;
     unconverted_codes.reserve(50); // reserve some memory
     std::vector<std::string> temp_results;

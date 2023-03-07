@@ -1,4 +1,5 @@
 # Roxygen documentation
+#### --> From UN stat file https://unstats.un.org/unsd/classifications/Econ/tables/CPC/CPCv21_HS12/cpc21-hs2012.txt
 
 #' Check whether your CPC codes are consistent with CPC 2.1.
 #'
@@ -7,32 +8,28 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
-#### inputs can be numeric as well as character
 #' @export
 gta_cpc_code_check <- function(codes) {
-  # Load cpc names
-  cpc_names <- gtalibrary::cpc.names |> tibble::as_tibble()
+    # Check length of longest number in codes, make sure it is not higher than 3
+    gta_logical_check(codes, \(x) nchar(x) < 4, error_msg = "{.var codes} can only have 3 digits max.")
 
-  # Check length of longest number in codes, make sure it is not higher than 3
-  gta_logical_check(codes, \(x) nchar(x) < 4, error_msg = "{.var codes can only have 3 digits max.}")
-  # check vector type to decide further processing
-  if (is.numeric(codes)) {
+    # Load cpc names
+    cpc_names <- gtalibrary::cpc.names |> data.table::as.data.table()
+
     # Expand all codes to 3 digits, to take care of leading zeros
-    codes <- stringr::str_pad(codes, width = 6, side = "left", pad = "0")
+    codes <- stringr::str_pad(codes, width = 3, side = "left", pad = "0")
 
-    # Check if all cpc codes occur on 2nd level cpc
     if (all(unique(codes) %in% sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc) == T)) {
-      codes <- sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)[substr(sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc), 1, 3) %in% codes]
-      print("Conversion successful. Returning vector of 3-digit CPC codes.")
-      sprintf("%03d", 11)
-      return(as.numeric(codes))
-    } else {
-      non.existing <- codes[!codes %in% sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)]
-      print(paste0("Non-existing values provided: ", paste0(non.existing, collapse = ", ")))
+        codes <- sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)[substr(sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc), 1, 3) %in% codes]
+        print("Conversion successful. Returning vector of 3-digit CPC codes.")
 
-      return(non.existing)
+        return(as.numeric(codes))
+    } else {
+        non.existing <- codes[!codes %in% sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)]
+        print(paste0("Non-existing values provided: ", paste0(non.existing, collapse = ", ")))
+
+        return(non.existing)
     }
     # Check whether vector is character, indicating that there are leading zeros cpc 3rd level codes included
-  }
 }
+

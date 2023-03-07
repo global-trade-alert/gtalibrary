@@ -18,7 +18,6 @@
 #' @param legend.position Define the position of the legend. Choices are "top" or "bottom".
 #' @param background.color Define the background-color of the plot, default is #EEEEEE (light gray), choose #FFFFFF for white.
 #'
-#'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
@@ -41,7 +40,6 @@ gta_theme <- function(base.size = 12,
             font.color.bold <- font.color.bold
         }
     }
-
     theme(
         line = element_line(colour = "#FFFFFF", size = 2, linetype = 1, lineend = "square"),
         rect = element_rect(fill = "#FFFFFF", colour = "#FFFFFF", size = 0, linetype = 1),
@@ -59,8 +57,8 @@ gta_theme <- function(base.size = 12,
         axis.text.y.right = element_text(family = base.family, colour = font.colour, size = base.size * 0.7, margin = margin(t = 0, r = 0, b = 0, l = 5), angle = y.right.angle),
         axis.ticks = element_line(colour = gta_colour$grey[1], size = 0.2),
         axis.ticks.length = unit(0, "cm"),
-        axis.line = element_line(colour = "#eeeeee", linetype = 1, size = 0),
-        legend.background = element_rect(fill = "transparent", colour = "#cccccc", size = 0, linetype = 1),
+        axis.line = element_line(colour = "#eeeeee", linetype = 1, linewidth = 0),
+        legend.background = element_rect(fill = "transparent", colour = "#cccccc", linewidth = 0, linetype = 1),
         legend.position = legend.position,
         legend.justification = c(0, 1),
         legend.title = element_text(family = base.family, face = "bold", colour = font.colour.bold, hjust = 0, size = base.size * 0.9, margin = margin(b = 5)),
@@ -68,21 +66,22 @@ gta_theme <- function(base.size = 12,
         legend.text = element_text(family = base.family, colour = font.colour, size = base.size * 0.9, margin = margin(b = 0, r = 10, l = 0), hjust = 0),
         legend.text.align = 0,
         legend.direction = "horizontal",
-        legend.key = element_rect(fill = "transparent", colour = "#cccccc", size = 0, linetype = 1),
+        legend.key = element_rect(fill = "transparent", colour = "#cccccc", linewidth = 0, linetype = 1),
         legend.margin = margin(l = 0),
         legend.box = legend.box.align,
         legend.box.just = 0,
         legend.box.margin = margin(t = 0, r = 0, b = 10, l = 0),
-        panel.background = element_rect(fill = "#FFFFFF", colour = "#999999", size = 0.5, linetype = 1),
-        panel.grid.minor.y = element_line(colour = "#eeeeee", linetype = 1, size = 0.5, lineend = "square"),
-        panel.grid.major = element_line(colour = "#eeeeee", linetype = 1, size = 0.5, lineend = "square"),
-        panel.grid.minor = element_line(colour = "#eeeeee", linetype = 1, size = 0, lineend = "square"),
-        plot.background = element_rect(fill = background.color, colour = "#CCCCCC", size = 0, linetype = 1),
+        panel.background = element_rect(fill = "#FFFFFF", colour = "#999999", linewidth = 0.5, linetype = 1),
+        panel.border = element_rect(color =  "#999999", fill = "transparent", linewidth = .5, linetype = 1), 
+        panel.grid.minor.y = element_line(colour = "#eeeeee", linetype = 1, linewidth = 0.5, lineend = "square"),
+        panel.grid.major = element_line(colour = "#eeeeee", linetype = 1, linewidth = 0.5, lineend = "square"),
+        panel.grid.minor = element_line(colour = "#eeeeee", linetype = 1, linewidth = 0, lineend = "square"),
+        plot.background = element_rect(fill = background.color, colour = "#CCCCCC", linewidth = 0, linetype = 1),
         plot.title = element_text(family = base.family, colour = font.colour.bold, face = "bold", size = base.size, hjust = 0),
         plot.subtitle = element_text(family = base.family, colour = font.colour, size = base.size * 0.9, hjust = 0, margin = margin(t = 0, r = 0, b = 10, l = 0)),
         plot.caption = element_text(family = base.family, colour = font.colour, size = base.size * 0.7),
         plot.margin = unit(c(0.05, 0.05, 0.05, 0.05), "npc"),
-        strip.background = element_rect(fill = "#FFFFFF", colour = gta_colour$grey[1], size = 0.5, linetype = 1),
+        strip.background = element_rect(fill = "#FFFFFF", colour = gta_colour$grey[1], linewidth = 0.5, linetype = 1),
         strip.text = element_text(family = base.family, colour = font.colour, size = base.size * 0.9, hjust = 0.5),
         complete = FALSE
     )

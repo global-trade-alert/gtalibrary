@@ -9,7 +9,11 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_hs_to_cpc <- function(codes) {
+#'
+#'
+#### function does not make too much sense since 1 hs code cannot be atributed to a 3 digit CPC code...
+#' --> use c++ function here as well (!)
+gta_hs_to_cpc <- function(codes, as_list = FALSE, message = TRUE) {
   code.correspondence <- read.csv("definitions/cpc-to-hs/cpc21-hs2012.csv", sep = ";")
   names(code.correspondence) <- c("cpc.3digit", "hs.6digit") ## JF has some importing issue, thus the renaming here.
 

@@ -135,10 +135,48 @@
     data <- dtplyr::lazy_dt(data) |>
         dplyr::filter(eval(parse(text = filter_statement)))
 
-    ### restricted the data set to the specified exporters.
-    ## Can be done here since they are always either a.un or i.un.
-    ## Cannot be done for the importers!
 
+
+    ###### No filtering takes place yet -> ONLY FURTHER BELOW --> mUST STILL BE MODIFIED! 
+    # if Input is NULL, all unique UN codes are returned
+    exporting_country <- gta_un_code_vector(exporters)
+    
+    if (!is.null(exporting_country)){
+        gta_logical_check(keep.exporters, is.logical, error_msg = "{.var keep.exporters must be TRUE/FALSE}")
+
+        if (keep.exporters){
+
+        } else {
+            
+        }
+    }
+
+    # experimental code --> copied from gta data slicer ... 
+    if (tolower(incl.exporters.strictness) == "one") {
+
+        affected_interventions <- dtplyr::lazy_dt(data) |>
+            dplyr::filter(eval(parse(text = filter_affected))) |>
+            dplyr::pull(intervention.id) |>
+            unique()
+        
+         affected_countries_info <- dtplyr::lazy_dt(data) |>
+                dplyr::filter(intervention.id %in% affected_interventions) |>
+                dplyr::select(a.un, intervention.id) |>
+                unique() |>
+                dplyr::mutate(affected_country = ifelse(a.un %in% affected_country_filter, TRUE, FALSE)) |>
+                dplyr::group_by(intervention.id) |>
+                dplyr::summarize(
+                    n_affected_total = length(a.un), # number of different affected countries per intervention.id
+                    n_affected_selected = length(a.un[affected_country]), # number of diff. affected countries per intervention.id which are in "affected.country"
+                    n_affected_unselected = length(a.un[!affected_country])
+                )
+                    
+    } else if (tolower(incl.exporters.strictness) == "oneplus") {
+
+    } else {
+
+    }
+    
     #### imposing the exporting countries incl. the relevant conditions.
 
     # adjust functon or calculate more efficiently from current data frame
@@ -148,7 +186,7 @@
         current.year.todate = current.year.todate
     )
 
-
+### gc() perform garbage collection from time to time ? 
 
     if (!is.null(importers)) {
         # do we need to specify importers if it is not null??
@@ -210,16 +248,3 @@ load("data/database replica/database replica - parts - base (1).Rdata")
 
 library(tidyverse)
 gtalibrary::gta_setwd("H")
-
-tuple <- as_tibble(gta_tuple)
-rm(gta_tuple)
-master <- as_tibble(master)
-master
-
-id_tuple <- unique(tuple$intervention_id)
-id_master <- unique(master$intervention.id)
-
-length(id_tuple)
-length(id_master)
-
-pryr::object_size(master)

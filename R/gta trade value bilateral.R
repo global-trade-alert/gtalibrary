@@ -32,33 +32,41 @@ gta_trade_value_bilateral <- function(data,
                                       cpc.sectors = NULL, keep.cpc = TRUE, hs.codes = NULL,
                                       keep.hs = TRUE, trade.data = "base",
                                       trade.data.path = "data/support tables/good support table for gtalibrary.rds") {
-    gta_parameter_check(trade.data, c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020)))
+    # check validity of trade.data parameter
+    gta_parameter_check(
+        trade.data,
+        c("base", "prior year", "current year", "before announcement", "during announcement", as.character(2005:2020))
+    )
+
+    # initialize vector which stores conditional filter statement
     filter_statement <- vector("character")
 
+    # read trade.base data table
     if (trade.data == "base") {
         trade.base <- gtalibrary::trade.base |>
             dplyr::mutate(trade.value = trade.value / 3) |>
             data.table::as.data.table()
+        # only read trade table if trade base is not base (as package table is used then)
     } else if (is.null(data)) {
         trade.base <- data.table::as.data.table(readRDS(trade.data.path))
-    } ## convert to data.table (analogous to gta.data.slicer())
+    }
 
     if (trade.data %in% as.character(2005:2020)) {
         base_year <- as.numeric(trade.data)
         trade.base <- trade.base |>
             dplyr::filter(year == base_year)
-    }
-
-    if (tolower(trade.data) == "prior year") {
+    } else if (tolower(trade.data) == "prior year") {
         trade.base <- trade.base |>
             dplyr::mutate(year = year + 1)
     }
 
     ## importer
     if (!is.null(importing.country)) {
+        # if importing.country is specified, user must select if countries are kept or deleted in parameter keep.importer
         gta_logical_check(keep.importer, is.logical)
         importers_filter <- gta_un_code_vector(importing.country)
 
+        # append filter statement
         if (keep.importer) {
             filter_statement <- append(filter_statement, "i.un %in% importers_filter")
         } else {
@@ -68,8 +76,11 @@ gta_trade_value_bilateral <- function(data,
 
     ## exporter
     if (!is.null(exporting.country)) {
+        # if exporting.country is specified, user must select if countries are kept or deleted in parameter keep.exporter
         gta_logical_check(keep.exporter, is.logical)
         exporters_filter <- gta_un_code_vector(exporting.country)
+
+        # append filter statement
         if (keep.exporter) {
             filter_statement <- append(filter_statement, "a.un %in% exporters_filter")
         } else {
@@ -78,9 +89,11 @@ gta_trade_value_bilateral <- function(data,
     }
     ## hs codes
     if (!is.null(hs.codes)) {
+        # if hs.codes is specified, user must select if hs codes are kept or deleted in parameter keep.hs
         gta_logical_check(keep.hs, is.logical)
         hs_codes_filter <- gta_hs_code_check(codes = hs.codes, message = FALSE)
 
+        # append filter statement
         if (keep.hs) {
             filter_statement <- append(filter_statement, "hs6 %in% hs_codes_filter") ## check if we need to pad the codes or make them numeric!!!
         } else {
@@ -90,25 +103,29 @@ gta_trade_value_bilateral <- function(data,
 
     ## cpc codes
     if (!is.null(cpc.sectors)) {
+        # if cpc.sectors is specified, user must select if cpc codes are kept or deleted in parameter keep.cpc
         gta_logical_check(keep.cpc, is.loical)
         cpc_codes_filter <- gta_cpc_to_hs(cpc.sectors)
 
-        if (is.null(heep.cpc)) {
+        # append filter statement
+        if (is.null(keep.cpc)) {
             filter_statement <- append(filter_statement, "hs6 %in% cpc_codes_filter")
         } else {
             filter_statement <- append(filter_statement, "!hs6 %in% cpc_codes_filter")
         }
     }
 
+    # filter trade base pased on filter statement & return reults as data.table
     if (!length(filter_statement) == 0) {
         # filter dataset
         filter_statement <- paste(filter_statement, collapse = " & ")
         out <- dtplyr::lazy_dt(trade.base) |>
             dplyr::filter(eval(parse(text = filter_statement))) |>
-            tibble::as_tibble()
+            data.table::as.data.table()
 
         return(out)
     } else {
+        # return unfilterd trade.base if filter statement is empty
         return(trade.base)
     }
 }
