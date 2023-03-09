@@ -81,5 +81,5 @@ gta_colour_palette <- function() {
     "grey.shades" = grey.shades
   )
 
-  gta_colour <<- gta_colour
+  return(gta_colour)
 }

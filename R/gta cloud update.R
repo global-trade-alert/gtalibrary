@@ -28,3 +28,16 @@ gta_cloud_update <- function() {
     print("Wrong password.")
   }
 }
+
+
+profvis::profvis({
+  gtalibrary::gta_trade_coverage(
+                gta.evaluation = c("Red", "Amber"),
+                affected.flows = "inward",
+                importers = 56,
+                keep.importers = TRUE,
+                intra.year.duration = TRUE,
+                trade.statistic = "share",
+                trade.data = 2019
+            )}
+)
