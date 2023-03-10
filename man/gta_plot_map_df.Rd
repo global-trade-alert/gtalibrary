@@ -4,7 +4,7 @@
 \alias{gta_plot_map_df}
 \title{Map geo data to a dataframe with un codes.}
 \usage{
-gta_plot_map_df(data = vdma.master, countries = NULL, values = NULL)
+gta_plot_map_df(data = NULL, countries = NULL, values = NULL)
 }
 \arguments{
 \item{data}{Specify the dataframe with the relevant columns.}

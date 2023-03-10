@@ -4,17 +4,20 @@
 \alias{gta_imp_exp_hs_tuples}
 \title{GTA Importer-Exporter-Product tuples}
 \usage{
-gta_imp_exp_hs_tuples(master.path = "data/master_plus.Rdata",
+gta_imp_exp_hs_tuples(
+  master.path = "data/master_plus.Rdata",
   master.data.frame = FALSE,
-  replica.path = "data/database replica/database replica - parts - base.Rdata",
-  df.name = "master.tuple", pc.name = "parameter.tuple")
+  replica.path.tuple = "data/database replica/gta_tuple.Rdata",
+  df.name = "master.tuple",
+  pc.name = "parameter.tuple"
+)
 }
 \arguments{
 \item{master.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
 
 \item{master.data.frame}{Specify if the master.path is a data frame in the current environment. Default is FALSE.}
 
-\item{replica.path}{Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.}
+\item{replica.path.tuple}{Location of the database replica. Default is 'data/database replica/database replica - parts - base.Rdata'.}
 
 \item{df.name}{Set the name of the generated result data frame. Default is 'master.tuple'.}
 

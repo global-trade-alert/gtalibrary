@@ -4,11 +4,19 @@
 \alias{gta_plot_map}
 \title{Create ggplot maps.}
 \usage{
-gta_plot_map(data = NULL, countries = NULL, value = NULL,
-  marked.country = NULL, marked.colour = gta_colour$green[2],
-  colour.low = gta_colour$blue[4], colour.high = gta_colour$blue[1],
-  range.split = waiver(), legend.title = NULL,
-  legend.labels = waiver(), title = NULL)
+gta_plot_map(
+  data = NULL,
+  countries = NULL,
+  value = NULL,
+  marked.country = NULL,
+  marked.colour = gta_colour$green[2],
+  colour.low = gta_colour$blue[4],
+  colour.high = gta_colour$blue[1],
+  range.split = waiver(),
+  legend.title = NULL,
+  legend.labels = waiver(),
+  title = NULL
+)
 }
 \arguments{
 \item{data}{Specify the dataframe with the relevant columns.}

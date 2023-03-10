@@ -2,48 +2,42 @@
 % Please edit documentation in R/gta theme.R
 \name{gta_theme}
 \alias{gta_theme}
-\title{Define plot theme settings for ggplot.}
+\title{Complete theme for GTA Plots}
 \usage{
-gta_theme(base.size = 12, aspect.ratio = NULL,
-  background.color = "#FFFFFF", font.colour = "#555555",
-  font.colour.bold = "#555555", base.family = "Open Sans",
-  base.family.bold = "Open Sans Bold", legend.box.align = "horizontal",
-  legend.title.align = 0, x.bottom.angle = 0,
-  x.top.angle = x.bottom.angle, x.bottom.align = 0.5,
-  y.left.angle = 0, y.right.angle = y.left.angle,
-  legend.position = "top")
+gta_theme(
+   base_size = 12,
+   base_family = "Open Sans",
+   base_line_size = base_size / 22,
+   base_rect_size = base_size / 22,
+   aspect_ratio = NULL
+)
 }
 \arguments{
-\item{base.size}{Takes in the value for the font base size as integer. All font are scaled relative to this value. Default is optimized for plots saved with default width of 21cm and relative height. Default: 11.}
+\item{base_size}{base font size, given in pts.}
 
-\item{aspect.ratio}{Takes in the value of the relative plot height as integer. Width = 1, height = aspect.ratio. Do not use for plots being saved to file. Rather define aspect ratio on save process. Default: NULL.}
+\item{base_family}{base font family}
 
-\item{background.color}{Define the background-color of the plot, default is #EEEEEE (light gray), choose #FFFFFF for white.}
+\item{base_line_size}{base size for line elements}
 
-\item{base.family}{Takes in the name of the font family. Default: "Open Sans".}
+\item{base_rect_size}{base size for rect elements}
 
-\item{base.family.bold}{Takes in the name of the font family for the bold face. Default: "Open Sans Bold".}
-
-\item{legend.box.align}{If more than legend existing, define the alignment. Either "horizontal" or "vertical". Default: "horizontal".}
-
-\item{legend.title.align}{Align legend title from left (0.0) to center (0.5) right (1) as integer. Default: 0.}
-
-\item{x.bottom.angle}{Define the labels angle for the bottom x-axis as integer. Default: 0.}
-
-\item{x.top.angle}{Define the labels angle for the top x-axis as integer. If undefined, value will be taken from bottom x-axis.}
-
-\item{x.bottom.align}{Define the alignment of the bottom x-axis labels as integer (0 to 1). Default: 0.5.}
-
-\item{y.left.angle}{Define the labels angle for the left y-axis as integer. Default: 0.}
-
-\item{y.right.angle}{Define the labels angle for the right y-axis as integer. If undefined, value will be taken from left y-axis.}
-
-\item{legend.position}{Define the position of the legend. Choices are "top" or "bottom".}
+\item{aspect_ratio}{Here, you can define the aspect ratio of the panel if needed (default is NULL)}
 }
 \description{
-This function defines the gta theme for ggplot. Add it at the end of a ggplot object.
+This function defines the GTA theme for ggplot. Add it at the end of a ggplot object.
+If you want to overwrite certain elements, simply add + `theme(element_to_overwrite)` to your plot.
+}
+\examples{
+# Create a plot with gta_theme()
+df |>
+   ggplot(aes(x = x, y = y, color = color)) +
+   geom_line() +
+   gta_theme() + # add the base theme to your plot
+   theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
 }
 \references{
+www.globaltradealert.org
+
 www.globaltradealert.org
 }
 \author{
