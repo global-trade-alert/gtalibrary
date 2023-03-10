@@ -3,7 +3,7 @@
 #' Complete theme for GTA Plots
 #'
 #' This function defines the GTA theme for ggplot. Add it at the end of a ggplot object.
-#' If you want to overwrite certain elements, simply add + `theme(element_to_overwrite)` to your plot.
+#' If you want to overwrite certain elements, simply add + [theme(element_to_overwrite)] to your plot.
 #' @usage
 #' gta_theme(
 #'    base_size = 12,
@@ -16,10 +16,7 @@
 #' @param base_family base font family
 #' @param base_line_size base size for line elements
 #' @param base_rect_size base size for rect elements
-#' @import ggplot2
 #' @param aspect_ratio Here, you can define the aspect ratio of the panel if needed (default is NULL)
-#' @references www.globaltradealert.org
-#' @author Global Trade Alert
 #' @examples
 #' # Create a plot with gta_theme()
 #' df |>
@@ -29,6 +26,7 @@
 #'     theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
+#' @import ggplot2
 #' @export
 gta_theme <- function(base_size = 12, base_family = "Open Sans", base_line_size = base_size / 22, base_rect_size = base_size / 22, aspect_ratio = NULL) {
     # margins are defined relative to the text size (base_size) of the plot

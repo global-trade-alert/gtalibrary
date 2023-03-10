@@ -25,19 +25,17 @@ gta_theme(
 }
 \description{
 This function defines the GTA theme for ggplot. Add it at the end of a ggplot object.
-If you want to overwrite certain elements, simply add + `theme(element_to_overwrite)` to your plot.
+If you want to overwrite certain elements, simply add + [theme(element_to_overwrite)] to your plot.
 }
 \examples{
 # Create a plot with gta_theme()
 df |>
-   ggplot(aes(x = x, y = y, color = color)) +
-   geom_line() +
-   gta_theme() + # add the base theme to your plot
-   theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
+    ggplot(aes(x = x, y = y, color = color)) +
+    geom_line() +
+    gta_theme() + # add the base theme to your plot
+    theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
 }
 \references{
-www.globaltradealert.org
-
 www.globaltradealert.org
 }
 \author{
