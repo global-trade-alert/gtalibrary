@@ -25,7 +25,7 @@ gta_theme(
 }
 \description{
 This function defines the GTA theme for ggplot. Add it at the end of a ggplot object.
-If you want to overwrite certain elements, simply add + [theme(element_to_overwrite)] to your plot.
+If you want to overwrite certain elements, simply add \code{theme()} to your plot.
 }
 \examples{
 # Create a plot with gta_theme()

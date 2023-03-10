@@ -3,7 +3,7 @@
 #' Complete theme for GTA Plots
 #'
 #' This function defines the GTA theme for ggplot. Add it at the end of a ggplot object.
-#' If you want to overwrite certain elements, simply add + [theme(element_to_overwrite)] to your plot.
+#' If you want to overwrite certain elements, simply add \code{theme()} to your plot.
 #' @usage
 #' gta_theme(
 #'    base_size = 12,
