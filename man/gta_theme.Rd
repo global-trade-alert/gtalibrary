@@ -35,9 +35,3 @@ df |>
     gta_theme() + # add the base theme to your plot
     theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
 }
-\references{
-www.globaltradealert.org
-}
-\author{
-Global Trade Alert
-}

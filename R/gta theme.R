@@ -24,8 +24,6 @@
 #'     geom_line() +
 #'     gta_theme() + # add the base theme to your plot
 #'     theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
-#' @references www.globaltradealert.org
-#' @author Global Trade Alert
 #' @import ggplot2
 #' @export
 gta_theme <- function(base_size = 12, base_family = "Open Sans", base_line_size = base_size / 22, base_rect_size = base_size / 22, aspect_ratio = NULL) {
