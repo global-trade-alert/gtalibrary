@@ -78,9 +78,8 @@ gta_theme <- function(base_size = 12, base_family = "sans", base_line_size = bas
         legend.position = "bottom",
         legend.justification = "center",
         legend.box.margin = margin(0, 0, 0, 0),
-        legend.box.spacing = unit(base_size / 2, "pt")
+        legend.box.spacing = unit(base_size / 2, "pt"),
         legend.box.background = element_blank(),
-        legend.box.spacing = unit(base_size / 4, "pt"),
         panel.background = element_rect(fill = "white"),
         panel.border = element_rect(fill = "transparent"),
         panel.grid.major = element_line(color = "#EEEEEE"),
