@@ -26,9 +26,28 @@
 #'     theme(axis.text.x = element_text(angle = 45, color = "red", size = 20)) # if you need to deviate from the theme, simply add changes within a new theme() element
 #' @import ggplot2
 #' @export
-gta_theme <- function(base_size = 12, base_family = "Open Sans", base_line_size = base_size / 22, base_rect_size = base_size / 22, aspect_ratio = NULL) {
+gta_theme <- function(base_size = 12, base_family = "sans", base_line_size = base_size / 22, base_rect_size = base_size / 22, aspect_ratio = NULL) {
     # margins are defined relative to the text size (base_size) of the plot
     # define complete theme
+
+    # check font availability on system
+    font_installed <- systemfonts::system_fonts() |>
+        dplyr::filter(family == base_family)
+
+    # check temporarily loaded fonts (eg. via sysfonts::font_add_google())
+    font_temp <- which(sysfonts::font_families() == base_family)
+
+    # if font is not loaded, print warning/info message. ggplot resorts to base font (sans)
+    if (nrow(font_installed) == 0 & length(font_temp) == 0) {
+        out <- glue::glue("The specified font family {base_family} is not installed on your system.
+        --> If you install the font, make sure to restart your R session before using it. ")
+        info <- glue::glue("If you do not wish to install {base_family}, add the following commands to your script:
+        sysfonts::add_font_google('{base_family}')
+        showtext::showtext_auto()")
+        cli::cli_alert_warning(out)
+        cli::cli_alert_info(info)
+    }
+
     theme(
         # set base line, rect and text --> These elements are inherited from all other elements
         line = element_line(colour = "#CCCCCC", linewidth = base_line_size, linetype = 1, lineend = "butt"),
