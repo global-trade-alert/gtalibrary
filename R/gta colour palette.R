@@ -48,12 +48,12 @@ gta_colour_palette <- function() {
     text_color <- "#555555"
     line_color <- "#CCCCCC"
     background_color <- "#EEEEEE"
-    
+
     # store colors in list
     gta_colour <- list(
-        text_color <- text_color, 
-        line_color  <- line_color, 
-        background_color <- background_color, 
+        text_color <- text_color,
+        line_color <- line_color,
+        background_color <- background_color,
         "green" = green,
         "liberalising" = liberalising,
         "green.light" = green.light,
@@ -68,7 +68,6 @@ gta_colour_palette <- function() {
         "grey" = grey,
         "blue.complement" = blue.complement,
         "qualitative" = qualitative,
-        "panel.bg" = panel.bg,
         "green.shades" = green.shades,
         "red.shades" = red.shades,
         "blue.shades" = blue.shades,

@@ -14,9 +14,3 @@ Access any colour by calling e.g. gta_colour$green[1]. Every colour comes in 4 p
 
 Applicable values are: green, liberalising, green.light, red, harmful, red.light, amber, blue, brown, turquoise, desert, grey, blue.complement, qualitative, green.shades(), red.shades(), amber.shades(), blue.shades(), turquoise.shades(), desert.shades(), brown.shades(), grey.shades().
 }
-\references{
-www.globaltradealert.org
-}
-\author{
-Global Trade Alert
-}

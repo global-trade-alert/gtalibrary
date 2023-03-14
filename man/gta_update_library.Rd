@@ -2,19 +2,10 @@
 % Please edit documentation in R/gta update library.R
 \name{gta_update_library}
 \alias{gta_update_library}
-\title{Get the latest version from GitHub.}
+\title{Get the latest gtalibrary version from GitHub.}
 \usage{
-gta_update_library(x)
-}
-\value{
-Be up to date with our latest functions.
+gta_update_library(branch = master)
 }
 \description{
 Syncs your local library with our latest GTA GitHub release.
-}
-\references{
-www.globaltradealert.org
-}
-\author{
-Global Trade Alert
 }

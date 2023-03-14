@@ -7,14 +7,8 @@
 gta_setwd(gdrive = NA)
 }
 \value{
-A common working directory.
+A common working directory
 }
 \description{
 Sets your working directory to that used by the GTA data team.
-}
-\references{
-www.globaltradealert.org
-}
-\author{
-Global Trade Alert
 }

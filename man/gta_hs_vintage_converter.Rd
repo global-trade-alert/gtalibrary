@@ -28,8 +28,10 @@ possible codes that were truncated to 6 digits and the codes that could not be c
 }
 \description{
 `gta_hs_vintage_converter()` takes a vector of HS codes of any vintage
-as an input and converts them to 6-digit HS2012 codes. Available vintages to convert
-from are: 1992, 1996, 2002, 2007, 2017, 2022
+as an input and converts them to 6-digit HS2012 codes.
+}
+\details{
+Available vintages to convert from are: 1992, 1996, 2002, 2007, 2017, 2022.
 Input codes can be of any length (ie. HS2, HS4, ...). Input codes longer than 6 digits
 are truncated to 6 digits.
 }
