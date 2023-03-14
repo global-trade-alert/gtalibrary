@@ -18,7 +18,6 @@
 #' gta_is_logical(b, \(x) is.numeric(x) & x > 0, error_msg = "{.var b} must be larger than 10")
 #' return(log(a) + b)
 #' }
-#' @export
 gta_logical_check <- function(check_arg, check_function, error_msg = NULL) {
     # check if check_function can be evaluated
     check <- tryCatch(

@@ -19,7 +19,6 @@
 #' # if you do not specify the arg_name, tolower(parameter) will be printed as the arg name.
 #' # To print the passed, unmodified name of the argument, specify: arg_name = parameter
 #' gta_parameter_check(tolower(parameter), permissible_values)
-#' @export
 gta_parameter_check <- function(parameter, permissible_values, arg_name = NULL, warning = FALSE) {
     # check if all parameters are in permissible values
     if (!all(parameter %in% permissible_values)) {
