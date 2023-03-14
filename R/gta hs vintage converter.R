@@ -48,7 +48,7 @@ gta_hs_vintage_converter <- function(codes, years = c(1992, 1996, 2002, 2007, 20
     # check validity of function arguments
     gta_logical_check(as_list, is.logical)
     gta_logical_check(message, is.logical)
-    gta_parameter_check(years, c(1996, 2002, 2007, 2012, 2017, 2022))
+    gta_parameter_check(years, c(1992, 1996, 2002, 2007, 2012, 2017, 2022))
 
     # pad codes that do not have an even character length with leading 0
     codes <- stringr::str_pad(codes, width = ceiling(nchar(codes) / 2) * 2, pad = "0", side = "left")
@@ -63,9 +63,9 @@ gta_hs_vintage_converter <- function(codes, years = c(1992, 1996, 2002, 2007, 20
     for (i in seq_len(length(years))) {
         year <- paste0("HS", years[i])
         matches[i] <-
-            sum(unique(codes) %in% substr(hs.vintages[[year]], 1, 2) |
-                unique(codes) %in% substr(hs.vintages[[year]], 1, 4) |
-                unique(codes) %in% hs.vintages[[year]], na.rm = TRUE)
+            sum(unique(codes) %in% substr(hs_vintages[[year]], 1, 2) |
+                unique(codes) %in% substr(hs_vintages[[year]], 1, 4) |
+                unique(codes) %in% hs_vintages[[year]], na.rm = TRUE)
     }
 
     # select the hs year used for conversion (max year with the highest number of matches)
@@ -78,7 +78,7 @@ gta_hs_vintage_converter <- function(codes, years = c(1992, 1996, 2002, 2007, 20
         tidyr::drop_na() |>
         dplyr::distinct()
 
-    codes_conversion <- gta_code_converter_cpp(codes_2012 = passed_df$HS2012, codes_vintage = passed_df[[hs.origin]], codes = codes)
+    codes_conversion <- gta_code_converter_cpp(codes_2012 = passed_df$HS2012, codes_vintage = passed_df[[hs_origin]], codes = codes)
 
     # prepare console output if message = TRUE
     if (message) {
