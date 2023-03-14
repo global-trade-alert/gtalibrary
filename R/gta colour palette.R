@@ -51,9 +51,9 @@ gta_colour_palette <- function() {
 
     # store colors in list
     gta_colour <- list(
-        text_color <- text_color,
-        line_color <- line_color,
-        background_color <- background_color,
+        "text_color" = text_color,
+        "line_color" = line_color,
+        "background_color" = background_color,
         "green" = green,
         "liberalising" = liberalising,
         "green.light" = green.light,
