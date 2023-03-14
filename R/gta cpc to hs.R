@@ -8,12 +8,12 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
-gta_cpc_to_hs=function(codes){
+#' @export
+gta_cpc_to_hs <- function(codes) {
   code.correspondence <- gtalibrary::cpc.to.hs
 
-  codes=gta_cpc_code_check(codes)
-  codes=code.correspondence$hs[code.correspondence$cpc %in% codes]
+  codes <- gta_cpc_code_check(codes)
+  codes <- code.correspondence$hs[code.correspondence$cpc %in% codes]
   return(codes)
   rm(codes, code.correspondence)
 }

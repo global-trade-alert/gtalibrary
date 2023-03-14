@@ -5,7 +5,7 @@
 #' @return A common working directory.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_setwd = function(gdrive=NA){
 
   if(is.na(gdrive)){

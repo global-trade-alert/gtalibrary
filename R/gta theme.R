@@ -39,8 +39,7 @@ gta_theme <- function(base_size = 12, base_family = "sans", base_line_size = bas
 
     # if font is not loaded, print warning/info message. ggplot resorts to base font (sans)
     if (nrow(font_installed) == 0 & length(font_temp) == 0) {
-        out <- glue::glue("The specified font family {base_family} is not installed on your system.
-        --> If you install the font, make sure to restart your R session before using it. ")
+        out <- glue::glue("The specified font family {base_family} is not installed on your system")
         info <- glue::glue("If you do not wish to install {base_family}, add the following commands to your script:
         sysfonts::add_font_google('{base_family}')
         showtext::showtext_auto()")

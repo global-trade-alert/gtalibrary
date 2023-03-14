@@ -8,7 +8,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-#'
+#' @export
 gta_collect_dom <- function(node=NULL,
                             dom.pos=c()) {
 

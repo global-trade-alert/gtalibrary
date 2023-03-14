@@ -8,7 +8,7 @@
 #'
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-#'
+#' @export
 gta_ted_parse <- function(dom.df=NULL,
                           fx.df=NULL) {
 

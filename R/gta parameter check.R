@@ -1,17 +1,40 @@
 # Roxygen documentation
 
-#' This is a helper function that evaluates whether all user input is understood. Returns 'OK' if this is so and the unconforming values otherwise.
+#' Helper function that evaluates whether user input matches permissible values
 #'
-#' @param check.vector Specify the vector you want to check.
-#' @param permissible.values Specify the permissible values.
-#'
-#' @references www.globaltradealert.org
-#' @author Global Trade Alert
-
-gta_parameter_check=function(check.vector = NULL, permissible.values=NULL){
-
-  if(sum(as.numeric((check.vector %in% permissible.values)==F))>0){
-    error.source=paste("'",paste(check.vector[(check.vector %in% permissible.values)==F], collapse="; "),"'", sep="")
-    return(error.source)
-  } else {return("OK")}
+#' @usage gta_parameter_check(
+#'      parameter,
+#'      permissible_values,
+#'      arg_name = NULL,
+#'      warning = FALSE
+#' )
+#' @param parameter Specify the argument you want to check.
+#' @param permissible_values Specify the permissible values.
+#' @param warning specifies whether the ocurrence of a value in parameter which is not contained in permissible_values should give a warning or an error
+#' gives an error by default (ie. Warning = FALSE)
+#' @param arg_name Optional specification of the argument's name that should be printed in the error message.
+#' @examples
+#' parameter <- c("one", "TWO", "tHrEE")
+#' permissible_values <- c("one", "two")
+#' # if you do not specify the arg_name, tolower(parameter) will be printed as the arg name.
+#' # To print the passed, unmodified name of the argument, specify: arg_name = parameter
+#' gta_parameter_check(tolower(parameter), permissible_values)
+#' @export
+gta_parameter_check <- function(parameter, permissible_values, arg_name = NULL, warning = FALSE) {
+    # check if all parameters are in permissible values
+    if (!all(parameter %in% permissible_values)) {
+        # if arg_name is not specified, take name of value passed to parameter
+        if (is.null(arg_name)) {
+            arg_name <- deparse(substitute(parameter))
+        }
+        # generate error message
+        error_source <- paste(parameter[!parameter %in% permissible_values], collapse = ", ")
+        error_msg <- glue::glue("Unknown values in {arg_name}: {paste(error_source, collapse = ', ')}")
+        # warn user or abort with error message
+        if (warning) {
+            cli::cli_alert_warning(error_msg)
+        } else {
+            cli::cli_abort(error_msg)
+        }
+    }
 }

@@ -11,7 +11,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_un_code_vector=function(countries, role=NULL){
 
   if(is.null(countries)){

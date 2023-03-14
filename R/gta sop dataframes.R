@@ -13,7 +13,7 @@
 
 # Last Update of the function: 03.11.2022
 # Names and columns based on the names provided in the SOP (last update: 28.06.2022)
-
+#' @export
 gta_sop_dataframes=function(aff.jur.df=F, dist.market.df=F, int.level.df=F, hs.codes.df=F, cpc.codes.df=F,
                             firms.df=F, products.df=F, investigations.df=F, frameworks.df=F, related.acts.df=F,
                             locations.df=F) {

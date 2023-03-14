@@ -11,7 +11,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_colour_palette <- function(){
 
   ### THE GTA standard colour palette

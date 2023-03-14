@@ -17,7 +17,7 @@
 
 
 # Function infos and parameters  --------------------------------------------
-
+#' @export
 gta_intervention_duration <- function(
   data.path="data/master_plus.Rdata",
   is.data.frame=FALSE,

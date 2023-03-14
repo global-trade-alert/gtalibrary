@@ -19,7 +19,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_plot_tile <- function(data = NULL,
                          value.x = NULL,
                          value.y = NULL,

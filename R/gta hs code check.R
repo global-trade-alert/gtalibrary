@@ -9,7 +9,7 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 
-
+#' @export
 gta_hs_code_check=function(codes){
 
   # Load HS names, create 4 and 2 digits columns

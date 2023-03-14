@@ -9,7 +9,7 @@
 #' @return Outputs either a list of credentials for a specified app or all credentials available for GTA.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
+#' @export
 gta_pwd <- function(type=NULL) {
 
   # Load stored credentials

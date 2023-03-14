@@ -2,21 +2,55 @@
 % Please edit documentation in R/gta hs vintage converter.R
 \name{gta_hs_vintage_converter}
 \alias{gta_hs_vintage_converter}
-\title{Convert HS codes of unkown vintage into HS 2012.}
+\title{Convert HS codes of unkown vintage into HS6 2012.}
 \usage{
-gta_hs_vintage_converter(codes, origin = "best")
+gta_hs_vintage_converter(
+    codes,
+    years = c(1992, 1996, 2002, 2007, 2012, 2017, 2022),
+    as_list = FALSE,
+    message = TRUE
+)
 }
 \arguments{
-\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed. Values with more than 6 digits will be limited to 6. Please input the codes as integer.}
+\item{codes}{Supply the HS codes you want to check. Values with 2 or more digits are allowed.
+Values with more than 6 digits will be limited to 6.
+codes can be of type numeric or character}
 
-\item{origin}{State the origin vintage, if you know it (options: '2002','2007','2012','2017','best', 'any'). Where 'best' selects the HS vintage with the most matches and 'any' selects HS codes from multiple origin vintages. Default is 'best'.}
+\item{years}{State the origin vintage years which should be tested as candidates to convert from.
+Options inclue 2002, 2007, 2012, 2017, 2022. Default is (2002, 2007, 2012, 2017).}
+
+\item{as_list}{if TRUE, returns the result as a list of the same length as `codes`.
+If FALSE, a vector of unique converted HS codes is returned}
+
+\item{message}{if TRUE, conversion results are printed to the console.
+This includes: The unique vintage year used for conversion (only if `orign` != "any"),
+possible codes that were truncated to 6 digits and the codes that could not be converted.}
 }
 \description{
-Returns it as a vector of 6-digit level HS 2012 codes.
+`gta_hs_vintage_converter()` takes a vector of HS codes of any vintage
+as an input and converts them to 6-digit HS2012 codes. Available vintages to convert
+from are: 1992, 1996, 2002, 2007, 2017, 2022
+Input codes can be of any length (ie. HS2, HS4, ...). Input codes longer than 6 digits
+are truncated to 6 digits.
+}
+\examples{
+# If you wish to convert every HS code into HS_2012 and append the result to an
+# existing data frame, the as_list comes in handy. Use \code{dplyr::mutate()} to
+# add a new row with the converted codes, and then use the \code{tidyr::unnest()} function.
+df <- tibble(
+    HS_unknown_vintage = c("010123", "02", "0345", "010101"),
+    Country = c("USA", "CH", "DE", "CAN")
+)
+
+df |>
+    dplyr::mutate(HS_2012 = gta_hs_vintage_converter(codes = HS_2007, as_list = TRUE, years = c(2002, 2007, 2012, 2017))) |>
+    tidyr::unnest(cols = HS_2012, keep_empty = TRUE) # keep_empty keeps the columns where the HS code could not be converted
+
+# If you know that the HS codes which you want to convert are from a specific year (eg. 2007), you
+# can simply adjust the argument `years` and only include 2007. This ensures that all codes are converted
+# form the HS2007 vintag
 }
 \references{
-www.globaltradealert.org
-}
-\author{
-Global Trade Alert
+The conversion Matrix underlying this function is stored in \code{`gtalibrary::hs_vintages`}
+The data was obtained from: https://unstats.un.org/unsd/classifications/Econ
 }
