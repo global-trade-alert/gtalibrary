@@ -5,15 +5,19 @@
 \alias{hs_vintages}
 \title{hs_vintage conversion matrix}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 6555 rows and 6 columns.
+An object of class \code{spec_tbl_df} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 6555 rows and 7 columns.
 }
 \usage{
-This data set is used in the function \code{gta_hs_vintage_converter()} to convert
-HS codes of any origin into 2012 vintage.
+hs_vintages
 }
 \description{
-hs_vintages contains the conversion matrix between different HS versions
-The underlying conversion matrices are obtained from https://unstats.un.org/unsd/classifications/Econ and allow you
-to convert HS codes from one vintage year to another.
+hs_vintages contains the conversion matrix for converting from HS 1992 / 1996 / 2007 /2017 and 2022 to HS2012.
+The underlying conversion matrices are obtained from https://unstats.un.org/unsd/classifications/Econ
+}
+\details{
+!Only use this data set to convert to HS 2012 codes! Conversion between other HS years are incomplete as the bilateral
+conversion matrices donwloaded from unstats were joined with HS2012 as the key value
+
+This data set is used in the function \code{gta_hs_vintage_converter()}
 }
 \keyword{datasets}

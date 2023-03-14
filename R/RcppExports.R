@@ -4,3 +4,4 @@
 gta_code_converter_cpp <- function(codes_2012, codes_vintage, codes) {
     .Call(`_gtalibrary_gta_code_converter_cpp`, codes_2012, codes_vintage, codes)
 }
+
