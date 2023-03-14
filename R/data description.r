@@ -6,5 +6,3 @@
 #' @usage This data set is used in the function \code{gta_hs_vintage_converter()} to convert
 #' HS codes of any origin into 2012 vintage.
 "hs_vintages"
-
-roxygen2::roxygenize()
