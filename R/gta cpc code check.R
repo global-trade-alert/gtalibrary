@@ -10,8 +10,7 @@
 #' @author Global Trade Alert
 
 #' @export
-gta_cpc_code_check = function(codes){
-
+gta_cpc_code_check <- function(codes) {
   # Load cpc names
   cpc.names <- gtalibrary::cpc.names
 
@@ -19,30 +18,30 @@ gta_cpc_code_check = function(codes){
   if (max(nchar(codes)) >= 4) {
     stop("Please provide codes only up to 3 figures")
   }
-    # check vector type to decide further processing
-  if (is.numeric(codes)==T) {
+  # check vector type to decide further processing
+  if (is.numeric(codes) == T) {
+    # Expand all codes to 3 digits, to take care of leading zeros
+    codes <- as.factor(sprintf("%03i", codes))
 
-        # Expand all codes to 3 digits, to take care of leading zeros
-        codes <- as.factor(sprintf("%03i", codes))
+    # Check if all cpc codes occur on 2nd level cpc
+    if (all(unique(codes) %in% sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc) == T)) {
+      codes <- sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)[substr(sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc), 1, 3) %in% codes]
+      print("Conversion successful. Returning vector of 3-digit CPC codes.")
 
-        # Check if all cpc codes occur on 2nd level cpc
-        if (all(unique(codes) %in% sprintf("%03i",subset(cpc.names, cpc.digit.level == 3)$cpc) == T)){
-          codes <- sprintf("%03i",subset(cpc.names, cpc.digit.level == 3)$cpc)[substr(sprintf("%03i",subset(cpc.names, cpc.digit.level == 3)$cpc),1,3) %in% codes]
-          print("Conversion successful. Returning vector of 3-digit CPC codes.")
+      return(as.numeric(codes))
+    } else {
+      non.existing <- codes[!codes %in% sprintf("%03i", subset(cpc.names, cpc.digit.level == 3)$cpc)]
+      print(paste0("Non-existing values provided: ", paste0(non.existing, collapse = ", ")))
 
-          return(as.numeric(codes))
-
-        } else {
-          non.existing <- codes[! codes %in% sprintf("%03i",subset(cpc.names, cpc.digit.level == 3)$cpc)]
-          print(paste0("Non-existing values provided: ", paste0(non.existing, collapse = ", ")))
-
-          return(non.existing)
-
-          }
-        # Check whether vector is character, indicating that there are leading zeros cpc 3rd level codes included
-  }   else if (is.numeric(codes)==F) {
-        stop("Please input all codes as integer!")
+      return(non.existing)
+    }
+    # Check whether vector is character, indicating that there are leading zeros cpc 3rd level codes included
+  } else if (is.numeric(codes) == F) {
+    stop("Please input all codes as integer!")
   }
-    rm(codes)
-
+  rm(codes)
 }
+
+
+
+remotes::install_github("global-trade-alert/gtalibrary")
