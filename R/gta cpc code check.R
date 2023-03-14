@@ -41,7 +41,3 @@ gta_cpc_code_check <- function(codes) {
   }
   rm(codes)
 }
-
-
-
-remotes::install_github("global-trade-alert/gtalibrary")
