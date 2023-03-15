@@ -1,4 +1,5 @@
 #' Check whether function arguments fulfill a logical conditoion
+#' 
 #' @usage
 #' gta_logical_check(
 #'      check_arg,

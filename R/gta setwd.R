@@ -1,7 +1,6 @@
 # Roxygen documentation
 
 #' Sets your working directory to that used by the GTA data team.
-#'
 #' @return A common working directory
 #' @export
 gta_setwd <- function(gdrive = NA) {

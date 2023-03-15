@@ -20,6 +20,7 @@ Imports:
     ggplot2,
     stringr, 
     dtplyr, 
-    devtools
+    devtools, 
+    lubridate
 LinkingTo: Rcpp
 
