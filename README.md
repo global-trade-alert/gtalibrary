@@ -1,4 +1,10 @@
 # gtalibrary
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/global-trade-alert/gtalibrary/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/global-trade-alert/gtalibrary/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+
 A nascent R package containing functions to work with Global Trade Alert data.
 
 
