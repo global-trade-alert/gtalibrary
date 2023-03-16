@@ -1307,7 +1307,7 @@ gta_trade_coverage <- function(
     }
 
 
-    if(trade.data %in% c("base", paste(2005:2020))){
+    if(trade.data %in% c("base","19-21 avg", paste(2005:2020))){
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
 
       dm.split <- split(duration.max, sample(1:nr.splits, nrow(duration.max), replace=T))
