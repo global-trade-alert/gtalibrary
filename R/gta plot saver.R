@@ -13,11 +13,6 @@
 #' @param eps Set eps output to FALSE. Default: TRUE.
 #' @param eps Set cairo_ps output to TRUE if you want to generate an eps file with transparency levels. Default: FALSE.
 #' @param aspect.ratio Define the aspect ratio of the plot as integer. Width = 1, height = 1*aspect.ratio. If height is defined, aspect.ratio does have no effect.
-#'
-#'
-#' @references www.globaltradealert.org
-#' @author Global Trade Alert
-
 
 #' @export
 gta_plot_saver <- function(plot = NULL,
@@ -30,56 +25,68 @@ gta_plot_saver <- function(plot = NULL,
                            pdf = F,
                            jpg = F,
                            cairo_ps = F,
-                           aspect.ratio = 21/29.7) {
-  if (is.null(height)) {
-    height = width*aspect.ratio
-  } else {
-    height = height
-  }
+                           aspect.ratio = 21 / 29.7) {
+    if (is.null(height)) {
+        height <- width * aspect.ratio
+    } else {
+        height <- height
+    }
 
-  if (png == T) {
-    ggsave(filename=paste0(name,".png"),
-           plot=plot,
-           device = "png",
-           path=path,
-           dpi=600,
-           width=width,
-           height = height,
-           units = "cm")}
-  if (jpg == T) {
-    ggsave(filename=paste0(name,".jpg"),
-           plot=plot,
-           device = "jpg",
-           path=path,
-           dpi=600,
-           width=width,
-           height = height,
-           units = "cm")}
-  if (eps == T) {
-    ggsave(filename=paste0(name,".eps"),
-           plot=plot,
-           device = "eps",
-           path=path,
-           width=width,
-           height = height,
-           units = "cm")
-  }
-  if (pdf == T) {
-    ggsave(filename=paste0(name,".pdf"),
-           plot=plot,
-           device = grDevices::cairo_pdf,
-           path=path,
-           width=width,
-           height = height,
-           units = "cm")
-  }
-  if (cairo_ps == T) {
-    ggsave(filename=paste0(name,".eps"),
-           plot=plot,
-           device = grDevices::cairo_ps,
-           path=path,
-           width=width,
-           height = height,
-           units = "cm")
-  }
+    if (png) {
+        ggsave(
+            filename = paste0(name, ".png"),
+            plot = plot,
+            device = "png",
+            path = path,
+            dpi = 600,
+            width = width,
+            height = height,
+            units = "cm"
+        )
+    }
+    if (jpg) {
+        ggsave(
+            filename = paste0(name, ".jpg"),
+            plot = plot,
+            device = "jpg",
+            path = path,
+            dpi = 600,
+            width = width,
+            height = height,
+            units = "cm"
+        )
+    }
+    if (eps) {
+        ggsave(
+            filename = paste0(name, ".eps"),
+            plot = plot,
+            device = "eps",
+            path = path,
+            width = width,
+            height = height,
+            units = "cm"
+        )
+    }
+    if (pdf) {
+        ggsave(
+            filename = paste0(name, ".pdf"),
+            plot = plot,
+            device = grDevices::cairo_pdf,
+            path = path,
+            width = width,
+            height = height,
+            units = "cm"
+        )
+    }
+    if (cairo_ps) {
+        ggsave(
+            filename = paste0(name, ".eps"),
+            plot = plot,
+            device = grDevices::cairo_ps,
+            path = path,
+            width = width,
+            height = height,
+            units = "cm"
+        )
+    }
 }

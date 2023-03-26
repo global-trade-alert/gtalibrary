@@ -38,24 +38,27 @@
 #' @param intervention.ids Provide a vector of intervention IDs.
 #' @param keep.interventions Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated intervention IDs.
 #' @param lag.adjustment Create a snapshot of the GTA data at the same point in each calendar year since 2009. Specify a cut-off date ('MM-DD').
-#' @param add.unpublished Including material that is not published (GTA 28 specifc: dumps & subsidies)
 #' @export
-gta_data_slicer <- function(
-    data = NULL, data.path = "data/master.Rds",
-    gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
-    keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
-    incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
-    nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
-    keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
-    submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
-    intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
-    implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
-    cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
-    intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL
-) {
+gta_data_slicer <- function(data = NULL, data.path = "data/master.Rds",
+                            gta.evaluation = NULL, affected.flows = NULL, implementing.country = NULL,
+                            keep.implementer = TRUE, affected.country = NULL, keep.affected = NULL,
+                            incl.affected.strictness = "ONEPLUS", keep.others = TRUE, nr.affected = c(0, 999),
+                            nr.affected.incl = "ALL", announcement.period = NULL, implementation.period = NULL,
+                            keep.implementation.na = NULL, revocation.period = NULL, keep.revocation.na = TRUE,
+                            submission.period = NULL, in.force.on.date = Sys.Date(), keep.in.force.on.date = "any",
+                            intervention.types = NULL, keep.type = NULL, mast.chapters = NULL, keep.mast = NULL,
+                            implementation.level = NULL, keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
+                            cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL, keep.hs = NULL,
+                            intervention.ids = NULL, keep.interventions = NULL, lag.adjustment = NULL) {
     # if master dataset is not provided, load it as data table
     # if it is already provided, ensure that it is formatted as a data.table
-    if (is.null(data)) data <- data.table::as.data.table(readRDS(data.path))
+    if (is.null(data)) {
+        # try to load data
+        tryCatch(
+            data <- data.table::as.data.table(readRDS(data.path)),
+            error = \(e) cli::cli_abort("Path to data file is invalid. Did you set your working directory ?")
+        )
+    }
     if (!data.table::is.data.table(data)) {
         data <- data.table::as.data.table(data)
     }
@@ -70,7 +73,6 @@ gta_data_slicer <- function(
     gta_logical_check(keep.implementer, is.logical, "Keep.implementer must be TRUE/FALSE")
     gta_logical_check(keep.revocation.na, is.logical, "Keep.revocation.na must be a TRUE/FALSE")
     gta_logical_check(keep.others, is.logical, "Keep.others must be a TRUE/FALSE")
-    gta_logical_check(add.unpublished, is.logical, "add.unpublished must be a TRUE/FALSE")
     gta_parameter_check(tolower(nr.affected.incl), c("all", "selected", "unselected"))
     gta_parameter_check(tolower(incl.affected.strictness), c("all", "one", "oneplus"))
     gta_logical_check(in.force.on.date, lubridate::is.Date, error_msg = "in.force.on.date must be a date")
@@ -117,15 +119,11 @@ gta_data_slicer <- function(
 
         affected_interventions <- dtplyr::lazy_dt(data) |>
             dplyr::filter(eval(parse(text = filter_affected))) |>
-            dplyr::pull(intervention.id) |>
-            dplyr::distinct()
+            dplyr::distinct(intervention.id) |>
+            dplyr::pull(intervention.id)
 
         # if any of the arguments deviate from the baseline, calculate information and adjust filtering of intervention.ids
         if (!all(nr.affected == c(0, 999)) | tolower(nr.affected.incl) != "all" | tolower(incl.affected.strictness) != "oneplus") {
-            ###### ¨¨¨¨
-            ###### !!! CHECK IF ADDITIONAL INFO WAS APPENDED TO THE DATA FRAME THAT COUNS THE AFFECTED TIMES!!!
-            ###### ¨¨¨¨
-
             # generates tibble that contains
             # - number of affected countries per intervention.id where at least one member in the argument "affected.country" is included
             # - number of values "affected.country" which are affected per intervention.id
@@ -168,8 +166,8 @@ gta_data_slicer <- function(
 
             # retrieve all the intervention.ids that fulfill the given criteria
             affected_interventions <- affected_countries_info |>
-                dplyr::pull(intervention.id) |>
-                dplyr::distinct()
+                dplyr::distinct(intervention.id) |>
+                dplyr::pull(intervention.id)
         }
 
         # if keep.affected = TRUE, intervention.ids can be taken over, if false, additionally filter for a.un %in% affected.country
@@ -342,6 +340,7 @@ gta_data_slicer <- function(
 
         # keep as tibble and not as data.table --> Faster performance
         data <- tibble::as_tibble(data) |>
+            # alternatively, use stringr::str_split() --> equivalent function
             dplyr::mutate(affected.product = stringr::str_split(string = affected.product, pattern = ", ")) |>
             tidyr::unnest(cols = affected.product) |>
             dplyr::filter(eval(parse(text = filter_statement_hs))) |>
@@ -361,6 +360,7 @@ gta_data_slicer <- function(
         }
 
         data <- tibble::as_tibble(data) |>
+            # alternatively, use stringr::str_split() --> equivalent function
             dplyr::mutate(affected.sector = stringr::str_split(string = affected.sector, pattern = ", ")) |>
             tidyr::unnest(cols = affected.sector) |>
             dplyr::filter(eval(parse(text = filter_statement_cpc))) |>
@@ -372,3 +372,10 @@ gta_data_slicer <- function(
 }
 
 #### NOT FINISHED YET MORE TESTING NEEDED
+
+# microbenchmark::microbenchmark(
+#     times = 1,
+#     a <- data |> gta_data_slicer(implementing.country = 756, affected.country = 688, mast.chapters = "L", keep.mast = TRUE, keep.affected = TRUE, keep.others = FALSE)
+# )
+
+## default behavior of keep.others --> May not be clear to everyone ??? since not the same behavior on implementing country side???!!!

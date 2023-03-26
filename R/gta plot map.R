@@ -31,109 +31,107 @@ gta_plot_map <- function(data = NULL,
                          legend.title = NULL,
                          legend.labels = waiver(),
                          title = NULL) {
+    library("data.table")
+    library("ggplot2")
 
-  library("data.table")
-  library("ggplot2")
+    # Load map data
+    gta_colour_palette()
 
-  # Load map data
-  gta_colour_palette()
+    world <- gtalibrary::world.geo
 
-  world <- gtalibrary::world.geo
+    data[, c("UN", "value")] <- data[, c(countries, value)]
+    data$UN <- gta_un_code_vector(data$UN)
 
-  data[,c("UN","value")] <- data[,c(countries,value)]
-  data$UN <- gta_un_code_vector(data$UN)
+    # merge data with map data
+    world <- merge(world, data[, c("UN", "value")], by = "UN", all.x = T)
 
-  # merge data with map data
-  world = merge(world, data[,c("UN","value")], by="UN", all.x=T)
+    ###### IMPORTANT, sort for X (id) again
+    world <- world[with(world, order(X)), ]
+    # world$value[is.na(world$value) == T] <- 0
 
-  ###### IMPORTANT, sort for X (id) again
-  world <-  world[with(world, order(X)),]
-  # world$value[is.na(world$value) == T] <- 0
-
-  if (length(range.split)==1){
-  eval(parse(text=paste("range.split <- seq(",min(world$value, na.rm=T),",",max(world$value, na.rm=T),",",(max(world$value, na.rm=T)-min(world$value, na.rm=T))/(range.split-1),")",sep="")))
-    range.split <- range.split[1:length(range.split)]
-    if(length(legend.labels)>0) {
-      if(length(range.split)!=length(legend.labels)) {
-        stop("Please make sure that range.split and legend.labels have the same number of elements.")
-      }
-    } else {
-      legend.labels <- paste(range.split, sep=",")
+    if (length(range.split) == 1) {
+        eval(parse(text = paste("range.split <- seq(", min(world$value, na.rm = T), ",", max(world$value, na.rm = T), ",", (max(world$value, na.rm = T) - min(world$value, na.rm = T)) / (range.split - 1), ")", sep = "")))
+        range.split <- range.split[1:length(range.split)]
+        if (length(legend.labels) > 0) {
+            if (length(range.split) != length(legend.labels)) {
+                stop("Please make sure that range.split and legend.labels have the same number of elements.")
+            }
+        } else {
+            legend.labels <- paste(range.split, sep = ",")
+        }
     }
-  }
-  if (length(range.split)>1) {
-    range.split <- range.split[1:length(range.split)]
-    if(length(legend.labels)>0) {
-      if(length(range.split)!=length(legend.labels)) {
-        stop("Please make sure that range.split and legend.labels have the same number of elements.")
-      }
-    } else {
-      legend.labels <- paste(range.split, sep=",")
+    if (length(range.split) > 1) {
+        range.split <- range.split[1:length(range.split)]
+        if (length(legend.labels) > 0) {
+            if (length(range.split) != length(legend.labels)) {
+                stop("Please make sure that range.split and legend.labels have the same number of elements.")
+            }
+        } else {
+            legend.labels <- paste(range.split, sep = ",")
+        }
     }
-  }
 
-  if (is.null(marked.country)){
+    if (is.null(marked.country)) {
+        plot <- ggplot() +
+            geom_polygon(data = subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white") +
+            coord_fixed() + # Important to fix world map proportions
+            ggtitle(title) +
+            labs(x = "", y = "") +
+            scale_fill_gradient(low = colour.low, high = colour.high, breaks = range.split, position = "bottom", labels = legend.labels, na.value = "#CCCCCC") + # Set color gradient
+            theme(
+                axis.title.x = element_blank(),
+                axis.text.x = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.title.y = element_blank(),
+                axis.text.y = element_blank(),
+                axis.ticks.y = element_blank(),
+                panel.background = element_blank(),
+                legend.position = "bottom",
+                plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b = 10)),
+                legend.title = element_text(vjust = 0.3, family = "", colour = "#333333", size = 11 * 0.8, margin = margin(r = 10)),
+                legend.text = element_text(family = "", colour = "#333333", size = 11 * 0.8, angle = 0, hjust = 0, vjust = 0, margin = margin(r = 10)),
+                legend.text.align = 0
+            ) +
+            guides(
+                fill = guide_legend(title = legend.title, label.position = "top"),
+                ymax = guide_legend(titel = "size")
+            )
 
-  plot = ggplot() +
-    geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white") +
-    coord_fixed() + # Important to fix world map proportions
-    ggtitle(title) +
-    labs(x="", y="") +
-    scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels, na.value = "#CCCCCC") + # Set color gradient
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          panel.background = element_blank(),
-          legend.position = "bottom",
-          plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b=10)),
-          legend.title = element_text(vjust= 0.3, family="", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
-          legend.text = element_text(family="", colour = "#333333", size = 11*0.8, angle = 0, hjust=0, vjust=0, margin = margin(r=10)),
-          legend.text.align = 0
+        plot
+    }
 
-    ) +
-    guides(fill=guide_legend(title=legend.title, label.position = "top"),
-           ymax=guide_legend(titel="size"))
+    if (is.null(marked.country) == F) {
+        marked.country <- gta_un_code_vector(marked.country)
 
-  plot
-
-  }
-
-  if(is.null(marked.country)==F) {
-
-    marked.country <- gta_un_code_vector(marked.country)
-
-    plot = ggplot() +
-      geom_polygon(data= subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white", ) +
-      geom_polygon(data=subset(world, UN == marked.country), aes(x=long, y=lat, group = group), fill=marked.colour, size = 0.2, colour = "white") +
-      coord_fixed() + # Important to fix world map proportions
-      ggtitle(title) +
-      labs(x="", y="") +
-      scale_fill_gradient(low = colour.low, high = colour.high, breaks=range.split, position="bottom", labels=legend.labels, na.value = "#CCCCCC") + # Set color gradient
-      theme(axis.title.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.title.y=element_blank(),
-            axis.text.y=element_blank(),
-            axis.ticks.y=element_blank(),
-            panel.background = element_blank(),
-            legend.position = "bottom",
-            plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b=10)),
-            legend.title = element_text(vjust= 0.3, family="", colour = "#333333", size = 11*0.8, margin = margin(r=10)),
-            legend.text = element_text(family="", colour = "#333333", size = 11*0.8, angle = 0, hjust=0, vjust=0, margin = margin(r=10)),
-            legend.text.align = 0
-
-      ) +
-      guides(fill=guide_legend(title=legend.title, label.position = "top"),
-             ymax=guide_legend(titel="size"))
-
-
-    plot
+        plot <- ggplot() +
+            geom_polygon(data = subset(world, country != "Antarctica"), aes(x = long, y = lat, group = group, fill = value), size = 0.2, color = "white", ) +
+            geom_polygon(data = subset(world, UN == marked.country), aes(x = long, y = lat, group = group), fill = marked.colour, size = 0.2, colour = "white") +
+            coord_fixed() + # Important to fix world map proportions
+            ggtitle(title) +
+            labs(x = "", y = "") +
+            scale_fill_gradient(low = colour.low, high = colour.high, breaks = range.split, position = "bottom", labels = legend.labels, na.value = "#CCCCCC") + # Set color gradient
+            theme(
+                axis.title.x = element_blank(),
+                axis.text.x = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.title.y = element_blank(),
+                axis.text.y = element_blank(),
+                axis.ticks.y = element_blank(),
+                panel.background = element_blank(),
+                legend.position = "bottom",
+                plot.title = element_text(family = "", colour = "#333333", size = 11, hjust = 0.5, margin = margin(b = 10)),
+                legend.title = element_text(vjust = 0.3, family = "", colour = "#333333", size = 11 * 0.8, margin = margin(r = 10)),
+                legend.text = element_text(family = "", colour = "#333333", size = 11 * 0.8, angle = 0, hjust = 0, vjust = 0, margin = margin(r = 10)),
+                legend.text.align = 0
+            ) +
+            guides(
+                fill = guide_legend(title = legend.title, label.position = "top"),
+                ymax = guide_legend(titel = "size")
+            )
 
 
-  }
+        plot
+    }
 
-  return(plot)
+    return(plot)
 }

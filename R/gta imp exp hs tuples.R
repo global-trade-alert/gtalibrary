@@ -11,11 +11,6 @@
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is 'parameter.tuple'.
 #'
 #' @return Output is two data frames. First data frame includes the importer-exporter-product relationships for the given interventions. Second data frame states parameter choices.
-#' @references www.globaltradealert.org
-#' @author Global Trade Alert
-
-
-# Function infos and parameters  --------------------------------------------
 #' @export
 gta_imp_exp_hs_tuples <- function(
   master.path="data/master_plus.Rdata",

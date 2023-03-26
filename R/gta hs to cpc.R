@@ -9,14 +9,13 @@
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
 #' @export
-gta_hs_to_cpc=function(codes){
-  code.correspondence=read.csv("definitions/cpc-to-hs/cpc21-hs2012.csv", sep=";")
-  names(code.correspondence)=c("cpc.3digit", "hs.6digit") ## JF has some importing issue, thus the renaming here.
+gta_hs_to_cpc <- function(codes) {
+    code.correspondence <- read.csv("definitions/cpc-to-hs/cpc21-hs2012.csv", sep = ";")
+    names(code.correspondence) <- c("cpc.3digit", "hs.6digit") ## JF has some importing issue, thus the renaming here.
 
-  codes=gta_hs_code_check(codes)
-  codes=code.correspondence$cpc.3digit[code.correspondence$hs.6digit %in% codes]
-  codes = ifelse(nchar(codes)<=4, substr(codes,1,2), substr(codes,1,3))
-  return(codes)
-  rm(codes, code.correspondence)
-
+    codes <- gta_hs_code_check(codes)
+    codes <- code.correspondence$cpc.3digit[code.correspondence$hs.6digit %in% codes]
+    codes <- ifelse(nchar(codes) <= 4, substr(codes, 1, 2), substr(codes, 1, 3))
+    return(codes)
+    rm(codes, code.correspondence)
 }
