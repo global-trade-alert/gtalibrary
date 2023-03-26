@@ -169,13 +169,3 @@
 #
 #
 # map
-
-gtalibrary::gta_setwd("H")
-load("data/support tables/Goods support table for gtalibrary.Rdata")
-trade.base.1921 <- aggregate(
-    trade.value ~ i.un + a.un + hs6,
-    subset(trade.annual, year > 2019 & year <= 2021),
-    sum
-)
-
-save(trade.base.1921, file = "C:/Users/sveng/OneDrive/Dokumente/GitHub/GTA/gtalibrary/datatrade.base.1921.rda")
