@@ -12,7 +12,7 @@
 #' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
-#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2020, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2020, the GTA base period data ('base', averages for 2005-2007), the 2019-2021 average ('19-21 avg') as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata').
 #' @param df.name Set the name of the generated result data frame. Default is trade.base.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.trade.base.
@@ -51,20 +51,31 @@ gta_trade_value_bilateral <- function(
     trade.base=gtalibrary::trade.base
     trade.base$trade.value=trade.base$trade.value/3
   } else{
-    load(trade.data.path)
 
-    if(trade.data %in% paste(2005:2020)){
-      yr=as.numeric(trade.data)
-      trade.base=subset(trade.annual, year==yr)
-      trade.base$year=NULL
-      rm(trade.annual)
+    if (trade.data=="19-21 avg"){
+
+      trade.base=gtalibrary::trade.base.1921
+      trade.base$trade.value=trade.base$trade.value/3
+
     } else {
-      trade.base=trade.annual
-      rm(trade.annual)
 
-      if(grepl("prior", trade.data, ignore.case = T)){
-        trade.base$year=trade.base$year+1
-      }
+      load(trade.data.path)
+
+      if(trade.data %in% paste(2005:2020)){
+        yr=as.numeric(trade.data)
+        trade.base=subset(trade.annual, year==yr)
+        trade.base$year=NULL
+        rm(trade.annual)
+      } else {
+        trade.base=trade.annual
+        rm(trade.annual)
+
+        if(grepl("prior", trade.data, ignore.case = T)){
+          trade.base$year=trade.base$year+1
+        }
+
+
+    }
 
     }
   }
