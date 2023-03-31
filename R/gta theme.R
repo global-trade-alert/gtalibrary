@@ -31,8 +31,8 @@ gta_theme <- function(base_size = 12, base_family = "sans", base_line_size = bas
     # define complete theme
 
     # check font availability on system
-    font_installed <- systemfonts::system_fonts() |>
-        dplyr::filter(family == base_family)
+    # font_installed <- systemfonts::system_fonts() |>
+    #     dplyr::filter(family == base_family)
 
     # check temporarily loaded fonts (eg. via sysfonts::font_add_google())
     # font_temp <- which(sysfonts::font_families() == base_family)
