@@ -19,6 +19,5 @@ Imports:
     ggplot2, 
     stringr, 
     devtools, 
-    sysfonts, 
     systemfonts
 
