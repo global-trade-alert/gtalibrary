@@ -40,8 +40,8 @@ gta_trade_value_bilateral <- function(importing.country = NULL,
   library(data.table)
   parameter.choices <- data.frame(parameter = character(), choice = character())
 
-  if (!trade.data %in% c("base", "prior year", "19-21 avg", "current year", "before announcement", "during announcement", paste(2005:2020))) {
-    stop("Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2020, 'prior year' or 'current year'.")
+  if (!trade.data %in% c("base", "prior year", "19-21 avg", "current year", "before announcement", "during announcement", paste(2005:2022))) {
+    stop("Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2022, 'prior year' or 'current year'.")
   }
 
   if (trade.data == "base") {
@@ -54,7 +54,7 @@ gta_trade_value_bilateral <- function(importing.country = NULL,
     } else {
       load(trade.data.path)
 
-      if (trade.data %in% paste(2005:2020)) {
+      if (trade.data %in% paste(2005:2022)) {
         yr <- as.numeric(trade.data)
         trade.base <- subset(trade.annual, year == yr)
         trade.base$year <- NULL
