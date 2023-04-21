@@ -51,7 +51,7 @@ gta_theme <- function(base_size = 12, base_family = "sans", base_line_size = bas
     theme(
         # set base line, rect and text --> These elements are inherited from all other elements
         line = element_line(colour = "#CCCCCC", linewidth = base_line_size, linetype = 1, lineend = "butt"),
-        rect = element_rect(fill = "#EEEEEE", color = "#CCCCCC", linewidth = base_rect_size, linetype = 1),
+        rect = element_rect(fill = "#FFFFFF", color = "#CCCCCC", linewidth = base_rect_size, linetype = 1),
         text = element_text(family = base_family, color = "#555555", size = base_size),
 
         # specification of theme elements
@@ -82,8 +82,8 @@ gta_theme <- function(base_size = 12, base_family = "sans", base_line_size = bas
         legend.box.background = element_blank(),
         panel.background = element_rect(fill = "white"),
         panel.border = element_rect(fill = "transparent"),
-        panel.grid.major = element_line(color = "#EEEEEE"),
-        panel.grid.minor = element_line(color = "#EEEEEE"),
+        panel.grid.major = element_line(color = "#FFFFFF"),
+        panel.grid.minor = element_line(color = "#FFFFFF"),
         panel.grid.minor.x = element_blank(),
         panel.spacing = unit(base_size * .8, "pt"),
         panel.ontop = FALSE,
