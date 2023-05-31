@@ -1115,8 +1115,8 @@ gta_trade_coverage <- function(
     ##### multiply in base values
     print("Importing trade base values ...")
 
-    if(!trade.data %in% c("base","prior year","current year", "before announcement","during announcement", paste(2005:2020))){
-      stop.print <- "Please specify proper trade data choice (i.e. 'base', a year between 2005 and 2020, 'prior year' or 'current year')."
+    if(!trade.data %in% c("base", "19-21 avg","prior year","current year", "before announcement","during announcement", paste(2005:2020))){
+      stop.print <- "Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2020, 'prior year' or 'current year')."
       error.message <<- c(T, stop.print)
       stop(stop.print)
     } else{
@@ -1307,7 +1307,7 @@ gta_trade_coverage <- function(
     }
 
 
-    if(trade.data %in% c("base", paste(2005:2020))){
+    if(trade.data %in% c("base","19-21 avg", paste(2005:2020))){
       trade.base.bilateral$iahs=paste(trade.base.bilateral$i.un,trade.base.bilateral$a.un, trade.base.bilateral$hs6, sep="-")
 
       dm.split <- split(duration.max, sample(1:nr.splits, nrow(duration.max), replace=T))

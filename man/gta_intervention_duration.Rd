@@ -4,10 +4,14 @@
 \alias{gta_intervention_duration}
 \title{GTA intra-year duration calculator}
 \usage{
-gta_intervention_duration(data.path = "data/master_plus.Rdata",
-  is.data.frame = FALSE, years = NULL, current.year.todate = TRUE,
+gta_intervention_duration(
+  data.path = "data/master_plus.Rdata",
+  is.data.frame = FALSE,
+  years = NULL,
+  current.year.todate = TRUE,
   df.name = "intervention.duration",
-  pc.name = "parameter.choice.duration")
+  pc.name = "parameter.choice.duration"
+)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}

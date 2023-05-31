@@ -4,36 +4,77 @@
 \alias{gta_trade_coverage}
 \title{GTA trade coverage function}
 \usage{
-gta_trade_coverage(data.path = "data/master_plus.Rdata",
+gta_trade_coverage(
+  data.path = "data/master_plus.Rdata",
   replica.path = "data/database replica/database replica - parts - base.Rdata",
-  coverage.period = NULL, current.year.todate = TRUE,
-  gta.evaluation = NULL, affected.flows = c("inward",
-  "outward subsidy"), importers = NULL, keep.importers = NULL,
-  incl.importers.strictness = "ONEPLUS", group.importers = TRUE,
-  separate.importer.groups = FALSE, nr.importers = c(0, 999),
-  nr.importers.incl = "ALL", jointly.affected.importers = FALSE,
-  exporters = NULL, keep.exporters = NULL,
-  incl.exporters.strictness = "ONEPLUS", group.exporters = TRUE,
-  separate.exporter.groups = FALSE, nr.exporters = c(0, 999),
-  nr.exporters.incl = "ALL", implementers = NULL,
-  implementer.role = NULL, keep.implementer = TRUE,
-  group.implementers = TRUE, separate.implementer.groups = FALSE,
-  implementer.trade = NULL, announcement.period = NULL,
-  implementation.period = NULL, revocation.period = NULL,
-  keep.revocation.na = NULL, submission.period = NULL,
-  in.force.today = NULL, intervention.types = NULL, keep.type = NULL,
-  keep.devaluations = FALSE, group.type = TRUE, mast.chapters = NULL,
-  keep.mast = NULL, group.mast = TRUE, implementation.level = NULL,
-  keep.level = NULL, eligible.firms = NULL, keep.firms = NULL,
-  cpc.sectors = NULL, keep.cpc = NULL, hs.codes = NULL,
-  keep.hs = NULL, hit.brackets = c(1, 99999),
-  intervention.ids = NULL, keep.interventions = NULL,
-  lag.adjustment = NULL, reporting.period = NULL,
-  intra.year.duration = TRUE, trade.statistic = "share",
+  replica.path.atl = "data/database replica/gta_affected_tariff_line.Rdata",
+  replica.path.tuple = "data/database replica/gta_tuple.Rdata",
+  coverage.period = NULL,
+  current.year.todate = TRUE,
+  gta.evaluation = NULL,
+  affected.flows = c("inward", "outward subsidy"),
+  importers = NULL,
+  keep.importers = NULL,
+  incl.importers.strictness = "ONEPLUS",
+  group.importers = TRUE,
+  separate.importer.groups = FALSE,
+  nr.importers = c(0, 999),
+  nr.importers.incl = "ALL",
+  jointly.affected.importers = FALSE,
+  exporters = NULL,
+  keep.exporters = NULL,
+  incl.exporters.strictness = "ONEPLUS",
+  group.exporters = TRUE,
+  separate.exporter.groups = FALSE,
+  nr.exporters = c(0, 999),
+  nr.exporters.incl = "ALL",
+  implementers = NULL,
+  implementer.role = NULL,
+  keep.implementer = TRUE,
+  group.implementers = TRUE,
+  separate.implementer.groups = FALSE,
+  implementer.trade = NULL,
+  announcement.period = NULL,
+  implementation.period = NULL,
+  revocation.period = NULL,
+  keep.revocation.na = NULL,
+  submission.period = NULL,
+  in.force.on.date = Sys.Date(),
+  keep.in.force.on.date = "any",
+  intervention.types = NULL,
+  keep.type = NULL,
+  keep.devaluations = FALSE,
+  group.type = TRUE,
+  mast.chapters = NULL,
+  keep.mast = NULL,
+  group.mast = TRUE,
+  implementation.level = NULL,
+  keep.level = NULL,
+  eligible.firms = NULL,
+  keep.firms = NULL,
+  keep.firm.trade.finance = FALSE,
+  keep.firm.financial.assistance.ifm = FALSE,
+  cpc.sectors = NULL,
+  keep.cpc = NULL,
+  hs.codes = NULL,
+  keep.hs = NULL,
+  hit.brackets = c(1, 99999),
+  intervention.ids = NULL,
+  keep.interventions = NULL,
+  lag.adjustment = NULL,
+  reporting.period = NULL,
+  add.unpublished = F,
+  intra.year.duration = TRUE,
+  get.hs.level.data = FALSE,
+  trade.statistic = "share",
   trade.data = "base",
   trade.data.path = "data/support tables/Goods support table for gtalibrary.Rdata",
-  rdata = FALSE, xlsx = FALSE, output.path = NULL,
-  xlsx.interventions = FALSE, output.path.interventions = NULL)
+  rdata = FALSE,
+  xlsx = FALSE,
+  output.path = NULL,
+  xlsx.interventions = FALSE,
+  output.path.interventions = NULL
+)
 }
 \arguments{
 \item{data.path}{Specifies where the GTA data file is located (Default: 'data/master_plus.Rdata'). Set to 'online' to download the latest copy.}
@@ -96,7 +137,9 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{submission.period}{Specify a period in which the interventions for your analysis have been submitted. Default is 'any'. Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions revoked since 'after.date'.}
 
-\item{in.force.today}{Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.}
+\item{in.force.on.date}{Specify the cutoff date to control for in force interventions. Default is the current date (Sys.Date).}
+
+\item{keep.in.force.on.date}{Specify whether you want to focus on interventions in force on the specified date ('Yes') or no longer in force on the specified date ('No'). Default is 'any' i.e. regardless of enforcement status on the specified date.}
 
 \item{intervention.types}{Specify the names of the trade policy instruments for your analysis. Default is 'any'. For the permissible values, please see the GTA website or the GTA handbook.}
 
@@ -120,6 +163,10 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{keep.firms}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated firm subsets.}
 
+\item{keep.firm.trade.finance}{Specify whether you want to keep firm-specific trade finance interventions inside the data set (Default: 'FALSE').}
+
+\item{keep.firm.financial.assistance.ifm}{Specify whether you want to keep firm-specific 'financial assistance in a foreign market' interventions inside the data set (Default: 'FALSE').}
+
 \item{cpc.sectors}{Provide a vector of CPC codes that you are interested in (version 2.1, 3-digit level).}
 
 \item{keep.cpc}{Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.}
@@ -142,7 +189,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 
 \item{trade.statistic}{Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.}
 
-\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2018, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.}
+\item{trade.data}{Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2020, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.}
 
 \item{trade.data.path}{Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),}
 
@@ -157,7 +204,7 @@ gta_trade_coverage(data.path = "data/master_plus.Rdata",
 \item{output.path.interventions}{Takes the value of the output path for the interventions list file (without the filename) added to the working directory as a string starting with "/". Default: None.}
 }
 \value{
-Outputs a table with coverage shares ranging from 2009 to 2018 for each importer, exporter, implementer, instrument combination.
+Outputs a table with coverage shares ranging from 2009 to 2020 for each importer, exporter, implementer, instrument combination.
 }
 \description{
 Computes the trade coverages of GTA measures.

@@ -4,7 +4,7 @@
 \alias{gta_setwd}
 \title{Sets your working directory to that used by the GTA data team.}
 \usage{
-gta_setwd(x)
+gta_setwd(gdrive = NA)
 }
 \value{
 A common working directory.
