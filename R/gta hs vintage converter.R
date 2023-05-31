@@ -34,13 +34,15 @@ gta_hs_vintage_converter=function(
     hs.07= subset(hs.vintages, origin.vintage=="HS 2007")
     hs.12= subset(hs.vintages, origin.vintage=="HS 2012")
     hs.17= subset(hs.vintages, origin.vintage=="HS 2017")
+    hs.22= subset(hs.vintages, origin.vintage=="HS 2022")
 
     matches=c(length(intersect(codes, hs.02$origin.code)),
               length(intersect(codes, hs.07$origin.code)),
               length(intersect(codes, hs.12$origin.code)),
-              length(intersect(codes, hs.17$origin.code)))
+              length(intersect(codes, hs.17$origin.code)),
+              length(intersect(codes, hs.22$origin.code)))
 
-    use.hs=c(2002, 2007, 2012, 2017)[matches==max(matches)]
+    use.hs=c(2002, 2007, 2012, 2017, 2022)[matches==max(matches)]
 
     hs.vintages= subset(hs.vintages, origin.vintage==paste("HS ", max(use.hs), sep=""))
 
