@@ -62,29 +62,37 @@ gta_firm_related_codes_last_dumps = function(master,
     and mfl.firm_name in (", paste(paste0("'", unique(firms.df$escaped.firm.name), "'"), collapse = ','), ");"
     ))
 
-  if (nrow(codes.last.dumps) > 0) {
-  # We join the data frames to obtain the interventions that will contain hs/cpc codes. In addition, we will
-  # see if the match occurs only by firm or by firm and type of intervention
-  int.codes = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type", "hs.code", "cpc.code")], firms.df[,c("firm.name", "intervention.id")], by = "firm.name")
-  int.codes = merge(int.codes, firms.df[,c("intervention.id", "dump.intervention.type")], by = 'intervention.id', all.x = T)
-  firms.int.types = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type")], firms.df[,c("firm.name", "intervention.id", 'dump.intervention.type')], by.x = c("firm.name", "BD.intervention.type"), by.y = c("firm.name", "dump.intervention.type"))
-  firms.int.types$match = 'by firm and intervention type'
-  int.codes = merge(int.codes, unique(firms.int.types[,c("intervention.id", "match")]), by = "intervention.id", all.x = T)
-  int.codes[which(is.na(int.codes$match)), "match"] = 'by firm only'
-
-  # We separate the hs/cpc codes in two different data frames
-  int.hs.codes = unique(subset(int.codes, select = -c(cpc.code)))
-  int.hs.codes = int.hs.codes[!is.na(int.hs.codes$hs.code),]
-  int.hs.codes = int.hs.codes[order(int.hs.codes$intervention.id),]
-
-  int.cpc.codes = unique(subset(int.codes, select = -c(hs.code)))
-  int.cpc.codes = int.cpc.codes[!is.na(int.cpc.codes$cpc.code),]
-  int.cpc.codes = int.cpc.codes[order(int.cpc.codes$intervention.id),]
-
   # Close he connections
   gta_sql_pool_close()
 
-  return(list(int.hs.codes, int.cpc.codes))
+  if (nrow(codes.last.dumps) > 0) {
+    # We join the data frames to obtain the interventions that will contain hs/cpc codes. In addition, we will
+    # see if the match occurs only by firm or by firm and type of intervention
+    int.codes = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type", "hs.code", "cpc.code")], firms.df[,c("firm.name", "intervention.id")], by = "firm.name")
+    int.codes = merge(int.codes, firms.df[,c("intervention.id", "dump.intervention.type")], by = 'intervention.id', all.x = T)
+    firms.int.types = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type")], firms.df[,c("firm.name", "intervention.id", 'dump.intervention.type')], by.x = c("firm.name", "BD.intervention.type"), by.y = c("firm.name", "dump.intervention.type"))
+    firms.int.types$match = 'by firm and intervention type'
+    int.codes = merge(int.codes, unique(firms.int.types[,c("intervention.id", "match")]), by = "intervention.id", all.x = T)
+    int.codes[which(is.na(int.codes$match)), "match"] = 'by firm only'
+
+    # We separate the hs/cpc codes in two different data frames
+    int.hs.codes = unique(subset(int.codes, select = -c(cpc.code)))
+    int.hs.codes = int.hs.codes[order(int.hs.codes$intervention.id),]
+    int.hs.codes = int.hs.codes[!is.na(int.hs.codes$hs.code),]
+
+    int.cpc.codes = unique(subset(int.codes, select = -c(hs.code)))
+    int.cpc.codes = int.cpc.codes[order(int.cpc.codes$intervention.id),]
+    int.cpc.codes = int.cpc.codes[!is.na(int.cpc.codes$cpc.code),]
+
+    if (nrow(int.hs.codes) > 0 & nrow(int.cpc.codes) == 0) {
+      return(int.hs.codes)
+     }
+    else if (nrow(int.hs.codes) == 0 & nrow(int.cpc.codes) > 0) {
+      return(int.cpc.codes)
+     }
+    else {
+      return(list(int.hs.codes, int.cpc.codes))
+     }
   }
   else {
     print("No hs/cpc codes found for the searched firms")
