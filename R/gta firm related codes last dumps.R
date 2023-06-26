@@ -62,7 +62,7 @@ gta_firm_related_codes_last_dumps = function(master,
     and mfl.firm_name in (", paste(paste0("'", unique(firms.df$escaped.firm.name), "'"), collapse = ','), ");"
     ))
 
-
+  if (nrow(codes.last.dumps) > 0) {
   # We join the data frames to obtain the interventions that will contain hs/cpc codes. In addition, we will
   # see if the match occurs only by firm or by firm and type of intervention
   int.codes = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type", "hs.code", "cpc.code")], firms.df[,c("firm.name", "intervention.id")], by = "firm.name")
@@ -85,4 +85,8 @@ gta_firm_related_codes_last_dumps = function(master,
   gta_sql_pool_close()
 
   return(list(int.hs.codes, int.cpc.codes))
+  }
+  else {
+    print("No hs/cpc codes found for the searched firms")
+  }
 }
