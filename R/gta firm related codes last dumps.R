@@ -11,15 +11,13 @@
 #' @author Global Trade Alert
 
 
-library(gtalibrary)
-library(gtasql)
-library(pool)
-library(DBI)
-library(gtabastiat)
-library(RMariaDB)
+gta_firm_related_codes_last_dumps = function(master,
+                                             firms.df) {
 
-
-gta_firm_related_codes_last_dumps = function(master, firms.df) {
+  library(gtasql)
+  library(pool)
+  library(DBI)
+  library(RMariaDB)
 
   # DB setup
   gta_sql_kill_connections()
