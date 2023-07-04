@@ -12,7 +12,7 @@
 #' @param keep.cpc Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated CPC codes.
 #' @param hs.codes Provide a vector of HS codes that you are interested in (2012 vintage, any digit level).
 #' @param keep.hs Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated HS codes.
-#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2020, the GTA base period data ('base', averages for 2005-2007), the 2019-2021 average ('19-21 avg') as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2007 and 2020, the GTA base period data ('base', averages for 2005-2007), the 2019-2021 average ('19-21 avg') as well as moving trade data as a function of coverage year ('prior year' and 'current year', 't-x' (x from 1 - 10)). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata').
 #' @param df.name Set the name of the generated result data frame. Default is trade.base.
 #' @param pc.name Set the name of the generated parameter choice data frame. Default is parameter.choice.trade.base.
@@ -20,7 +20,6 @@
 #' @return Output is two data frames. First data frame includes the trade values for the given importer-exporter-product combinations. Second data frame states parameter choices.
 #' @references www.globaltradealert.org
 #' @author Global Trade Alert
-
 
 # Function infos and parameters  --------------------------------------------
 
@@ -40,8 +39,8 @@ gta_trade_value_bilateral <- function(importing.country = NULL,
   library(data.table)
   parameter.choices <- data.frame(parameter = character(), choice = character())
 
-  if (!trade.data %in% c("base", "prior year", "19-21 avg", "current year", "before announcement", "during announcement", paste(2005:2022))) {
-    stop("Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2022, 'prior year' or 'current year'.")
+  if (!trade.data %in% c("base", glue::glue("t-{c(1:10)}"), "prior year", "19-21 avg", "current year", "before announcement", "during announcement", paste(2005:2022))) {
+    stop("Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2022, 'prior year', 'current year' or t-x for x between 1 and 10.")
   }
 
   if (trade.data == "base") {
@@ -66,10 +65,16 @@ gta_trade_value_bilateral <- function(importing.country = NULL,
         if (grepl("prior", trade.data, ignore.case = T)) {
           trade.base$year <- trade.base$year + 1
         }
+        # lagged year implementation via t-x in trade.data argument
+        if (stringr::str_detect(trade.data, pattern = "t-[0-9]{1,2}")){
+
+          # extract x from t-x
+          lag_years <- stringr::str_extract_all(trade.data, pattern = "[0-9]+") |> as.numeric()
+          trade.base$year <- trade.base$year + lag_years
+        }
       }
     }
   }
-
 
   ## importer
   if (is.null(importing.country)) {
