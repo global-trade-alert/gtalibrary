@@ -66,6 +66,7 @@
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
 #' @param output.path Takes the value of the output path (without the filename) added to the working directory as a string starting with "/". Default: None.
 #' @param xlsx.interventions Takes value TRUE or FALSE. If TRUE, xlsx file with a list of used interventions will be stored. Default: FALSE
+#' @param return.interventions Takes value TRUE or FALSE. If TRUE, results from the data_slicer function will be stored in the global environment
 #' @param output.path.interventions Takes the value of the output path for the interventions list file (without the filename) added to the working directory as a string starting with "/". Default: None.
 
 
@@ -145,6 +146,7 @@ gta_trade_coverage <- function(
   xlsx = FALSE,
   output.path = NULL,
   xlsx.interventions = FALSE,
+  return.interventions = FALSE,
   output.path.interventions = NULL) {
 
 
@@ -192,8 +194,11 @@ gta_trade_coverage <- function(
                     lag.adjustment=lag.adjustment,
                     reporting.period=reporting.period,
                     add.unpublished=add.unpublished)
-
-
+    
+    if (return.interventions) {
+      coverage.interventions <<- master.sliced  
+    }
+    
     ## removing certain problemtic, wide-reaching cases until further investigation
     out=c(20387, 20389, 16408, 16817, 15248, 20098, 56907,
           18891,70350,16819,71578,58794,18254,13633,15366,19899,13512,14328,

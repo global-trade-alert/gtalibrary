@@ -55,6 +55,10 @@ gta_imp_exp_hs_tuples <- function(
   # gta_tuple=gta_tuple[,c("intervention_id","un_code_implementer","un_code_distorted","un_code_affected", "affected_products")]
 
   load(replica.path.tuple)
+  
+  # Remove sector_code column from gta_tuple set, as it's not needed in this function and crashes the outward subsidy set creation
+  gta_tuple$sector_code <- NULL
+  
   names(gta_tuple)=c("intervention.id","un.ij","un.dm","un.aj", "affected.product")
   gta_tuple=subset(gta_tuple, intervention.id %in% master$intervention.id)
   parameter.choices=rbind(parameter.choices, data.frame(parameter="Data base replica source:", choice=paste("Local copy from '",replica.path.tuple,"'.", sep="")))
