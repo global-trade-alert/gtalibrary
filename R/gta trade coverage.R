@@ -60,7 +60,7 @@
 #' @param reporting.period Specify the period in which an intervention was documented by the GTA team. Default c('2008-11-01',today).
 #' @param intra.year.duration Adjust the estimates for the number of days the relevant intervention has been in force in the given year (TRUE/FALSE). Default is TRUE.
 #' @param trade.statistic Choose to calculate trade shares ('share') or absolute USD values ('value'). Default is 'share'.
-#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2020, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year'). Default is 'base'.
+#' @param trade.data Choose the trade data underlying these calulations. Choices are individual years between 2005 and 2020, the GTA base period data ('base', averages for 2005-2007) as well as moving trade data as a function of coverage year ('prior year' and 'current year', or t-x (x between 1 and 10)). Default is 'base'.
 #' @param trade.data.path Set path of trade data file (default is 'data/support tables/Goods support table for gtalibrary.Rdata'),
 #' @param rdata Takes value TRUE or FALSE. If TRUE, Rdata file will be stored alongside xlsx. Default: FALSE
 #' @param xlsx Takes value TRUE or FALSE. If TRUE, xlsx file will be stored. Default: FALSE
@@ -1120,8 +1120,8 @@ gta_trade_coverage <- function(
     ##### multiply in base values
     print("Importing trade base values ...")
 
-    if(!trade.data %in% c("base", "19-21 avg","prior year","current year", "before announcement","during announcement", paste(2005:2020))){
-      stop.print <- "Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2020, 'prior year' or 'current year')."
+    if(!trade.data %in% c("base", "19-21 avg","prior year","current year", glue::glue("t-{c(1:10)}"), "before announcement","during announcement", paste(2005:2020))){
+      stop.print <- "Please specify proper trade data choice (i.e. 'base', '19-21 avg', a year between 2005 and 2020, 'prior year' , t-x (x between 1 and 10), or 'current year')."
       error.message <<- c(T, stop.print)
       stop(stop.print)
     } else{
