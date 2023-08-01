@@ -69,7 +69,7 @@ gta_trade_value_bilateral <- function(importing.country = NULL,
         if (stringr::str_detect(trade.data, pattern = "t-[0-9]{1,2}")){
 
           # extract x from t-x
-          lag_years <- stringr::str_extract_all(trade.data, pattern = "[0-9]+") |> as.numeric()
+          lag_years <- stringr::str_extract_all(trade.data, pattern = "[0-9]+") %>% as.numeric()
           trade.base$year <- trade.base$year + lag_years
         }
       }
