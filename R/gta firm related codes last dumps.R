@@ -46,7 +46,7 @@ gta_firm_related_codes_last_dumps = function(master,
   # Perform the search in the DB
   codes.last.dumps = gta_sql_get_value(
     paste0("select distinct mfl.firm_name, mfl.firm_name_original, gmt.name as BD_intervention_type,
-    gatl.tariff_line_code as hs_code,gas.sector_code as cpc_code, gdl.dump_name
+    gatl.tariff_line_code as hs_codes, gas.sector_code as cpc_codes, gdl.dump_name
     from gta_intervention_dump gid
     join gta_intervention gi on gi.id = gid.intervention_id
     join gta_measure gm on gm.id = gi.measure_id
@@ -68,7 +68,7 @@ gta_firm_related_codes_last_dumps = function(master,
   if (nrow(codes.last.dumps) > 0) {
     # We join the data frames to obtain the interventions that will contain hs/cpc codes. In addition, we will
     # see if the match occurs only by firm or by firm and type of intervention
-    int.codes = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type", "hs.code", "cpc.code")], firms.df[,c("firm.name", "intervention.id")], by = "firm.name")
+    int.codes = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type", "hs.codes", "cpc.codes")], firms.df[,c("firm.name", "intervention.id")], by = "firm.name")
     int.codes = merge(int.codes, firms.df[,c("intervention.id", "dump.intervention.type")], by = 'intervention.id', all.x = T)
     firms.int.types = merge(codes.last.dumps[, c("firm.name", "BD.intervention.type")], firms.df[,c("firm.name", "intervention.id", 'dump.intervention.type')], by.x = c("firm.name", "BD.intervention.type"), by.y = c("firm.name", "dump.intervention.type"))
     firms.int.types$match = 'by firm and intervention type'
@@ -76,13 +76,13 @@ gta_firm_related_codes_last_dumps = function(master,
     int.codes[which(is.na(int.codes$match)), "match"] = 'by firm only'
 
     # We separate the hs/cpc codes in two different data frames
-    int.hs.codes = unique(subset(int.codes, select = -c(cpc.code)))
+    int.hs.codes = unique(subset(int.codes, select = -c(cpc.codes)))
     int.hs.codes = int.hs.codes[order(int.hs.codes$intervention.id),]
-    int.hs.codes = int.hs.codes[!is.na(int.hs.codes$hs.code),]
+    int.hs.codes = int.hs.codes[!is.na(int.hs.codes$hs.codes),]
 
-    int.cpc.codes = unique(subset(int.codes, select = -c(hs.code)))
+    int.cpc.codes = unique(subset(int.codes, select = -c(hs.codes)))
     int.cpc.codes = int.cpc.codes[order(int.cpc.codes$intervention.id),]
-    int.cpc.codes = int.cpc.codes[!is.na(int.cpc.codes$cpc.code),]
+    int.cpc.codes = int.cpc.codes[!is.na(int.cpc.codes$cpc.codes),]
 
     if (nrow(int.hs.codes) > 0 & nrow(int.cpc.codes) == 0) {
       return(int.hs.codes)
