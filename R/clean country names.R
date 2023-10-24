@@ -15,7 +15,7 @@ gta_clean_country_names <- function(country, conversionTable = FALSE) {
             matched <- append(matched, NA_character_)
             matching_table <- matching_table |> tibble::add_row(gta_country = NA_character_, input_country = country[index])
         } else {
-            matched <- append(matched, i)
+            matched <- append(matched, result)
             if (tolower(country[index]) == tolower(result)) {
                 matching_table <- matching_table |> tibble::add_row(gta_country = result, input_country = country[index], name_changed = FALSE)
             } else {
