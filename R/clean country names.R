@@ -39,7 +39,7 @@ gta_clean_country_names <- function(country, conversionTable = FALSE) {
     # only analyze unique input values and then use df join to output converted
     # vector of original length (faster, since join is implemented in C)
     country_distinct <- unique(country)
-    match_sheet <- gtalibrary::country_regex
+    # match_sheet <- gtalibrary::country_regex
     matching_table <- tibble::tibble(input_country = NA, gta_country = NA, name_changed = NA)
     matched <- vector()
 
