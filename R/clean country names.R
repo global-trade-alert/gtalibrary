@@ -94,17 +94,17 @@ gta_clean_country_names <- function(country, conversionTable = FALSE, customConv
             dplyr::left_join(custom, by = dplyr::join_by(input_country == country_distinct)) |>
             dplyr::mutate(gta_country = ifelse(is.na(country_custom), gta_country, country_custom)) |>
             dplyr::select(-country_custom) |>
-            tidyr::drop_na()
+            tidyr::drop_na(1)
     } else {
         out <- tibble::tibble(country_distinct = country_distinct, country_gta = matched) |>
             dplyr::left_join(custom, by = dplyr::join_by(country_distinct)) |>
             dplyr::mutate(country_gta = ifelse(is.na(country_custom), country_gta, country_custom)) |>
             dplyr::select(-country_custom) |>
             dplyr::right_join(tibble::tibble(country = country), by = dplyr::join_by(country_distinct == country)) |>
-            tidyr::drop_na() |>
             dplyr::pull(country_gta)
             names(out) <- NULL
     }
     
     return(out)
 }
+
