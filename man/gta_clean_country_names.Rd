@@ -6,7 +6,8 @@
 \usage{
 gta_clean_country_names(
     country,
-    conversionTable = FALSE
+    conversionTable = FALSE, 
+    customConversion = NULL
 )
 }
 \arguments{
@@ -14,6 +15,11 @@ gta_clean_country_names(
 
 \item{conversionTable}{set to TRUE if the function should return a conversion table
 which shows how each unique value in `country` is converted by the function}
+
+\item{customConversion}{If you wish to overwrite the default function behavior you can add a named vector to the function 
+which contains as names the name of the  the country name to be converted and as value the name function should convert to. 
+Eg: Your data contains South - and North Korea which you do not wnat to convert according to the GTA 
+nomenclature: --> c("South Korea" = "Korea (S)", "North Korea" = "Korea, (N)")}
 }
 \description{
 \code{gta_clean_country_names()} takes a vector of country names
