@@ -12,11 +12,17 @@
 #' @usage
 #' gta_clean_country_names(
 #'     country,
-#'     conversionTable = FALSE
+#'     conversionTable = FALSE, 
+#'     customConversion = NULL
 #' )
 #' @param country a vector of country names
 #' @param conversionTable set to TRUE if the function should return a conversion table
 #' which shows how each unique value in `country` is converted by the function
+#' @param customConversion
+#' If you wish to overwrite the default function behavior you can add a named vector to the function 
+#' which contains as names the name of the  the country name to be converted and as value the name function should convert to. 
+#' Eg: Your data contains South - and North Korea which you do not wnat to convert according to the GTA 
+#' nomenclature: --> c("South Korea" = "Korea (S)", "North Korea" = "Korea, (N)")
 #' @examples 
 #' a_mess <- tibble::tible(
 #'      country = c(
@@ -31,13 +37,30 @@
 #' # a_mess |> 
 #'      mutate(clean_names = gta_clean_country_names(country))
 #' 
+#' # if you wish to convert the value "Korea, this time in the south" to "South Korea" and leave "USA" unchanged, 
+#' supply a named vector to customConversion.
+#' # function value: 
+#' custom <- ("Korea, this time in the south" = "South Korea", "USA" = "USA")
+#' a_mess |> 
+#'      mutate(clean_names = gta_clean_country_names(country, customConversion = custom))
 #' @references
 #' The function uses gtalibrary::country_regex which contains a regex for each
 #' country which inputs are matched against.
 #' @export
-gta_clean_country_names <- function(country, conversionTable = FALSE) {
+gta_clean_country_names <- function(country, conversionTable = FALSE, customConversion = NULL) {
     # only analyze unique input values and then use df join to output converted
     # vector of original length (faster, since join is implemented in C)
+    if (!is.null(customConversion)){
+        custom <- tibble::tibble(country_distinct = names(customConversion), country_custom = customConversion)
+
+        # ensure that country is unique 
+        if (!length(custom$country_distinct) == length(unique(custom$country_distinct))){
+            cli::cli_alert_danger("Please make sure that your inputs in the customConversion table are unique!")
+        }
+    } else {
+        custom <- tibble::tibble(country_custom = NA, country_distinct = NA)
+    }
+
     country_distinct <- unique(country)
     match_sheet <- country_regex
     matching_table <- tibble::tibble(input_country = NA, gta_country = NA, name_changed = NA)
@@ -67,11 +90,21 @@ gta_clean_country_names <- function(country, conversionTable = FALSE) {
     }
 
     if (conversionTable) {
-        out <- matching_table
+        out <- matching_table |>
+            dplyr::left_join(custom, by = dplyr::join_by(input_country == country_distinct)) |>
+            dplyr::mutate(gta_country = ifelse(is.na(country_custom), gta_country, country_custom)) |>
+            dplyr::select(-country_custom) |>
+            tidyr::drop_na()
     } else {
         out <- tibble::tibble(country_distinct = country_distinct, country_gta = matched) |>
-            dplyr::right_join(tibble::tibble(country), by = dplyr::join_by(country_distinct == country)) |>
+            dplyr::left_join(custom, by = dplyr::join_by(country_distinct)) |>
+            dplyr::mutate(country_gta = ifelse(is.na(country_custom), country_gta, country_custom)) |>
+            dplyr::select(-country_custom) |>
+            dplyr::right_join(tibble::tibble(country = country), by = dplyr::join_by(country_distinct == country)) |>
+            tidyr::drop_na() |>
             dplyr::pull(country_gta)
+            names(out) <- NULL
     }
+    
     return(out)
 }
