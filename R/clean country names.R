@@ -75,5 +75,3 @@ gta_clean_country_names <- function(country, conversionTable = FALSE) {
     }
     return(out)
 }
-
-gta_clean_country_names(c("uganda", "uganda", "uganda"))
