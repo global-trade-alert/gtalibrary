@@ -66,7 +66,7 @@ gta_clean_country_names <- function(country, conversionTable = FALSE, customConv
     matching_table <- tibble::tibble(input_country = NA, gta_country = NA, name_changed = NA)
     matched <- vector()
 
-    country_cleaned <- stringr::str_remove_all(country_distinct, "[:punct:]|\\s") |> tolower()
+    country_cleaned <- stringr::str_replace_all(country_distinct, "[:punct:]|", " ") |> tolower()
     index <- 1 # used to access uncleaned values faster
     # apply to every value in country
     for (i in country_cleaned) {
