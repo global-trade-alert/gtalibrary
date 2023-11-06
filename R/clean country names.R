@@ -30,23 +30,24 @@
 #'          "Korea, this time in the south",
 #'          "Burma", 
 #'          "Germany (EU Country)", 
-#'          "Bosnia", "
-#'           "USA", 
+#'          "Bosnia",
+#'           "USA"
 #'     )
 #' 
-#' # a_mess |> 
+#' # a_mess %>% 
 #'      mutate(clean_names = gta_clean_country_names(country))
 #' 
 #' # if you wish to convert the value "Korea, this time in the south" to "South Korea" and leave "USA" unchanged, 
 #' supply a named vector to customConversion.
 #' # function value: 
 #' custom <- ("Korea, this time in the south" = "South Korea", "USA" = "USA")
-#' a_mess |> 
+#' a_mess %>% 
 #'      mutate(clean_names = gta_clean_country_names(country, customConversion = custom))
 #' @references
 #' The function uses gtalibrary::country_regex which contains a regex for each
 #' country which inputs are matched against.
 #' @export
+#' 
 gta_clean_country_names <- function(country, conversionTable = FALSE, customConversion = NULL) {
     # only analyze unique input values and then use df join to output converted
     # vector of original length (faster, since join is implemented in C)
@@ -62,11 +63,11 @@ gta_clean_country_names <- function(country, conversionTable = FALSE, customConv
     }
 
     country_distinct <- unique(country)
-    match_sheet <- country_regex
+    match_sheet <- gtalibrary::country_regex
     matching_table <- tibble::tibble(input_country = NA, gta_country = NA, name_changed = NA)
     matched <- vector()
 
-    country_cleaned <- stringr::str_replace_all(country_distinct, "[:punct:]|", " ") |> tolower()
+    country_cleaned <- stringr::str_replace_all(country_distinct, "[:punct:]", " ") %>% tolower()
     index <- 1 # used to access uncleaned values faster
     # apply to every value in country
     for (i in country_cleaned) {
@@ -74,15 +75,15 @@ gta_clean_country_names <- function(country, conversionTable = FALSE, customConv
         # no match if country is ambiguous
         if (length(result) > 1 | length(result) == 0) {
             matched <- append(matched, NA_character_)
-            matching_table <- matching_table |>
+            matching_table <- matching_table %>%
                 tibble::add_row(gta_country = NA_character_, input_country = country_distinct[index])
         } else {
             matched <- append(matched, result)
             if (tolower(country_distinct[index]) == tolower(result)) {
-                matching_table <- matching_table |>
+                matching_table <- matching_table %>%
                     tibble::add_row(gta_country = result, input_country = country_distinct[index], name_changed = FALSE)
             } else {
-                matching_table <- matching_table |>
+                matching_table <- matching_table %>%
                     tibble::add_row(gta_country = result, input_country = country_distinct[index], name_changed = TRUE)
             }
         }
@@ -90,21 +91,19 @@ gta_clean_country_names <- function(country, conversionTable = FALSE, customConv
     }
 
     if (conversionTable) {
-        out <- matching_table |>
-            dplyr::left_join(custom, by = dplyr::join_by(input_country == country_distinct)) |>
-            dplyr::mutate(gta_country = ifelse(is.na(country_custom), gta_country, country_custom)) |>
-            dplyr::select(-country_custom) |>
+        out <- matching_table %>%
+            dplyr::left_join(custom, by = dplyr::join_by(input_country == country_distinct)) %>%
+            dplyr::mutate(gta_country = ifelse(is.na(country_custom), gta_country, country_custom)) %>%
+            dplyr::select(-country_custom) %>%
             tidyr::drop_na(1)
     } else {
-        out <- tibble::tibble(country_distinct = country_distinct, country_gta = matched) |>
-            dplyr::left_join(custom, by = dplyr::join_by(country_distinct)) |>
-            dplyr::mutate(country_gta = ifelse(is.na(country_custom), country_gta, country_custom)) |>
-            dplyr::select(-country_custom) |>
-            dplyr::right_join(tibble::tibble(country = country), by = dplyr::join_by(country_distinct == country)) |>
+        out <- tibble::tibble(country_distinct = country_distinct, country_gta = matched) %>%
+            dplyr::left_join(custom, by = dplyr::join_by(country_distinct)) %>%
+            dplyr::mutate(country_gta = ifelse(is.na(country_custom), country_gta, country_custom)) %>%
+            dplyr::select(-country_custom) %>%
+            dplyr::right_join(tibble::tibble(country = country), by = dplyr::join_by(country_distinct == country)) %>%
             dplyr::pull(country_gta)
             names(out) <- NULL
-    }
-    
+    }  
     return(out)
 }
-
