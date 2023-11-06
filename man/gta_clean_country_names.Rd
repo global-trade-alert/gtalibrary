@@ -32,6 +32,27 @@ If you want a table with unique country names from the input vector, the name
 they were converted to and information on whether the function changed the name, set conversionTable
 to true. This will output a tibble with these three columns.
 }
+\examples{
+a_mess <- tibble::tible(
+     country = c(
+         "Korea, the one in the north",
+         "Korea, this time in the south",
+         "Burma", 
+         "Germany (EU Country)", 
+         "Bosnia",
+          "USA"
+    )
+
+# a_mess \%>\% 
+     mutate(clean_names = gta_clean_country_names(country))
+
+# if you wish to convert the value "Korea, this time in the south" to "South Korea" and leave "USA" unchanged, 
+supply a named vector to customConversion.
+# function value: 
+custom <- ("Korea, this time in the south" = "South Korea", "USA" = "USA")
+a_mess \%>\% 
+     mutate(clean_names = gta_clean_country_names(country, customConversion = custom))
+}
 \references{
 The function uses gtalibrary::country_regex which contains a regex for each
 country which inputs are matched against.
