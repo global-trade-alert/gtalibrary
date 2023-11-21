@@ -19,7 +19,7 @@ gta_get_imf_data(
 
 \item{series}{What time series do you want? Options: 'fx' for USD exchange rates.}
 
-\item{countries}{What countries do you want? Permissiable options are 'all' plus GTA names and ISO3 codes.}
+\item{countries}{What countries do you want? Permissiable options are 'all' plus ISO2 format included inside the "imf.symbol" vector.}
 
 \item{fx.frequency}{Provide time series frequency e.g. ('D','M','Q','A')}
 }
