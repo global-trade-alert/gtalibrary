@@ -12,7 +12,8 @@
 
 
 gta_firm_related_codes_last_dumps = function(master,
-                                             firms.df) {
+                                             firms.df,
+                                             dump.name.substring) {
 
   library(gtasql)
   library(pool)
@@ -57,7 +58,7 @@ gta_firm_related_codes_last_dumps = function(master,
     left join gta_affected_tariff_line gatl on gatl.intervention_id = gi.id
     left join gta_affected_sector gas on gas.intervention_id = gi.id
     where gm.status_id = 4
-    and gdl.dump_name like '%", readline("Type the name of the data dump you want to filter by: "), "%'
+    and gdl.dump_name like '%", dump.name.substring, "%'
     and (gatl.tariff_line_code is not null or gas.sector_code is not null)
     and mfl.firm_name in (", paste(paste0("'", unique(firms.df$escaped.firm.name), "'"), collapse = ','), ");"
     ))
