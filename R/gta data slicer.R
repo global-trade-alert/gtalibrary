@@ -946,6 +946,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
         parameter.choices=rbind(parameter.choices,
                                 data.frame(parameter=paste0("In force on ",in.force.on.date,':'), choice="Regardless"))
       } else {
+      
 
       #determine interpretability of in.force.on.date
       tryCatch({date=format(as.Date(x=in.force.on.date),"%Y-%m-%d")},
@@ -955,7 +956,7 @@ gta_data_slicer=function(data.path = "data/master_plus.Rdata",
                  stop(stop.print)
                },
                finally={
-                 if(is.na(date) | !substr(as.character(date),1,4) %in% as.character(2000:2024) | length(date)!=1){
+                 if(is.na(date) | !substr(as.character(date),1,4) %in% as.character(2000:format(Sys.Date(), "%Y")) | length(date)!=1){
                    stop.print <- "Please specify a valid unique in.force.on.date ('yyyy-mm-dd'). Default is current date (Sys.Date)."
                    error.message <<- c(T, stop.print)
                    stop(stop.print)
